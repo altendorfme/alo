@@ -21,7 +21,7 @@ log_info() {
 
 check_nginx() {
     log_info "Checking Nginx process status..."
-    local max_attempts=30
+    local max_attempts=5
     local attempt=0
 
     while [ $attempt -lt $max_attempts ]; do
@@ -31,7 +31,7 @@ check_nginx() {
         fi
         
         log_info "Waiting for Nginx to start... (Attempt $((attempt+1))/$max_attempts)"
-        sleep 2
+        sleep 3
         attempt=$((attempt+1))
     done
 
@@ -40,7 +40,7 @@ check_nginx() {
 
 check_php_fpm() {
     log_info "Checking PHP-FPM process status..."
-    local max_attempts=30
+    local max_attempts=5
     local attempt=0
 
     while [ $attempt -lt $max_attempts ]; do
@@ -50,7 +50,7 @@ check_php_fpm() {
         fi
         
         log_info "Waiting for PHP-FPM to start... (Attempt $((attempt+1))/$max_attempts)"
-        sleep 2
+        sleep 3
         attempt=$((attempt+1))
     done
 
@@ -69,7 +69,7 @@ check_supervisord() {
         fi
         
         log_info "Waiting for Supervisord processes to start... (Attempt $((attempt+1))/$max_attempts)"
-        sleep 2
+        sleep 3
         attempt=$((attempt+1))
     done
 
@@ -138,10 +138,27 @@ chmod -R 775 /app/config
 
 log_success "Permissions adjusted"
 
+# Check for .env file
+check_env_file() {
+    log_info "Checking for config file..."
+    local attempt=1
+
+    while true; do
+        if [ -f /app/config/.env ]; then
+            return 0
+        fi
+        
+        log_info "While waiting for the installation to finish, access /install... (Attempt $attempt)"
+        sleep 60
+        attempt=$((attempt+1))
+    done
+}
+
 # Supervisord (campaign:send)
 log_info "Start supervisord (campaign:send)..."
 
 /usr/bin/supervisord -c /etc/supervisor/supervisord.conf &
+check_env_file
 check_supervisord
 
 log_success "Supervisord started"
