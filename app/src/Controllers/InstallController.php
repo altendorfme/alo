@@ -217,7 +217,7 @@ class InstallController extends BaseController
             'APP_URL' => $formData['app_url'],
             'APP_TZ' => $formData['app_tz'],
             'APP_LANGUAGE' => $formData['app_language'],
-            'CLIENT_URL' => $formData['client_url'],
+            'CLIENT_URL' => rtrim($formData['client_url'], '/'),
             'CLIENT_ICON_URL' => $formData['client_icon_url'],
             'CLIENT_BADGE_URL' => $formData['client_badge_url'],
             'DB_HOST' => $formData['db_host'],
