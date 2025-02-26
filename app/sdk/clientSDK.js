@@ -531,7 +531,13 @@ class PushBaseClient extends PushBase {
         this.messaging = getMessaging(this.app);
 
         if (this.registrationMode === 'auto') {
-            this.subscribe();
+            const delay = this.options.registrationDelay || 0;
+            if (delay > 0) {
+                this.logger.log(`Delaying subscription by ${delay}ms`, 'info');
+                setTimeout(() => this.subscribe(), delay);
+            } else {
+                this.subscribe();
+            }
         }
     }
 
