@@ -4,12 +4,12 @@
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <div class="title d-flex">
-        <i class="bi bi-<?php echo $isEdit ? 'pencil-square' : 'plus-circle'; ?> me-2 fs-5"></i>
-        <h1 class="h4"><?php echo $isEdit ? _e('campaign_edit') : _e('campaign_publish'); ?></h1>
+        <i class="bi bi-<?= $isEdit ? 'pencil-square' : 'plus-circle'; ?> me-2 fs-5"></i>
+        <h1 class="h4"><?= $isEdit ? _e('campaign_edit') : _e('campaign_publish'); ?></h1>
     </div>
     <div class="btn-toolbar">
         <button type="submit" form="campaignForm" name="action" value="save" class="btn btn-primary me-2">
-            <?php echo $isEdit ? _e('campaign_edit') : _e('campaign_publish'); ?>
+            <?= $isEdit ? _e('campaign_edit') : _e('campaign_publish'); ?>
         </button>
         <button type="submit" form="campaignForm" name="action" value="draft" class="btn btn-secondary">
             <?= _e('save_as_draft') ?>
@@ -50,13 +50,13 @@
                     <div class="mb-3">
                         <label for="name" class="form-label fw-bold"><i class="bi bi-pencil-square me-2"></i><?= _e('campaign_name') ?></label>
                         <input type="text" class="form-control" id="name" name="name" required
-                            value="<?php echo htmlspecialchars($campaign['name'] ?? ''); ?>">
+                            value="<?= htmlspecialchars($campaign['name'] ?? ''); ?>">
                     </div>
 
                     <div class="mb-3">
                         <label for="push_title" class="form-label fw-bold"><i class="bi bi-card-heading me-2"></i><?= _e('push_title') ?></label>
                         <input type="text" class="form-control" id="push_title" name="push_title" required
-                            value="<?php echo htmlspecialchars($campaign['push_title'] ?? ''); ?>">
+                            value="<?= htmlspecialchars($campaign['push_title'] ?? ''); ?>">
                         <small class="form-text text-muted"><?= _e('push_title_description') ?></small>
                     </div>
 
@@ -71,7 +71,7 @@
                     <div class="mb-3">
                         <label for="push_url" class="form-label fw-bold"><i class="bi bi-link-45deg me-2"></i><?= _e('push_url') ?></label>
                         <input type="url" class="form-control" id="push_url" name="push_url"
-                            value="<?php echo htmlspecialchars($campaign['push_url'] ?? ''); ?>">
+                            value="<?= htmlspecialchars($campaign['push_url'] ?? ''); ?>">
                         <small class="form-text text-muted"><?= _e('push_url_description') ?></small>
                     </div>
 
@@ -79,7 +79,7 @@
                         <label for="push_image" class="form-label fw-bold"><i class="bi bi-image me-2"></i><?= _e('push_image_url') ?></label>
                         <div class="d-flex">
                             <input type="url" class="form-control" id="push_image" name="push_image"
-                            value="<?php echo htmlspecialchars($campaign['push_image'] ?? ''); ?>">
+                            value="<?= htmlspecialchars($campaign['push_image'] ?? ''); ?>">
                             <div id="push_image_preview" class="d-flex justify-content-center bg-light align-items-center rounded overflow-hidden ms-2 text-white" style="min-width: 38px; height: 38px;"></div>
                         </div>
                         <small class="form-text text-muted"><?= _e('push_image_url_description') ?></small>
@@ -166,7 +166,7 @@
                     <div class="mb-3">
                         <label for="send_at" class="form-label fw-bold"><i class="bi bi-calendar-event me-2"></i><?= _e('send_at') ?></label>
                         <input type="datetime-local" class="form-control" id="send_at" name="send_at"
-                            value="<?php echo isset($campaign['send_at']) ? date('Y-m-d\TH:i', strtotime($campaign['send_at'])) : ''; ?>">
+                            value="<?= isset($campaign['send_at']) ? date('Y-m-d\TH:i', strtotime($campaign['send_at'])) : ''; ?>">
                         <small class="form-text text-muted"><?= _e('schedule_description') ?></small>
                     </div>
                 </div>
@@ -181,7 +181,7 @@
                         <label for="push_icon" class="form-label fw-bold"><i class="bi bi-image-fill me-2"></i><?= _e('push_icon_url') ?> (<?= _e('optional') ?>)</label>
                         <div class="d-flex">
                             <input type="url" class="form-control" id="push_icon" name="push_icon"
-                            value="<?php echo $isEdit ? htmlspecialchars($campaign['push_icon'] ?? '') : htmlspecialchars($client['icon']); ?>">
+                            value="<?= $isEdit ? htmlspecialchars($campaign['push_icon'] ?? '') : htmlspecialchars($client['icon']); ?>">
                             <div id="push_icon_preview" class="d-flex justify-content-center bg-light align-items-center rounded overflow-hidden ms-2 text-white" style="min-width: 38px; height: 38px;"></div>
                         </div>
                         <small class="form-text text-muted"><?= _e('push_icon_url_description') ?></small>
@@ -191,7 +191,7 @@
                         <label for="push_badge" class="form-label fw-bold"><i class="bi bi-patch-check-fill me-2"></i><?= _e('push_badge_url') ?> (<?= _e('optional') ?>)</label>
                         <div class="d-flex">
                             <input type="url" class="form-control" id="push_badge" name="push_badge"
-                            value="<?php echo $isEdit ? htmlspecialchars($campaign['push_badge'] ?? '') : htmlspecialchars($client['badge']); ?>">
+                            value="<?= $isEdit ? htmlspecialchars($campaign['push_badge'] ?? '') : htmlspecialchars($client['badge']); ?>">
                             <div id="push_badge_preview" class="d-flex justify-content-center bg-light align-items-center rounded overflow-hidden ms-2 text-white" style="min-width: 38px; height: 38px;"></div>
                         </div>
                         <small class="form-text text-muted"><?= _e('push_badge_url_description') ?></small>
@@ -201,7 +201,7 @@
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="push_requireInteraction"
                                 name="push_requireInteraction" value="1"
-                                <?php echo ($campaign['push_requireInteraction'] ?? false) ? 'checked' : ''; ?>>
+                                <?= ($campaign['push_requireInteraction'] ?? false) ? 'checked' : ''; ?>>
                             <label class="form-check-label fw-bold" for="push_requireInteraction">
                                 <i class="bi bi-hand-index me-2"></i><?= _e('require_interaction') ?>
                             </label>
@@ -213,7 +213,7 @@
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="push_renotify"
                                 name="push_renotify" value="1"
-                                <?php echo ($campaign['push_renotify'] ?? false) ? 'checked' : ''; ?>>
+                                <?= ($campaign['push_renotify'] ?? false) ? 'checked' : ''; ?>>
                             <label class="form-check-label fw-bold" for="push_renotify">
                                 <i class="bi bi-bell me-2"></i><?= _e('renotify') ?>
                             </label>
@@ -225,7 +225,7 @@
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="push_silent"
                                 name="push_silent" value="1"
-                                <?php echo ($campaign['push_silent'] ?? false) ? 'checked' : ''; ?>>
+                                <?= ($campaign['push_silent'] ?? false) ? 'checked' : ''; ?>>
                             <label class="form-check-label fw-bold" for="push_silent">
                                 <i class="bi bi-volume-mute me-2"></i><?= _e('silent') ?>
                             </label>
@@ -242,7 +242,7 @@
 
 <?php $this->start('page_scripts') ?>
 <script id="listSegments" type="application/json">
-    <?php echo json_encode($listSegments); ?>
+    <?= json_encode($listSegments); ?>
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {

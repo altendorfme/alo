@@ -5,12 +5,12 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <div class="title d-flex">
-        <i class="bi bi-<?php echo $isEdit ? 'pencil-square' : 'plus-circle'; ?> me-2 fs-5"></i>
-        <h1 class="h4"><?php echo $isEdit ? _e('user_edit') : _e('user_create'); ?></h1>
+        <i class="bi bi-<?= $isEdit ? 'pencil-square' : 'plus-circle'; ?> me-2 fs-5"></i>
+        <h1 class="h4"><?= $isEdit ? _e('user_edit') : _e('user_create'); ?></h1>
     </div>
     <div class="btn-toolbar">
         <button type="submit" form="userForm" name="action" value="save" class="btn btn-primary">
-            <?php echo $isEdit ? _e('user_edit') : _e('user_create'); ?>
+            <?= $isEdit ? _e('user_edit') : _e('user_create'); ?>
         </button>
     </div>
 </div>

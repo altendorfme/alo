@@ -2,7 +2,7 @@
 
 <?php $this->start('page_content') ?>
 
-<form method="post" action="/login/reset_password?token=<?php echo htmlspecialchars($token ?? ''); ?>">
+<form method="post" action="/login/reset_password?token=<?= htmlspecialchars($token ?? ''); ?>">
     <div class="form-floating mb-3">
         <input type="password" class="form-control" id="password" name="password" placeholder="New Password" required autocomplete="new-password">
         <label for="password"><?= _e('new_password') ?></label>
