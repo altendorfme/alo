@@ -3,8 +3,8 @@
 <?php $this->start('page_content') ?>
 
 <p><?= $line1 ?></p>
-<p><?= $email ?>: <?= $email ?></p>
-<p><?= $password ?>: <?= $password ?></p>
+<p><?= $emailText ?>: <?= $email ?></p>
+<p><?= $passwordText ?>: <?= $password ?></p>
 <p><a href='<?= $loginLink ?>'><?= $button ?></a>!</p>
 
 <?php $this->end() ?>
