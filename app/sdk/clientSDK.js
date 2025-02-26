@@ -2,7 +2,13 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.0/fireba
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging.js';
 
 class PushBaseLogger {
+    constructor(enableLogging = false) {
+        this.enableLogging = enableLogging;
+    }
+    
     log(message, level = 'info') {
+        if (!this.enableLogging) return;
+        
         const timestamp = new Date().toISOString();
         const logLevels = {
             'info': console.log,
@@ -22,7 +28,7 @@ class PushBase {
             customSegments: options.customSegments || {},
             enableLogging: options.enableLogging || false
         };
-        this.logger = new PushBaseLogger();
+        this.logger = new PushBaseLogger(this.options.enableLogging);
     }
 
     isSiteAllowed() {
@@ -515,7 +521,8 @@ class PushBaseClient extends PushBase {
     constructor(config = {}) {
         super({
             registrationDelay: config.registrationDelay || 0,
-            customSegments: config.customSegments || {}
+            customSegments: config.customSegments || {},
+            enableLogging: config.enableLogging || false
         });
         this.firebaseConfig = config.firebaseConfig || {
             apiKey: "{{FIREBASE_APIKEY}}",
