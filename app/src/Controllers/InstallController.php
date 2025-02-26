@@ -38,7 +38,7 @@ class InstallController extends BaseController
     {
         $formData = [
             'app_url' => $this->getDefaultAppUrl(),
-            'app_tz' => 'America/Sao_Paulo',
+            'app_tz' => '',
             'app_language' => 'en',
             'client_url' => 'https://pushbase.org',
             'db_host' => 'maridb',
