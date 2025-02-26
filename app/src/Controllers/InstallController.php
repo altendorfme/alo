@@ -41,7 +41,7 @@ class InstallController extends BaseController
             'app_tz' => '',
             'app_language' => 'en',
             'client_url' => 'https://pushbase.org',
-            'db_host' => 'maridb',
+            'db_host' => 'mariadb',
             'db_user' => 'pushbase',
             'db_pass' => '',
             'db_encoding' => 'utf8mb4',
