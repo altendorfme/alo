@@ -243,5 +243,6 @@ return [
     'error_token_required' => 'Token is required',
     'error_failed_unsubscribe' => 'Failed to unsubscribe',
     'success_subscription_created' => 'Subscription created successfully',
-    'success_unsubscribed' => 'Successfully unsubscribed'
+    'success_unsubscribed' => 'Successfully unsubscribed',
+    'client_configuration' => 'Client Configuration'
 ];

@@ -95,6 +95,9 @@ return function (RouteCollector $r) {
             $r->addRoute('GET', '[/page/{page:\d+}]', [SegmentController::class, 'segments']);
         });
 
+        // Client Config
+        $r->addRoute('GET', '/client', [ClientConfigController::class, 'index']);
+
         // API
         $r->addGroup('/api', function (RouteCollector $r) {
             $r->addRoute('POST', '/campaign/import/metadata', [CampaignController::class, 'importMetadata']);

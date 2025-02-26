@@ -105,9 +105,9 @@
                             <?= $this->e($user['email']) ?>
                         </span>
                         <?php if ($user['role'] != 'editor') { ?>
-                            <a href="/download/pushBaseSW" title="<?= _e('download_sw') ?>"
+                            <a href="/client" title="<?= _e('client_configuration') ?>"
                                 class="nav-link border rounded border-secondary py-1 px-2 d-inline-block my-1 my-md-0 me-md-2">
-                                <i class="bi bi-download"></i>
+                                <i class="bi bi-magic"></i>
                             </a>
                         <?php } ?>
                         <a href="/logout" title="<?= _e('sign_out') ?>"

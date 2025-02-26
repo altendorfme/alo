@@ -16,7 +16,8 @@ use Pushbase\Controllers\{
     SegmentController,
     SubscriberController,
     TemplateController,
-    UserController
+    UserController,
+    ClientConfigController
 };
 use Pushbase\Middleware\{
     CorsMiddleware,

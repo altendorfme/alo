@@ -243,5 +243,6 @@ return [
     'error_token_required' => 'Token é obrigatório',
     'error_failed_unsubscribe' => 'Falha ao cancelar inscrição',
     'success_subscription_created' => 'Inscrição criada com sucesso',
-    'success_unsubscribed' => 'Cancelamento de inscrição realizado com sucesso'
+    'success_unsubscribed' => 'Cancelamento de inscrição realizado com sucesso',
+    'client_configuration' => 'Configuração no Client'
 ];
