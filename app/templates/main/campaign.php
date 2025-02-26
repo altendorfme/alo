@@ -1,4 +1,4 @@
-<?php $this->layout('layout/default', ['js' => 'campaign']); ?>
+<?php $this->layout('layout/default', ['title' => $isEdit ? _e('campaign_edit') : _e('campaign_publish')]); ?>
 
 <?php $this->start('page_content') ?>
 
@@ -9,7 +9,7 @@
     </div>
     <div class="btn-toolbar">
         <button type="submit" form="campaignForm" name="action" value="save" class="btn btn-primary me-2">
-            <?php echo $isEdit ? _e('campaign_publish') : _e('campaign_publish'); ?>
+            <?php echo $isEdit ? _e('campaign_edit') : _e('campaign_publish'); ?>
         </button>
         <button type="submit" form="campaignForm" name="action" value="draft" class="btn btn-secondary">
             <?= _e('save_as_draft') ?>
