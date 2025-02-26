@@ -134,25 +134,26 @@ class UserController extends BaseController
                     );
 
                     return $this->render('main/user', [
-                        'success' =>_e('success_token_generated') . '<b>' . $bearerToken . '</b>',
+                        'success' => _e('success_token_generated') . '<b>' . $bearerToken . '</b>',
                         'title' => $isEdit ? _e('user_edit') : _e('user_create'),
                         'isEdit' => $isEdit,
                         'userData' => $userData,
-                    ], 200);
+                    ]);
                 } catch (Exception $e) {
                     return $this->render('main/user', [
                         'error' => _e('error_token_generation_failed'),
                         'title' => $isEdit ? _e('user_edit') : _e('user_create'),
                         'isEdit' => $isEdit,
                         'userData' => $userData,
-                    ], 500);
+                    ]);
                 }
             }
 
             if (!isset($postData['email']) || !isset($postData['role'])) {
                 return $this->render('main/user', [
                     'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                    'error' => _e('error_missing_required_fields')
+                    'error' => _e('error_missing_required_fields'),
+                    'isEdit' => $isEdit
                 ]);
             }
 
@@ -161,19 +162,19 @@ class UserController extends BaseController
             $updateData = [
                 'email' => $postData['email'],
                 'role' => $postData['role'],
-                'status' => $postData['status'],
+                'status' => $postData['status'] ?? ($isEdit ? null : 'active'),
             ];
 
             if (!$isEdit) {
                 $updateData['password'] = password_hash($password, PASSWORD_DEFAULT);
-                $updateData['status'] = 'active'; 
             }
 
             try {
                 if (!filter_var($updateData['email'], FILTER_VALIDATE_EMAIL)) {
                     return $this->render('main/user', [
                         'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                        'error' => _e('error_invalid_email_format')
+                        'error' => _e('error_invalid_email_format'),
+                        'isEdit' => $isEdit
                     ]);
                 }
 
@@ -186,7 +187,8 @@ class UserController extends BaseController
                 if ($existingUser) {
                     return $this->render('main/user', [
                         'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                        'error' => _e('error_email_already_exists')
+                        'error' => _e('error_email_already_exists'),
+                        'isEdit' => $isEdit
                     ]);
                 }
 
@@ -214,7 +216,8 @@ class UserController extends BaseController
             } catch (Exception $e) {
                 return $this->render('main/user', [
                     'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                    'error' => _e('error_saving_user')
+                    'error' => _e('error_saving_user'),
+                    'isEdit' => $isEdit
                 ]);
             }
         }
