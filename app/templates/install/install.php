@@ -7,7 +7,7 @@
 use jessedp\Timezones\Timezones; ?>
 <main class="container">
     <div class="text-center mb-4">
-        <i class="bi bi-bell-fill text-primary d-inline-block"></i>
+        <i class="install-logo bi bi-bell-fill text-primary d-inline-block"></i>
     </div>
 
     <div class="row justify-content-center">
@@ -727,7 +727,7 @@ use jessedp\Timezones\Timezones; ?>
         }
     }
 
-    .bi.bi-bell-fill {
+    .install-logo {
         display: inline-block;
         font-size: 2rem;
         animation: bell-shake 1s ease-in-out infinite;
