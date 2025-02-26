@@ -1,0 +1,68 @@
+services:
+  # PushBase
+  pushbase:
+    container_name: pushbase
+    image: ghcr.io/altendorfme/pushbase:latest
+    ports:
+      - 8088:8088
+    volumes:
+      - ./pushbase/config:/app/config
+    depends_on:
+      - mariadb
+      - rabbitmq
+    networks:
+      - pushbase
+  # MariaDB
+  mariadb:
+    image: mariadb:10.11.10
+    container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mariadb/data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - pushbase
+  # RabbitMQ
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    restart: unless-stopped
+    networks:
+      - pushbase
+  # Nginx Proxy Manager
+  # Email: admin@example.com
+  # Password: changeme
+  nginx:
+    image: jc21/nginx-proxy-manager:2.12.3
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 81:81
+      - 443:443
+    volumes:
+      - ./nginx/data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - pushbase
+    networks:
+      - pushbase
+networks:
+  pushbase:
+    driver: bridge

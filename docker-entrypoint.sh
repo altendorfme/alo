@@ -1,0 +1,153 @@
+#!/bin/bash
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+log_success() {
+    echo -e "${GREEN}[✓] $1${NC}"
+}
+
+log_error() {
+    echo -e "${RED}[✗] $1${NC}"
+    exit 1
+}
+
+log_info() {
+    echo -e "${YELLOW}[i] $1${NC}"
+}
+
+check_nginx() {
+    log_info "Checking Nginx process status..."
+    local max_attempts=30
+    local attempt=0
+
+    while [ $attempt -lt $max_attempts ]; do
+        if pgrep nginx > /dev/null; then
+            log_success "Nginx started successfully"
+            return 0
+        fi
+        
+        log_info "Waiting for Nginx to start... (Attempt $((attempt+1))/$max_attempts)"
+        sleep 2
+        attempt=$((attempt+1))
+    done
+
+    log_error "Failed to start Nginx after $max_attempts attempts"
+}
+
+check_php_fpm() {
+    log_info "Checking PHP-FPM process status..."
+    local max_attempts=30
+    local attempt=0
+
+    while [ $attempt -lt $max_attempts ]; do
+        if pgrep php-fpm > /dev/null; then
+            log_success "PHP-FPM started successfully"
+            return 0
+        fi
+        
+        log_info "Waiting for PHP-FPM to start... (Attempt $((attempt+1))/$max_attempts)"
+        sleep 2
+        attempt=$((attempt+1))
+    done
+
+    log_error "Failed to start PHP-FPM after $max_attempts attempts"
+}
+
+check_supervisord() {
+    log_info "Checking Supervisord process status..."
+    local max_attempts=30
+    local attempt=0
+
+    while [ $attempt -lt $max_attempts ]; do
+        if supervisorctl -c /etc/supervisor/supervisord.conf status | grep -q "RUNNING"; then
+            log_success "Supervisord configuration is valid and processes are running"
+            return 0
+        fi
+        
+        log_info "Waiting for Supervisord processes to start... (Attempt $((attempt+1))/$max_attempts)"
+        sleep 2
+        attempt=$((attempt+1))
+    done
+
+    log_error "Not all Supervisord processes are running after $max_attempts attempts"
+}
+
+echo -e "\n${YELLOW}PushBase: Starting${NC}\n"
+
+# PHP-FPM
+if [ ! -d /var/run/php ]; then
+    log_info "Creating PHP-FPM directory..."
+    mkdir -p /var/run/php
+    chown -R www-data:www-data /var/run/php
+    log_success "PHP-FPM directory created"
+fi
+
+log_info "Starting PHP-FPM..."
+php-fpm &
+check_php_fpm
+
+# NGINX
+log_info "Checking Nginx configuration..."
+nginx -t
+if [ $? -ne 0 ]; then
+    log_error "Invalid Nginx configuration"
+else
+    log_success "Valid Nginx configuration"
+fi
+
+log_info "Starting Nginx..."
+nginx -g "daemon off;" &
+check_nginx
+
+# Cron
+log_info "Setting up cron jobs..."
+
+(
+    echo "0 0 1 * * /usr/local/bin/php /app/bin/pushbase geoip:update >> /tmp/geoip_update.log 2>&1"
+    echo "* * * * * /usr/local/bin/php /app/bin/pushbase campaign:queue >> /tmp/campaign_queue.log 2>&1"
+) | crontab -
+
+service cron restart
+
+log_success "Cron jobs added"
+
+# GeoIP
+log_info "Checking GeoIP database..."
+if [ ! -f /app/config/GeoLite2-City.mmdb ]; then
+    log_info "GeoLite2-City.mmdb not found. Updating GeoIP database..."
+    php /app/bin/pushbase geoip:update
+    if [ $? -eq 0 ]; then
+        log_success "GeoIP database updated successfully"
+    else
+        log_error "Failed to update GeoIP database"
+    fi
+else
+    log_success "GeoIP database exists"
+fi
+
+# Permissions
+log_info "Adjusting directory permissions..."
+
+mkdir -p /app/config
+chown -R www-data:www-data /app/config
+chmod -R 775 /app/config
+
+log_success "Permissions adjusted"
+
+# Supervisord (campaign:send)
+log_info "Start supervisord (campaign:send)..."
+
+/usr/bin/supervisord -c /etc/supervisor/supervisord.conf &
+check_supervisord
+
+log_success "Supervisord started"
+
+echo -e "\n${GREEN}PushBase: Initialized ===${NC}\n"
+
+wait -n
+
+exit $?

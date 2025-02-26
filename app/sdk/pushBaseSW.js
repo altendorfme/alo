@@ -1,0 +1,1 @@
+importScripts('{{APP_URL}}/serviceWorker');

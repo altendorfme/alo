@@ -1,0 +1,42 @@
+# Dependencies
+/vendor/
+/test/**/vendor/
+composer.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs and databases
+/config/.*
+/config/geoip/*
+/private
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Cache and temporary files
+.php_cs.cache
+.phpunit.result.cache
+.phpunit.cache
+*.cache
+*.log
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/build/
+/dist/
+/node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+!.gitkeep

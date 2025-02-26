@@ -1,0 +1,70 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Pushbase CLI Application
+ * 
+ * Provides command-line interface for various Pushbase operations
+ */
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use League\CLImate\CLImate;
+use Pushbase\Container\ContainerFactory;
+use Pushbase\Commands\Campaign\QueueCommand;
+use Pushbase\Commands\Campaign\SendCommand;
+use Pushbase\Commands\GeoIP\UpdateCommand as GeoIPUpdateCommand;
+
+// Create dependency injection container
+$container = ContainerFactory::create();
+
+// Initialize CLImate
+$climate = new CLImate();
+
+// Define available commands
+$commands = [
+    'campaign:queue' => function() use ($container, $climate) {
+        $command = $container->get(QueueCommand::class);
+        return $command->execute();
+    },
+    'campaign:send' => function() use ($container, $climate) {
+        $command = $container->get(SendCommand::class);
+        return $command->execute();
+    },
+    'geoip:update' => function() use ($container, $climate) {
+        $command = $container->get(GeoIPUpdateCommand::class);
+        return $command->execute();
+    }
+];
+
+// Check if a command was provided
+if (!isset($argv[1])) {
+    $climate->blue()->bold()->out("PushBase");
+    $climate->bold()->out("Available commands:");
+    foreach (array_keys($commands) as $availableCommand) {
+        $climate->out("  - {$availableCommand}");
+    }
+    exit(1);
+}
+
+// Get the command
+$commandName = $argv[1];
+
+try {
+    // Check if command exists
+    if (!isset($commands[$commandName])) {
+        $climate->red()->out("Unknown command: {$commandName}");
+        $climate->out("Available commands:");
+        foreach (array_keys($commands) as $availableCommand) {
+            $climate->out("  - {$availableCommand}");
+        }
+        exit(1);
+    }
+
+    // Execute the command
+    $exitCode = $commands[$commandName]();
+    exit($exitCode);
+
+} catch (Exception $e) {
+    $climate->red()->out("Error: " . $e->getMessage());
+    exit(1);
+}
