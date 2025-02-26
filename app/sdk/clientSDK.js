@@ -305,6 +305,29 @@ class PushBase {
 
     async subscribe(registration = null) {
         try {
+            // Check for existing service worker registrations
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            
+            // Look for an active subscription
+            for (let reg of registrations) {
+                if (reg && reg.active) {
+                    const existingSubscription = await reg.pushManager.getSubscription();
+                    
+                    if (existingSubscription) {
+                        // Check if the subscriber is active on the server
+                        const isUserActive = await this.checkUserStatus(existingSubscription.endpoint);
+                        
+                        if (isUserActive) {
+                            this.logger.log('Found existing active subscription. Skipping new subscription.', 'info');
+                            return existingSubscription;
+                        }
+                    }
+                }
+            }
+            
+            // No active subscription found, create a new one
+            this.logger.log('No active subscription found. Creating new subscription.', 'info');
+            
             if (!registration) {
                 registration = await this.registerServiceWorker('pushBaseSW.js');
             }
@@ -484,39 +507,6 @@ class PushBase {
     }
 }
 
-class PushNotificationManager extends PushBase {
-    constructor(options) {
-        super(options);
-        this.init();
-    }
-
-    async init() {
-        if (!this.isSiteAllowed()) {
-            this.logger.log("Application allowed only for specific sites.", 'warn');
-            return false;
-        }
-
-        if (!this.isBrowserSupported()) {
-            this.logger.log("Application cannot work on this browser or OS.", 'warn');
-            return false;
-        }
-
-        try {
-            const hasPermission = await this.checkPermission();
-            if (hasPermission) {
-                const registration = await this.registerServiceWorker();
-                const subscription = await this.subscribe(registration);
-                await this.sendSubscriptionToServer(subscription);
-                return true;
-            }
-            return false;
-        } catch (error) {
-            this.logger.log(`Initialization failed: ${error.message}`, 'error');
-            return false;
-        }
-    }
-}
-
 class PushBaseClient extends PushBase {
     constructor(config = {}) {
         super({
@@ -535,7 +525,6 @@ class PushBaseClient extends PushBase {
         };
 
         this.NOTIFICATION_STORAGE_KEY = 'pushbase-'+this.firebaseConfig.appId;
-
         this.registrationMode = config.registrationMode || 'manual';
 
         this.app = initializeApp(this.firebaseConfig);
@@ -606,13 +595,11 @@ class PushBaseClient extends PushBase {
                     this.logger.log(`Unregistering service worker due to inactive user: ${subscription.endpoint}`, 'warn');
                     await registration.unregister();
 
-                    if (this.registrationMode === 'auto') {
-                        try {
-                            await this.registerServiceWorker('pushBaseSW.js');
-                            await this.requestNotificationPermission();
-                        } catch (registrationError) {
-                            this.logger.log(`Failed to re-register service worker: ${registrationError.message}`, 'error');
-                        }
+                    try {
+                        await this.registerServiceWorker('pushBaseSW.js');
+                        await this.requestNotificationPermission();
+                    } catch (registrationError) {
+                        this.logger.log(`Failed to re-register service worker: ${registrationError.message}`, 'error');
                     }
                 } else {
                     this.logger.log(`Service worker is valid and user is active: ${subscription.endpoint}`, 'info');
