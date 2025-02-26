@@ -57,7 +57,7 @@ class InstallController extends BaseController
             'smtp_port' => 587,
             'smtp_security' => 'tls',
             'smtp_auth' => 'true',
-            'smtp_from' => 'pushbase@'.$this->getDefaultAppUrl(),
+            'smtp_from' => 'pushbase@' . parse_url($this->getDefaultAppUrl(), PHP_URL_HOST),
             'smtp_from_name' => 'Pushbase',
             'firebase_apikey' => '',
             'firebase_authdomain' => '',
