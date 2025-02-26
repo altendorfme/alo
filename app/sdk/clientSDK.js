@@ -534,10 +534,8 @@ class PushBaseClient extends PushBase {
         this.app = initializeApp(this.firebaseConfig);
         this.messaging = getMessaging(this.app);
 
-        this.validateServiceWorkers();
-
         if (this.registrationMode === 'auto') {
-            this.autoInitialize();
+            this.subscribe();
         }
     }
 
@@ -602,11 +600,6 @@ class PushBaseClient extends PushBase {
                     await registration.unregister();
 
                     if (this.registrationMode === 'auto') {
-                        if (this.options.registrationDelay > 0) {
-                            this.logger.log(`Waiting ${this.options.registrationDelay}ms before re-registering`, 'info');
-                            await new Promise(resolve => setTimeout(resolve, this.options.registrationDelay));
-                        }
-
                         try {
                             await this.registerServiceWorker('pushBaseSW.js');
                             await this.requestNotificationPermission();
@@ -623,20 +616,8 @@ class PushBaseClient extends PushBase {
         }
     }
 
-    async autoInitialize() {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.requestNotificationPermission());
-        } else {
-            await this.requestNotificationPermission();
-        }
-    }
-
     async requestNotificationPermission() {
         try {
-            if (this.options.registrationDelay > 0) {
-                await new Promise(resolve => setTimeout(resolve, this.options.registrationDelay));
-            }
-
             const registration = await this.registerServiceWorker('pushBaseSW.js');
             const permission = await Notification.requestPermission();
 
