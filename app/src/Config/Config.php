@@ -14,7 +14,6 @@ class Config
         $this->config = [
             'app' => [
                 'url' => '',
-                'tz' => 'UTC',
                 'language' => 'en'
             ],
             'client' => [
@@ -67,7 +66,6 @@ class Config
             $this->config = [
                 'app' => [
                     'url' => $_ENV['APP_URL'],
-                    'tz' => $_ENV['APP_TZ'],
                     'language' => $_ENV['APP_LANGUAGE']
                 ],
 				'client' => [
@@ -106,8 +104,6 @@ class Config
                     'vhost' => $_ENV['RABBITMQ_VHOST']
                 ]
             ];
-
-            date_default_timezone_set($this->config['app']['tz']);
         } catch (\Exception $e) {
             $currentPath = $_SERVER['REQUEST_URI'] ?? '';
 

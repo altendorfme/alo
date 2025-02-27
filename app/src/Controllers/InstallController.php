@@ -38,7 +38,6 @@ class InstallController extends BaseController
     {
         $formData = [
             'app_url' => $this->getDefaultAppUrl(),
-            'app_tz' => '',
             'app_language' => 'en',
             'client_url' => 'https://pushbase.org',
             'db_host' => 'mariadb',
@@ -215,7 +214,6 @@ class InstallController extends BaseController
     {
         $config = [
             'APP_URL' => $formData['app_url'],
-            'APP_TZ' => $formData['app_tz'],
             'APP_LANGUAGE' => $formData['app_language'],
             'CLIENT_URL' => rtrim($formData['client_url'], '/'),
             'CLIENT_ICON_URL' => $formData['client_icon_url'],
@@ -259,7 +257,6 @@ class InstallController extends BaseController
 
         $envContent = "# Server Configuration\n";
         $envContent .= "APP_URL={$config['APP_URL']}\n";
-        $envContent .= "APP_TZ={$config['APP_TZ']}\n";
         $envContent .= "APP_LANGUAGE={$config['APP_LANGUAGE']}\n\n";
 
         $envContent .= "# Client\n";

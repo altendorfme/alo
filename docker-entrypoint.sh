@@ -78,6 +78,24 @@ check_supervisord() {
 
 echo -e "\n${YELLOW}PushBase: Starting${NC}\n"
 
+# Set timezone
+if [ -n "$TZ" ]; then
+    log_info "Setting timezone to $TZ..."
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
+    echo $TZ > /etc/timezone
+    
+    echo "date.timezone = $TZ" > /usr/local/etc/php/conf.d/timezone.ini
+    log_success "Timezone set to $TZ for both system and PHP"
+else
+    log_info "No TZ environment variable set, using UTC as default timezone"
+
+    ln -snf /usr/share/zoneinfo/UTC /etc/localtime
+    echo "UTC" > /etc/timezone
+    
+    echo "date.timezone = UTC" > /usr/local/etc/php/conf.d/timezone.ini
+    log_success "Timezone set to UTC for both system and PHP"
+fi
+
 # PHP-FPM
 if [ ! -d /var/run/php ]; then
     log_info "Creating PHP-FPM directory..."

@@ -3,6 +3,8 @@ services:
   pushbase:
     container_name: pushbase
     image: ghcr.io/altendorfme/pushbase:latest
+    environment:
+      TZ: UTC
     ports:
       - 8088:8088
     volumes:

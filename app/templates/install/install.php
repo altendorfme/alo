@@ -2,9 +2,6 @@
 
 <?php $this->start('page_content') ?>
 
-<?php
-
-use jessedp\Timezones\Timezones; ?>
 <main class="container">
     <div class="text-center mb-4">
         <i class="install-logo bi bi-bell-fill text-primary d-inline-block"></i>
@@ -33,26 +30,6 @@ use jessedp\Timezones\Timezones; ?>
                                     readonly required>
                             </div>
                             <div id="app_url_error" class="text-danger"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="app_tz" class="form-label"><?= _e('timezone') ?></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                                <?php
-                                $timezone = Timezones::create(
-                                    'app_tz',
-                                    null,
-                                    [
-                                        'attr' => [
-                                            'required' => true,
-                                            'id'       => 'app_tz',
-                                            'class'    => 'form-select'
-                                        ]
-                                    ]
-                                );
-                                echo $timezone;
-                                ?>
-                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="app_language" class="form-label"><?= _e('language') ?></label>
