@@ -1,6 +1,7 @@
 <?php
 return [
     'lang' => 'pt-BR',
+    'lang_full' => 'Português-Brasil',
     'language' => 'Idioma',
     'login' => 'Entrar',
     'email' => 'E-mail',

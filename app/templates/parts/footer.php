@@ -18,10 +18,15 @@
                     <i class="bi bi-hourglass-split" title="<?= _e('load_time') ?>"></i>
                     <?= round((microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true))) * 1000, 2) ?> ms
                 </div>
-                
+
                 <div class="d-inline-block me-3">
                     <i class="bi bi-clock" title="<?= _e('timezone') ?>"></i>
                     <?= date_default_timezone_get() ?>
+                </div>
+
+                <div class="d-inline-block me-3">
+                    <i class="bi bi-translate" title="<?= _e('lang_full') ?>"></i>
+                    <?= _e('lang_full') ?>
                 </div>
             </div>
         </div>

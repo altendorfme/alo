@@ -1,6 +1,7 @@
 <?php
 return [
     'lang' => 'en',
+    'lang_full' => 'English',
     'language' => 'Language',
     'login' => 'Login',
     'email' => 'Email',
