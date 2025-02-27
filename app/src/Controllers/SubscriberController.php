@@ -70,7 +70,7 @@ class SubscriberController extends BaseController
 
         $analyticsData = $data['analyticsData'] ?? null;
 
-        $subscriber = $this->db->queryFirstRow(
+        $existingSubscriber = $this->db->queryFirstRow(
             "SELECT * FROM subscribers WHERE endpoint = %s",
             $data['endpoint']
         );
@@ -80,31 +80,45 @@ class SubscriberController extends BaseController
         try {
             $this->db->startTransaction();
 
-            $this->db->insert('subscribers', [
-                'uuid' => Uuid::uuid4()->toString(),
-                'endpoint' => $data['endpoint'],
-                'p256dh' => $data['p256dh'],
-                'authKey' => $data['authKey'],
-                'subscribed_at' => $this->db->sqleval('NOW()'),
-                'error_count' => 0,
-                'last_active' => $this->db->sqleval('NOW()'),
-                'status' => 'active'
-            ]);
+            if ($existingSubscriber) {
+                $this->db->update('subscribers', [
+                    'p256dh' => $data['p256dh'],
+                    'authKey' => $data['authKey'],
+                    'last_active' => $this->db->sqleval('NOW()'),
+                    'status' => 'active'
+                ], "id = %i", $existingSubscriber['id']);
+                
+                $subscriber = $this->db->queryFirstRow(
+                    "SELECT * FROM subscribers WHERE id = %i",
+                    $existingSubscriber['id']
+                );
+            } else {
+                $this->db->insert('subscribers', [
+                    'uuid' => Uuid::uuid4()->toString(),
+                    'endpoint' => $data['endpoint'],
+                    'p256dh' => $data['p256dh'],
+                    'authKey' => $data['authKey'],
+                    'subscribed_at' => $this->db->sqleval('NOW()'),
+                    'error_count' => 0,
+                    'last_active' => $this->db->sqleval('NOW()'),
+                    'status' => 'active'
+                ]);
 
-            $subscriberId = $this->db->queryFirstField("SELECT LAST_INSERT_ID()");
-            if (!$subscriberId) {
-                $this->db->rollback();
-                throw new \Exception("Failed to get ID for new subscriber");
-            }
+                $subscriberId = $this->db->queryFirstField("SELECT LAST_INSERT_ID()");
+                if (!$subscriberId) {
+                    $this->db->rollback();
+                    throw new \Exception("Failed to get ID for new subscriber");
+                }
 
-            $subscriber = $this->db->queryFirstRow(
-                "SELECT * FROM subscribers WHERE id = %i",
-                $subscriberId
-            );
+                $subscriber = $this->db->queryFirstRow(
+                    "SELECT * FROM subscribers WHERE id = %i",
+                    $subscriberId
+                );
 
-            if (!$subscriber) {
-                $this->db->rollback();
-                throw new \Exception("Failed to verify subscriber record after creation");
+                if (!$subscriber) {
+                    $this->db->rollback();
+                    throw new \Exception("Failed to verify subscriber record after creation");
+                }
             }
 
             $this->db->commit();
@@ -117,10 +131,10 @@ class SubscriberController extends BaseController
                 }
 
                 if (!empty($analyticsToStore)) {
-                    $this->storeAnalyticsData($subscriberId, $analyticsToStore);
+                    $this->storeAnalyticsData($subscriber['id'], $analyticsToStore);
                 }
             } catch (\Exception $e) {
-                // Continue with subscription creation even if analytics fails
+                // Continue with subscription creation/update even if analytics fails
             }
 
             try {
@@ -132,12 +146,15 @@ class SubscriberController extends BaseController
                 // Continue
             }
 
+            $statusCode = $existingSubscriber ? 200 : 201;
+            $message = $existingSubscriber ? _e('success_subscription_updated') : _e('success_subscription_created');
+            
             return new Response(
-                201,
+                $statusCode,
                 ['Content-Type' => 'application/json'],
                 json_encode([
                     'uuid' => $subscriber['uuid'],
-                    'message' => _e('success_subscription_created')
+                    'message' => $message
                 ])
             );
         } catch (\Exception $e) {
