@@ -36,8 +36,8 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
                         <?= _e('role') ?>
                     </label>
                     <select class="form-control" id="role" name="role" required>
-                        <option value="admin"><?= _e('admin') ?></option>
-                        <option value="editor" selected><?= _e('editor') ?></option>
+                        <option value="admin"><?= _e('role_admin') ?></option>
+                        <option value="editor" selected><?= _e('role_editor') ?></option>
                     </select>
                 </div>
             </div>
@@ -62,8 +62,8 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
                         <?= _e('role') ?>
                     </label>
                     <select class="form-control" id="role" name="role" required>
-                        <option value="admin" <?= $userData['role'] === 'admin' ? 'selected' : '' ?>><?= _e('admin') ?></option>
-                        <option value="editor" <?= $userData['role'] === 'editor' ? 'selected' : '' ?>><?= _e('editor') ?></option>
+                        <option value="admin" <?= $userData['role'] === 'admin' ? 'selected' : '' ?>><?= _e('role_admin') ?></option>
+                        <option value="editor" <?= $userData['role'] === 'editor' ? 'selected' : '' ?>><?= _e('role_editor') ?></option>
                     </select>
                 </div>
             </div>
