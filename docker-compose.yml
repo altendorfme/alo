@@ -1,10 +1,10 @@
 services:
   # PushBase
   pushbase:
-    container_name: pushbase
     image: ghcr.io/altendorfme/pushbase:latest
+    container_name: pushbase
     environment:
-      TZ: UTC
+      TZ: ${TZ}
     ports:
       - 8088:8088
     volumes:
@@ -19,6 +19,7 @@ services:
     image: mariadb:10.11.10
     container_name: mariadb
     environment:
+      TZ: ${TZ}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
@@ -32,10 +33,11 @@ services:
       - pushbase
   # RabbitMQ
   rabbitmq:
-    hostname: rabbitmq
     image: rabbitmq:4-management
     container_name: rabbitmq
+    hostname: rabbitmq
     environment:
+      TZ: ${TZ}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}
@@ -54,6 +56,8 @@ services:
     image: jc21/nginx-proxy-manager:2.12.3
     container_name: nginx
     restart: unless-stopped
+    environment:
+      TZ: ${TZ}
     ports:
       - 80:80
       - 81:81
