@@ -218,7 +218,7 @@ return [
     'success_campaign_cancelled' => 'Campanha cancelada com sucesso',
     'success_campaign_deleted' => 'Campanha excluída com sucesso',
     'success_segment_edited' => 'Segmento editado com sucesso',
-    'success_token_generated' => 'Token foi gerado: ',
+    'success_token_generated' => 'Token foi gerado, copie utilizando o botão abaixo!',
     'error_token_generation_failed' => 'Falha ao gerar token bearer',
     'error_missing_required_fields' => 'Campos obrigatórios ausentes',
     'error_invalid_email_format' => 'Formato de e-mail inválido',

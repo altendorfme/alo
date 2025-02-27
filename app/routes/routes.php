@@ -77,9 +77,14 @@ return function (RouteCollector $r) {
 
         // User Management
         $r->addGroup('/user', function (RouteCollector $r) {
-            $r->addRoute(['GET', 'POST'], '', [UserController::class, 'user']);
-            $r->addRoute(['GET', 'POST'], '/edit/{id:\d+}', [UserController::class, 'user']);
-            $r->addRoute(['GET', 'POST'], '/token/{id:\d+}', [UserController::class, 'user']);
+            // GET routes for viewing
+            $r->addRoute('GET', '', [UserController::class, 'viewUserCreate']);
+            $r->addRoute('GET', '/edit/{id:\d+}', [UserController::class, 'viewUserEdit']);
+            
+            // POST routes for actions
+            $r->addRoute('POST', '', [UserController::class, 'createUser']);
+            $r->addRoute('POST', '/edit/{id:\d+}', [UserController::class, 'updateUser']);
+            $r->addRoute('POST', '/token/{id:\d+}', [UserController::class, 'generateApiKey']);
         });
         // Users Listing
         $r->addGroup('/users', function (RouteCollector $r) {

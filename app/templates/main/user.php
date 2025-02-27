@@ -83,9 +83,9 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
     </div>
 </form>
 
-<?php if ($user['role'] != 'editor' && $isEdit) { ?>
+<?php if (isset($userData['role']) && $userData['role'] != 'editor' && $isEdit) { ?>
     <div class="d-flex gap-3 pt-4 mt-4 border-top">
-        <form id="formGenerateApiKey" method="POST">
+        <form id="formGenerateApiKey" method="POST" action="/user/token/<?= $userData['id'] ?>">
             <input type="hidden" name="generateApiKey" value="true">
             <button class="btn btn-sm btn-outline-primary" name="action" form="formGenerateApiKey">
                 <i class="bi bi-key me-1"></i> <?= _e('generate_key') ?>

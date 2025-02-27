@@ -88,15 +88,20 @@ class UserController extends BaseController
         return $this->render('main/users', $data);
     }
 
-    public function user(ServerRequestInterface $request, array $args = []): ResponseInterface
+    public function viewUserCreate(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->render('main/user', [
+            'title' => _e('user_create'),
+            'isEdit' => false,
+        ]);
+    }
+
+    public function viewUserEdit(ServerRequestInterface $request, array $args = []): ResponseInterface
     {
         $id = $args['id'] ?? null;
         if ($id == 1) {
             return new Response(302, ['Location' => '/users']);
         }
-
-        $isEdit = $id !== null;
-        $userData = null;
 
         $userData = $this->db->queryFirstRow(
             "SELECT * FROM users WHERE id = %d",
@@ -107,118 +112,218 @@ class UserController extends BaseController
             return new Response(404, ['Location' => "/users?error=error_user_not_found"]);
         }
 
-        if ($request->getMethod() === 'GET') {
+        $queryParams = $request->getQueryParams();
+        $successMessage = null;
+        $errorMessage = null;
+        $token = null;
+
+        if (isset($queryParams['success'])) {
+            $successMessage = _e($queryParams['success']);
+            if (isset($queryParams['token'])) {
+                $token = $queryParams['token'];
+                $successMessage .= '<b>' . htmlspecialchars($token) . '</b>';
+            }
+        }
+
+        if (isset($queryParams['error'])) {
+            $errorMessage = _e($queryParams['error']);
+        }
+
+        return $this->render('main/user', [
+            'title' => _e('user_edit'),
+            'isEdit' => true,
+            'userData' => $userData,
+            'success' => $successMessage,
+            'error' => $errorMessage,
+        ]);
+    }
+
+    public function createUser(ServerRequestInterface $request): ResponseInterface
+    {
+        $postData = $request->getParsedBody();
+
+        if (!isset($postData['email']) || !isset($postData['role'])) {
             return $this->render('main/user', [
-                'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                'isEdit' => $isEdit,
-                'userData' => $userData,
+                'title' => _e('user_create'),
+                'error' => _e('error_missing_required_fields'),
+                'isEdit' => false
             ]);
         }
 
-        if ($request->getMethod() === 'POST') {
-            $postData = $request->getParsedBody();
-            $isEdit = $id !== null;
-            if (isset($postData['generateApiKey']) && $postData['generateApiKey'] == true) {
-                try {
-                    $bearerToken = bin2hex(random_bytes(32));
-                    $this->db->update('users', ['api_key' => $bearerToken], 'id=%d', $id);
+        $password = PasswordService::generateSecurePassword();
 
-                    $userData = $this->db->queryFirstRow(
-                        "SELECT * FROM users WHERE id = %d",
-                        $id
-                    );
+        $userData = [
+            'email' => $postData['email'],
+            'role' => $postData['role'],
+            'status' => $postData['status'] ?? 'active',
+            'password' => password_hash($password, PASSWORD_DEFAULT)
+        ];
 
-                    return $this->render('main/user', [
-                        'success' => _e('success_token_generated') . '<b>' . $bearerToken . '</b>',
-                        'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                        'isEdit' => $isEdit,
-                        'userData' => $userData,
-                    ]);
-                } catch (Exception $e) {
-                    return $this->render('main/user', [
-                        'error' => _e('error_token_generation_failed'),
-                        'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                        'isEdit' => $isEdit,
-                        'userData' => $userData,
-                    ]);
-                }
-            }
-
-            if (!isset($postData['email']) || !isset($postData['role'])) {
+        try {
+            if (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
                 return $this->render('main/user', [
-                    'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                    'error' => _e('error_missing_required_fields'),
-                    'isEdit' => $isEdit
+                    'title' => _e('user_create'),
+                    'error' => _e('error_invalid_email_format'),
+                    'isEdit' => false
                 ]);
             }
 
-            $password = $isEdit ? null : PasswordService::generateSecurePassword();
+            $existingUser = $this->db->queryFirstRow(
+                "SELECT id FROM users WHERE email = %s",
+                $userData['email']
+            );
 
-            $updateData = [
-                'email' => $postData['email'],
-                'role' => $postData['role'],
-                'status' => $postData['status'] ?? ($isEdit ? null : 'active'),
-            ];
-
-            if (!$isEdit) {
-                $updateData['password'] = password_hash($password, PASSWORD_DEFAULT);
+            if ($existingUser) {
+                return $this->render('main/user', [
+                    'title' => _e('user_create'),
+                    'error' => _e('error_email_already_exists'),
+                    'isEdit' => false
+                ]);
             }
+
+            $id = $this->db->insert('users', $userData);
 
             try {
-                if (!filter_var($updateData['email'], FILTER_VALIDATE_EMAIL)) {
-                    return $this->render('main/user', [
-                        'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                        'error' => _e('error_invalid_email_format'),
-                        'isEdit' => $isEdit
-                    ]);
-                }
-
-                $existingUser = $this->db->queryFirstRow(
-                    "SELECT id FROM users WHERE email = %s AND id != %d",
-                    $updateData['email'],
-                    $isEdit ? $id : 0
-                );
-
-                if ($existingUser) {
-                    return $this->render('main/user', [
-                        'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                        'error' => _e('error_email_already_exists'),
-                        'isEdit' => $isEdit
-                    ]);
-                }
-
-                if ($isEdit) {
-                    $this->db->update('users', $updateData, 'id=%d', $id);
-                    $userData = $this->db->queryFirstRow(
-                        "SELECT * FROM users WHERE id = %d",
-                        $id
-                    );
-                } else {
-                    $id = $this->db->insert('users', $updateData);
-
-                    try {
-                        $emailController = new EmailController($this->container);
-                        $emailController->sendWelcomeEmail($updateData['email'], $password);
-                    } catch (Exception $e) {
-                        error_log("Failed to send welcome email: " . $e->getMessage());
-                    }
-
-                    $userData = $updateData;
-                    $userData['id'] = $id;
-                }
-
-                return $this->render('main/user', [
-                    'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                    'isEdit' => $isEdit,
-                    'userData' => $userData,
-                ], 302);
+                $emailController = new EmailController($this->container);
+                $emailController->sendWelcomeEmail($userData['email'], $password);
             } catch (Exception $e) {
+                error_log("Failed to send welcome email: " . $e->getMessage());
+            }
+
+            $userData['id'] = $id;
+
+            return $this->render('main/users', [
+                'title' => _e('users'),
+                'success' => _e('success_user_created')
+            ], 302);
+        } catch (Exception $e) {
+            return $this->render('main/user', [
+                'title' => _e('user_create'),
+                'error' => _e('error_saving_user'),
+                'isEdit' => false
+            ]);
+        }
+    }
+
+    public function updateUser(ServerRequestInterface $request, array $args = []): ResponseInterface
+    {
+        $id = $args['id'] ?? null;
+        if ($id == 1) {
+            return new Response(302, ['Location' => '/users']);
+        }
+
+        $userData = $this->db->queryFirstRow(
+            "SELECT * FROM users WHERE id = %d",
+            $id
+        );
+
+        if (!$userData) {
+            return new Response(404, ['Location' => "/users?error=error_user_not_found"]);
+        }
+
+        $postData = $request->getParsedBody();
+
+        if (!isset($postData['email']) || !isset($postData['role'])) {
+            return $this->render('main/user', [
+                'title' => _e('user_edit'),
+                'error' => _e('error_missing_required_fields'),
+                'isEdit' => true,
+                'userData' => $userData
+            ]);
+        }
+
+        $updateData = [
+            'email' => $postData['email'],
+            'role' => $postData['role'],
+            'status' => $postData['status'] ?? $userData['status'],
+        ];
+
+        if (isset($postData['status']) && $postData['status'] === 'inactive' && $userData['status'] !== 'inactive') {
+            $updateData['api_key'] = null;
+        }
+
+        try {
+            if (!filter_var($updateData['email'], FILTER_VALIDATE_EMAIL)) {
                 return $this->render('main/user', [
-                    'title' => $isEdit ? _e('user_edit') : _e('user_create'),
-                    'error' => _e('error_saving_user'),
-                    'isEdit' => $isEdit
+                    'title' => _e('user_edit'),
+                    'error' => _e('error_invalid_email_format'),
+                    'isEdit' => true,
+                    'userData' => $userData
                 ]);
             }
+
+            $existingUser = $this->db->queryFirstRow(
+                "SELECT id FROM users WHERE email = %s AND id != %d",
+                $updateData['email'],
+                $id
+            );
+
+            if ($existingUser) {
+                return $this->render('main/user', [
+                    'title' => _e('user_edit'),
+                    'error' => _e('error_email_already_exists'),
+                    'isEdit' => true,
+                    'userData' => $userData
+                ]);
+            }
+
+            $this->db->update('users', $updateData, 'id=%d', $id);
+            $updatedUserData = $this->db->queryFirstRow(
+                "SELECT * FROM users WHERE id = %d",
+                $id
+            );
+
+            return $this->render('main/user', [
+                'title' => _e('user_edit'),
+                'isEdit' => true,
+                'userData' => $updatedUserData,
+                'success' => _e('success_user_updated')
+            ]);
+        } catch (Exception $e) {
+            return $this->render('main/user', [
+                'title' => _e('user_edit'),
+                'error' => _e('error_saving_user'),
+                'isEdit' => true,
+                'userData' => $userData
+            ]);
+        }
+    }
+
+    public function generateApiKey(ServerRequestInterface $request, array $args = []): ResponseInterface
+    {
+        $id = $args['id'] ?? null;
+        if ($id == 1) {
+            return new Response(302, ['Location' => '/users']);
+        }
+
+        $userData = $this->db->queryFirstRow(
+            "SELECT * FROM users WHERE id = %d",
+            $id
+        );
+
+        if (!$userData) {
+            return new Response(404, ['Location' => "/users?error=error_user_not_found"]);
+        }
+
+        $postData = $request->getParsedBody();
+        
+        if (!isset($postData['generateApiKey']) || $postData['generateApiKey'] !== 'true') {
+            return new Response(302, [
+                'Location' => "/user/edit/{$id}?error=error_invalid_request"
+            ]);
+        }
+
+        try {
+            $bearerToken = bin2hex(random_bytes(32));
+            $this->db->update('users', ['api_key' => $bearerToken], 'id=%d', $id);
+
+            return new Response(302, [
+                'Location' => "/user/edit/{$id}?success=success_token_generated"
+            ]);
+        } catch (Exception $e) {
+            return new Response(302, [
+                'Location' => "/user/edit/{$id}?error=error_token_generation_failed"
+            ]);
         }
     }
 }
