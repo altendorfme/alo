@@ -328,14 +328,31 @@ class SubscriberController extends BaseController
         }
 
         try {
-            $ip = $_SERVER['REMOTE_ADDR'] ?? null;
-
-            if (!$ip || $ip === '127.0.0.1' || $ip === '::1' || $ip === 'localhost') {
+            $ip = null;
+            $ipServices = [
+                'https://checkip.amazonaws.com',
+                'https://icanhazip.com',
+                'https://ifconfig.me/ip'
+            ];
+            
+            foreach ($ipServices as $service) {
                 try {
-                    $ip = trim(file_get_contents('https://ifconfig.me/ip'));
+                    $context = stream_context_create([
+                        'http' => [
+                            'timeout' => 2
+                        ]
+                    ]);
+                    $ip = trim(file_get_contents($service, false, $context));
+                    if ($ip && filter_var($ip, FILTER_VALIDATE_IP)) {
+                        break;
+                    }
                 } catch (\Exception $e) {
-                    return [];
+                    continue;
                 }
+            }
+            
+            if (!$ip) {
+                return [];
             }
 
             if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP)) {
