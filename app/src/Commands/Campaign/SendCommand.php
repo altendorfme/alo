@@ -104,12 +104,24 @@ class SendCommand
                                     $messagesProcessed++;
                                     $totalNotificationsSent++;
 
+                                    $this->db->query("
+                                        INSERT INTO analytics_campaign
+                                        (campaign_id, subscriber_id, interaction_type)
+                                        VALUES (%s, %s, 'sent')
+                                    ", $campaign['id'], $payload['subscriber']['id']);
+
                                     $channel->basic_ack($message->getDeliveryTag());
                                 } else {
                                     $this->climate->error( "Message failed to sent for subscription {$endpoint}: {$result->getReason()}" );
                             
                                     $messagesFailed++;
                                     $totalNotificationsFailed++;
+
+                                    $this->db->query("
+                                        INSERT INTO analytics_campaign
+                                        (campaign_id, subscriber_id, interaction_type)
+                                        VALUES (%s, %s, 'failed')
+                                    ", $campaign['id'], $payload['subscriber']['id']);
 
                                     if ($result->isSubscriptionExpired()) {
                                         $this->db->query("
