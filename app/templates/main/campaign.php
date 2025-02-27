@@ -17,7 +17,7 @@
     </div>
 </div>
 
-<form method="POST" class="needs-validation" id="campaignForm" novalidate>
+<form method="POST" action="<?= $isEdit ? '/campaign/edit/' . $campaign['id'] : '/campaign' ?>" class="needs-validation" id="campaignForm" novalidate>
     <div class="row">
         <div class="col-md-6">
 
