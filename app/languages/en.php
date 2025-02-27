@@ -263,5 +263,9 @@ return [
     'manual_mode_instruction' => 'You will need to add a button to your website to trigger the subscription.',
     'implementation_code' => 'Implementation Code',
     'copy_code' => 'Copy Code',
-    'code_placement_instruction' => 'Add this code before the closing </body> tag of your website.'
+    'code_placement_instruction' => 'Add this code before the closing </body> tag of your website.',
+    'success_user_updated' => 'User updated successfully!',
+    'success_user_created' => 'User created successfully!',
+    'error_saving_user' => 'Error while saving the user!',
+    'error_user_not_found' => 'User not found!'
 ];

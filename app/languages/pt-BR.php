@@ -263,5 +263,9 @@ return [
     'manual_mode_instruction' => 'Você precisará adicionar um botão ao seu site para acionar a inscrição.',
     'implementation_code' => 'Código de Implementação',
     'copy_code' => 'Copiar Código',
-    'code_placement_instruction' => 'Adicione este código antes da tag de fechamento </body> do seu site.'
+    'code_placement_instruction' => 'Adicione este código antes da tag de fechamento </body> do seu site.',
+    'success_user_updated' => 'Usuario atualizado com sucesso!',
+    'success_user_created' => 'Usuario criado com sucesso!',
+    'error_saving_user' => 'Erro ao salvar o usuario!',
+    'error_user_not_found' => 'Usuario não encontrado!'
 ];

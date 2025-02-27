@@ -3,9 +3,11 @@
 namespace Pushbase\Controllers;
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use Psr\Container\ContainerInterface;
 use Pushbase\Config\Config;
 use League\Plates\Engine;
+use Exception;
 
 class EmailController extends BaseController
 {
@@ -64,55 +66,86 @@ class EmailController extends BaseController
         $this->mailer->SMTPSecure = trim($this->smtp['security']);
         $this->mailer->Username = trim($this->smtp['user']);
         $this->mailer->Password = trim($this->smtp['pass']);
-        $this->mailer->setFrom($this->smtp['from'], $this->smtp['fromName']);
+
+        $fromEmail = $this->smtp['from'];
+        $fromName = $this->smtp['fromName'];
+        
+        $this->mailer->setFrom($fromEmail, $fromName);
         $this->mailer->isHTML(true);
     }
 
-    public function sendPasswordResetEmail(string $email, string $resetToken): void
+    public function sendPasswordResetEmail(string $email, string $resetToken): bool
     {
-        $this->mailer->clearAddresses();
-        $this->mailer->addAddress($email);
-        $this->mailer->Subject = $this->_e('email_password_reset_subject');
+        try {
+            $this->mailer->clearAddresses();
+            $this->mailer->addAddress($email);
+            $this->mailer->Subject = $this->_e('email_password_reset_subject');
 
-        $resetLink = $this->config->get('app.url') . "/login/reset_password?token=" . urlencode($resetToken);
+            $resetLink = $this->config->get('app.url') . "/login/reset_password?token=" . urlencode($resetToken);
 
-        $templateData = [
-            'lang' => $this->config->get('app.language'),
-            'resetLink' => $resetLink,
-            'title' => $this->_e('email_password_reset_title'),
-            'line1' => $this->_e('email_password_reset_line1'),
-            'line2' => $this->_e('email_password_reset_line2'),
-            'line3' => $this->_e('email_password_reset_line3'),
-            'button' => $this->_e('email_password_reset_button')
-        ];
+            $templateData = [
+                'lang' => $this->config->get('app.lang'),
+                'resetLink' => $resetLink,
+                'title' => $this->_e('email_password_reset_title'),
+                'line1' => $this->_e('email_password_reset_line1'),
+                'line2' => $this->_e('email_password_reset_line2'),
+                'line3' => $this->_e('email_password_reset_line3'),
+                'button' => $this->_e('email_password_reset_button')
+            ];
 
-        $this->mailer->Body = $this->templateEngine->render('emails/password_reset', $templateData);
+            $this->mailer->Body = $this->templateEngine->render('emails/password_reset', $templateData);
+            $this->mailer->AltBody = strip_tags(str_replace(['<br>', '</p>'], ["\n", "\n\n"], $this->mailer->Body));
 
-        $this->mailer->send();
+            return $this->mailer->send();
+        } catch (PHPMailerException $e) {
+            error_log("Failed to send password reset email to {$email}: " . $e->getMessage());
+            throw new Exception("Failed to send password reset email: " . $e->getMessage());
+        }
     }
 
-    public function sendWelcomeEmail(string $email, string $password): void
+    public function sendWelcomeEmail(string $email, string $password): bool
     {
-        $this->mailer->clearAddresses();
-        $this->mailer->addAddress($email);
-        $this->mailer->Subject = $this->_e('email_welcome_subject');
+        try {
+            $this->mailer->addAddress($email);
+            
+            $this->mailer->Subject = $this->_e('email_welcome_subject');
 
-        $loginLink = $this->config->get('app.url') . "/login";
+            $loginLink = $this->config->get('app.url') . "/login";
+            
+            $templateData = [
+                'lang' => $this->config->get('app.lang'),
+                'email' => $email,
+                'password' => $password,
+                'loginLink' => $loginLink,
+                'emailText' => $this->_e('email'),
+                'passwordText' => $this->_e('password'),
+                'title' => $this->_e('email_welcome_title'),
+                'line1' => $this->_e('email_welcome_line1'),
+                'button' => $this->_e('email_welcome_button')
+            ];
 
-        $templateData = [
-            'lang' => $this->config->get('app.language'),
-            'email' => $email,
-            'password' => $password,
-            'loginLink' => $loginLink,
-            'emailText' => $this->_e('email'),
-            'passwordText' => $this->_e('password'),
-            'title' => $this->_e('email_welcome_title'),
-            'line1' => $this->_e('email_welcome_line1'),
-            'button' => $this->_e('email_welcome_button')
-        ];
+            try {
+                $this->mailer->Body = $this->templateEngine->render('emails/welcome', $templateData);
+                $this->mailer->AltBody = strip_tags(str_replace(['<br>', '</p>'], ["\n", "\n\n"], $this->mailer->Body));
+            } catch (Exception $e) {
+                error_log("Failed to render welcome email template: " . $e->getMessage());
+                throw new Exception("Failed to render welcome email template: " . $e->getMessage());
+            }
 
-        $this->mailer->Body = $this->templateEngine->render('emails/welcome', $templateData);
-
-        $this->mailer->send();
+            $result = $this->mailer->send();
+            
+            if (!$result) {
+                error_log("Failed to send welcome email to {$email}: " . $this->mailer->ErrorInfo);
+                throw new Exception("Failed to send welcome email: " . $this->mailer->ErrorInfo);
+            }
+            
+            return $result;
+        } catch (PHPMailerException $e) {
+            error_log("PHPMailer exception when sending welcome email to {$email}: " . $e->getMessage());
+            throw new Exception("Failed to send welcome email: " . $e->getMessage());
+        } catch (Exception $e) {
+            error_log("Exception when sending welcome email to {$email}: " . $e->getMessage());
+            throw $e;
+        }
     }
 }

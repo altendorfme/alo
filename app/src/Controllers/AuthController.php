@@ -9,6 +9,7 @@ use Pushbase\Database\Database;
 use Pushbase\Config\Config;
 use Pushbase\Auth;
 use Nyholm\Psr7\Response;
+use Exception;
 
 class AuthController extends BaseController
 {
@@ -142,11 +143,17 @@ class AuthController extends BaseController
             if (!empty($user)) {
                 $resetToken = $this->generatePasswordResetToken($email);
 
-                $this->emailController->sendPasswordResetEmail($email, $resetToken);
-
-                return $this->render('login/login', [
-                    'message' => _e('success_password_reset_link_sent')
-                ]);
+                try {
+                    $this->emailController->sendPasswordResetEmail($email, $resetToken);
+                    return $this->render('login/login', [
+                        'message' => _e('success_password_reset_link_sent')
+                    ]);
+                } catch (Exception $e) {
+                    error_log("Password reset email failed: " . $e->getMessage());
+                    return $this->render('login/forgot_password', [
+                        'error' => _e('error_sending_password_reset_email')
+                    ]);
+                }
             } else {
                 // Email not found
                 return $this->render('login/forgot_password', [

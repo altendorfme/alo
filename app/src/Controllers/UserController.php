@@ -97,19 +97,14 @@ class UserController extends BaseController
 
         $isEdit = $id !== null;
         $userData = null;
-        if ($isEdit) {
-            try {
-                $userData = $this->db->queryFirstRow(
-                    "SELECT * FROM users WHERE id = %d",
-                    $id
-                );
 
-                if (!$userData) {
-                    return new Response(404, ['Location' => '/users']);
-                }
-            } catch (Exception $e) {
-                return new Response(500, ['Location' => '/users']);
-            }
+        $userData = $this->db->queryFirstRow(
+            "SELECT * FROM users WHERE id = %d",
+            $id
+        );
+
+        if (!$userData) {
+            return new Response(404, ['Location' => "/users?error=error_user_not_found"]);
         }
 
         if ($request->getMethod() === 'GET') {
@@ -201,8 +196,12 @@ class UserController extends BaseController
                 } else {
                     $id = $this->db->insert('users', $updateData);
 
-                    $emailController = new EmailController($this->container);
-                    $emailController->sendWelcomeEmail($updateData['email'], $password);
+                    try {
+                        $emailController = new EmailController($this->container);
+                        $emailController->sendWelcomeEmail($updateData['email'], $password);
+                    } catch (Exception $e) {
+                        error_log("Failed to send welcome email: " . $e->getMessage());
+                    }
 
                     $userData = $updateData;
                     $userData['id'] = $id;

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $this->get('title', 'Notification') ?></title>
+    <title><?= $this->get('title', 'PushBase') ?></title>
     <style type="text/css">
         body,
         table,
@@ -106,13 +106,11 @@
             <tr>
                 <td align="center">
                     <table class="container" role="presentation" cellspacing="0" cellpadding="0" border="0">
-                        <?php if ($this->get('title')) { ?>
-                            <tr>
-                                <td class="header">
-                                    <h1><?= htmlspecialchars($this->get('title')) ?></h1>
-                                </td>
-                            </tr>
-                        <?php } ?>
+                        <tr>
+                            <td class="header">
+                                <h1><?= $this->get('title', 'PushBase') ?></h1>
+                            </td>
+                        </tr>
 
                         <tr>
                             <td class="content">
