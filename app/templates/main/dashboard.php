@@ -166,7 +166,6 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Function to create pie chart
         function createPieChart(canvasId, labels, data) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             new Chart(ctx, {
@@ -196,7 +195,12 @@
             });
         }
 
-        // Create charts using server-side data
+        createPieChart(
+            'categoryChart',
+            <?= json_encode(array_map('ucfirst', $segments['category']['labels'])) ?>,
+            <?= json_encode($segments['category']['data']) ?>
+        );
+
         createPieChart(
             'browserChart',
             <?= json_encode($segments['browser_name']['labels']) ?>,
@@ -211,14 +215,8 @@
 
         createPieChart(
             'deviceChart',
-            <?= json_encode($segments['device_type']['labels']) ?>,
+            <?= json_encode(array_map('ucfirst', $segments['device_type']['labels'])) ?>,
             <?= json_encode($segments['device_type']['data']) ?>
-        );
-
-        createPieChart(
-            'categoryChart',
-            <?= json_encode($segments['category']['labels']) ?>,
-            <?= json_encode($segments['category']['data']) ?>
         );
     });
 </script>
