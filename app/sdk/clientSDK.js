@@ -305,16 +305,13 @@ class PushBase {
 
     async subscribe(registration = null) {
         try {
-            // Check for existing service worker registrations
             const registrations = await navigator.serviceWorker.getRegistrations();
             
-            // Look for an active subscription
             for (let reg of registrations) {
                 if (reg && reg.active) {
                     const existingSubscription = await reg.pushManager.getSubscription();
                     
                     if (existingSubscription) {
-                        // Check if the subscriber is active on the server
                         const isUserActive = await this.checkUserStatus(existingSubscription.endpoint);
                         
                         if (isUserActive) {
@@ -325,7 +322,6 @@ class PushBase {
                 }
             }
             
-            // No active subscription found, create a new one
             this.logger.log('No active subscription found. Creating new subscription.', 'info');
             
             if (!registration) {
@@ -531,12 +527,33 @@ class PushBaseClient extends PushBase {
         this.messaging = getMessaging(this.app);
 
         if (this.registrationMode === 'auto') {
-            const delay = this.options.registrationDelay || 0;
-            if (delay > 0) {
-                this.logger.log(`Delaying subscription by ${delay}ms`, 'info');
-                setTimeout(() => this.subscribe(), delay);
+            const browser = this.detectBrowserDetails();
+            const isFirefoxOrSafari = browser.name === 'Mozilla Firefox' || browser.name === 'Safari';
+            
+            if (isFirefoxOrSafari) {
+                this.logger.log(`Browser is ${browser.name}. Waiting for user interaction before subscribing.`, 'info');
+                const userInteractionEvents = ['click', 'keydown', 'touchstart', 'mousedown'];
+                
+                const handleUserInteraction = () => {
+                    this.logger.log('User interaction detected. Proceeding with subscription.', 'info');
+                    this.subscribe();
+                    
+                    userInteractionEvents.forEach(event => {
+                        window.removeEventListener(event, handleUserInteraction);
+                    });
+                };
+                
+                userInteractionEvents.forEach(event => {
+                    window.addEventListener(event, handleUserInteraction);
+                });
             } else {
-                this.subscribe();
+                const delay = this.options.registrationDelay || 0;
+                if (delay > 0) {
+                    this.logger.log(`Delaying subscription by ${delay}ms`, 'info');
+                    setTimeout(() => this.subscribe(), delay);
+                } else {
+                    this.subscribe();
+                }
             }
         }
     }
