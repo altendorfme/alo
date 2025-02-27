@@ -113,7 +113,6 @@ class InstallController extends BaseController
     {
         $requiredFields = [
             'app_url',
-            'app_tz',
             'app_language',
             'client_url',
             'db_host',
