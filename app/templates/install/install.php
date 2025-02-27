@@ -386,7 +386,7 @@
                                     value="<?= htmlspecialchars($formData['firebase_vapid_public'] ?? '') ?>">
                             </div>
                         </div>
-                        <div class="mb-3">
+                        <div>
                             <label for="firebase_vapid_private" class="form-label">VAPID Private Key</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
