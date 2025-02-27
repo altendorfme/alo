@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $this->get('title', 'PushBase') ?></title>
+    <title><?= $this->get('emailTitle') ?></title>
     <style type="text/css">
         body,
         table,
@@ -108,7 +108,7 @@
                     <table class="container" role="presentation" cellspacing="0" cellpadding="0" border="0">
                         <tr>
                             <td class="header">
-                                <h1><?= $this->get('title', 'PushBase') ?></h1>
+                                <h1><?= $this->get('emailTitle') ?></h1>
                             </td>
                         </tr>
 

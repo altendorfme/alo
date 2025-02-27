@@ -86,7 +86,7 @@ class EmailController extends BaseController
             $templateData = [
                 'lang' => $this->config->get('app.lang'),
                 'resetLink' => $resetLink,
-                'title' => $this->_e('email_password_reset_title'),
+                'emailTitle' => $this->_e('email_password_reset_title'),
                 'line1' => $this->_e('email_password_reset_line1'),
                 'line2' => $this->_e('email_password_reset_line2'),
                 'line3' => $this->_e('email_password_reset_line3'),
@@ -119,7 +119,7 @@ class EmailController extends BaseController
                 'loginLink' => $loginLink,
                 'emailText' => $this->_e('email'),
                 'passwordText' => $this->_e('password'),
-                'title' => $this->_e('email_welcome_title'),
+                'emailTitle' => $this->_e('email_welcome_title'),
                 'line1' => $this->_e('email_welcome_line1'),
                 'button' => $this->_e('email_welcome_button')
             ];
