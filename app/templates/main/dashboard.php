@@ -59,6 +59,23 @@
     </div>
 </div>
 
+<!-- Subscribers Trend Chart -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up me-2"></i>
+                    <?= _e('subscribers_status_trend') ?>
+                </h5>
+            </div>
+            <div class="card-body" style="height: 400px;">
+                <canvas id="subscribersTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Recent Campaigns Section -->
 <?php if (!empty($campaigns['recent'])) { ?>
     <div class="row">
@@ -218,6 +235,73 @@
             <?= json_encode(array_map('ucfirst', $segments['device_type']['labels'])) ?>,
             <?= json_encode($segments['device_type']['data']) ?>
         );
+        
+        const subscribersCtx = document.getElementById('subscribersTrendChart').getContext('2d');
+        new Chart(subscribersCtx, {
+            type: 'line',
+            data: {
+                labels: <?= json_encode(array_column($subscribers_trend['dates'] ?? [], 'date')) ?>,
+                datasets: [
+                    {
+                        label: '<?= _e('active') ?>',
+                        data: <?= json_encode(array_column($subscribers_trend['data'] ?? [], 'active')) ?>,
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    },
+                    {
+                        label: '<?= _e('inactive') ?>',
+                        data: <?= json_encode(array_column($subscribers_trend['data'] ?? [], 'inactive')) ?>,
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    },
+                    {
+                        label: '<?= _e('unsubscribed') ?>',
+                        data: <?= json_encode(array_column($subscribers_trend['data'] ?? [], 'unsubscribed')) ?>,
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '<?= _e('subscribers_count') ?>'
+                        }
+                    }
+                }
+            }
+        });
     });
 </script>
 <?php $this->end() ?>

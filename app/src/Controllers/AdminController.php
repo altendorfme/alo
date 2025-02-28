@@ -25,16 +25,16 @@ class AdminController extends BaseController
     {
         $getSegmentData = function ($segmentType) {
             $query = "
-                SELECT 
-                    a.segment_value as name, 
-                    a.count 
-                FROM 
+                SELECT
+                    a.segment_value as name,
+                    a.count
+                FROM
                     segments s
-                JOIN 
+                JOIN
                     analytics_segments a ON s.id = a.segment_id
-                WHERE 
+                WHERE
                     s.name = %s
-                ORDER BY 
+                ORDER BY
                     a.count DESC
                 LIMIT 5
             ";
@@ -49,6 +49,89 @@ class AdminController extends BaseController
                 'data' => $data ?: []
             ];
         };
+
+        $subscribers_trend = [];
+        try {
+            $earliestDataQuery = "
+                SELECT
+                    MIN(DATE(created_at)) as earliest_date
+                FROM
+                    analytics_subscribers
+            ";
+            
+            $earliestDate = $this->db->queryFirstField($earliestDataQuery);
+            if ($earliestDate) {
+                $startDate = date('Y-m-d', strtotime("-30 days"));
+
+                if ($earliestDate > $startDate) {
+                    $startDate = $earliestDate;
+                }
+
+                $query = "
+                    SELECT
+                        DATE(created_at) as date,
+                        status,
+                        COUNT(*) as count
+                    FROM
+                        analytics_subscribers
+                    WHERE
+                        created_at >= %s
+                    GROUP BY
+                        DATE(created_at), status
+                    ORDER BY
+                        date ASC
+                ";
+                
+                $results = $this->db->query($query, $startDate);
+
+                $dates = [];
+                $data = [];
+                
+                $currentDate = new \DateTime($startDate);
+                $today = new \DateTime();
+                
+                while ($currentDate <= $today) {
+                    $dateStr = $currentDate->format('Y-m-d');
+                    $dates[] = ['date' => $dateStr];
+                    $data[$dateStr] = [
+                        'active' => 0,
+                        'inactive' => 0,
+                        'unsubscribed' => 0
+                    ];
+                    $currentDate->modify('+1 day');
+                }
+
+                foreach ($results as $row) {
+                    $date = $row['date'];
+                    $status = $row['status'];
+                    $count = (int)$row['count'];
+                    
+                    if (isset($data[$date])) {
+                        $data[$date][$status] = $count;
+                    }
+                }
+
+                $chartData = [];
+                foreach ($data as $date => $statusCounts) {
+                    $chartData[] = $statusCounts;
+                }
+                
+                $subscribers_trend = [
+                    'dates' => $dates,
+                    'data' => $chartData
+                ];
+            } else {
+                $subscribers_trend = [
+                    'dates' => [],
+                    'data' => []
+                ];
+            }
+        } catch (\Exception $e) {
+            $subscribers_trend = [
+                'dates' => [],
+                'data' => []
+            ];
+        }
 
         $dashboard = [
             'subscribers' => [
@@ -75,7 +158,8 @@ class AdminController extends BaseController
                 'os_name' => $getSegmentData('os_name'),
                 'device_type' => $getSegmentData('device_type'),
                 'category' => $getSegmentData('category')
-            ]
+            ],
+            'subscribers_trend' => $subscribers_trend
         ];
 
         return $this->render('main/dashboard', $dashboard);

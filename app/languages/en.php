@@ -267,5 +267,8 @@ return [
     'success_user_updated' => 'User updated successfully!',
     'success_user_created' => 'User created successfully!',
     'error_saving_user' => 'Error while saving the user!',
-    'error_user_not_found' => 'User not found!'
+    'error_user_not_found' => 'User not found!',
+    'subscribers_status_trend' => 'Subscribers Trend',
+    'subscribers_count' => 'Subscribers Count',
+    'date' => 'Date'
 ];
