@@ -9,7 +9,7 @@
     </div>
     <div class="btn-toolbar">
         <button type="submit" form="campaignForm" name="action" value="save" class="btn btn-primary me-2">
-            <?= $isEdit ? _e('campaign_edit') : _e('campaign_publish'); ?>
+            <?= $isEdit ? _e('campaign_publish') : _e('campaign_publish'); ?>
         </button>
         <button type="submit" form="campaignForm" name="action" value="draft" class="btn btn-secondary">
             <?= _e('save_as_draft') ?>
@@ -466,26 +466,6 @@
         imagePreview('push_icon');
         imagePreview('push_badge');
 
-        function toggleFormElements(disabled) {
-            document.querySelectorAll('input, textarea, button, select').forEach(element => {
-                element.disabled = disabled;
-            });
-
-            const importButton = document.getElementById('importButton');
-            const spinner = importButton.querySelector('.spinner-border');
-            const importText = importButton.querySelector('.import-text');
-
-            if (disabled) {
-                spinner.classList.remove('d-none');
-                importText.textContent = '<?= _e('importing') ?>';
-                importButton.disabled = true;
-            } else {
-                spinner.classList.add('d-none');
-                importText.textContent = '<?= _e('import_metadata') ?>';
-                importButton.disabled = false;
-            }
-        }
-
         document.getElementById('importButton').addEventListener('click', async function(e) {
             const urlInput = document.getElementById('importUrl');
             const url = urlInput.value.trim();
@@ -494,7 +474,6 @@
                 alert('<?= _e('validate_url') ?>');
                 return;
             }
-            toggleFormElements(true);
 
             try {
                 const response = await fetch('/api/campaign/import/metadata', {
@@ -529,7 +508,9 @@
             } catch (error) {
                 alert('<?= _e('error_network_response') ?>');
             } finally {
-                toggleFormElements(false);
+                imagePreview('push_image');
+                imagePreview('push_icon');
+                imagePreview('push_badge');
             }
         });
     });

@@ -55,23 +55,25 @@ return function (RouteCollector $r) {
         $r->addRoute('GET', '/logout', [AuthController::class, 'logout']);
         $r->addRoute('GET', '/dashboard', [AdminController::class, 'dashboard']);
 
-        // Download Route for pushBaseSW (Only for user with ID 1)
+        // Download Route for pushBaseSW
         $r->addRoute('GET', '/download/pushBaseSW', [SDKController::class, 'downloadPushBaseSW']);
 
         // Campaign Management
         $r->addGroup('/campaign', function (RouteCollector $r) {
-            $r->addRoute(['GET', 'POST'], '', [CampaignController::class, 'campaign']);
-            $r->addRoute(['GET', 'POST'], '/edit/{id:\d+}', [CampaignController::class, 'campaign']);
+            $r->addRoute('GET', '', [CampaignController::class, 'viewCampaign']);
+            $r->addRoute('POST', '', [CampaignController::class, 'processCampaign']);
+            
+            $r->addRoute('GET', '/edit/{id:\d+}', [CampaignController::class, 'viewEditCampaign']);
+            $r->addRoute('POST', '/edit/{id:\d+}', [CampaignController::class, 'processEditCampaign']);
+
             $r->addRoute('GET', '/delete/{id:\d+}', [CampaignController::class, 'deleteCampaign']);
             $r->addRoute('GET', '/cancel/{id:\d+}', [CampaignController::class, 'cancelCampaign']);
-            
-            // Updated analytics route to use new CampaignAnalyticsController
             $r->addRoute('GET', '/analytics/{id:\d+}', [CampaignAnalyticsController::class, 'campaignAnalytics']);
         });
-
-        // Campaigns Listing and Export
+        //-- Listing and Export
         $r->addGroup('/campaigns', function (RouteCollector $r) {
-            $r->addRoute('GET', '[/page/{page:\d+}]', [CampaignController::class, 'campaigns']);
+            $r->addRoute('GET', '[/page/{page:\d+}]', [CampaignController::class, 'viewCampaigns']);
+            $r->addRoute('POST', '', [CampaignController::class, 'processCampaigns']);
             $r->addRoute('GET', '/export/{format:csv|xlsx}', [CampaignController::class, 'exportCampaigns']);
         });
 

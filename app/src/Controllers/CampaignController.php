@@ -40,7 +40,7 @@ class CampaignController extends BaseController
         return $user['id'] ?? null;
     }
 
-    public function campaigns(ServerRequestInterface $request, array $args = []): ResponseInterface
+    public function viewCampaigns(ServerRequestInterface $request, array $args = []): ResponseInterface
     {
         $currentPage = isset($args['page']) ? (int)$args['page'] : 1;
         if ($currentPage < 1) $currentPage = 1;
@@ -91,33 +91,50 @@ class CampaignController extends BaseController
             'statuses' => $statuses
         ];
 
-        if ($request->getMethod() === 'POST') {
-            $params = (array)$request->getParsedBody();
-            if (isset($params['error'])) {
-                $data['error'] = $params['error'];
-            }
-            if (isset($params['cancelled'])) {
-                $data['cancelled'] = $params['cancelled'];
-            }
-            if (isset($params['deleted'])) {
-                $data['deleted'] = $params['deleted'];
-            }
+        // Check for query parameters that might have been set by redirects
+        if (isset($queryParams['error'])) {
+            $data['error'] = $queryParams['error'];
+        }
+        if (isset($queryParams['cancelled'])) {
+            $data['cancelled'] = $queryParams['cancelled'];
+        }
+        if (isset($queryParams['deleted'])) {
+            $data['deleted'] = $queryParams['deleted'];
         }
 
         return $this->render('main/campaigns', $data);
     }
 
-    public function campaign(ServerRequestInterface $request, array $args = []): ResponseInterface
+    public function processCampaigns(ServerRequestInterface $request, array $args = []): ResponseInterface
     {
-        $id = $args['id'] ?? null;
-        $isEdit = $id !== null;
-        $campaignObj = new \Pushbase\Campaign();
-        $campaign = null;
+        $params = (array)$request->getParsedBody();
+        $data = [];
+        
+        if (isset($params['error'])) {
+            $data['error'] = $params['error'];
+        }
+        if (isset($params['cancelled'])) {
+            $data['cancelled'] = $params['cancelled'];
+        }
+        if (isset($params['deleted'])) {
+            $data['deleted'] = $params['deleted'];
+        }
+        
+        // Redirect to GET endpoint with parameters
+        return new Response(302, [
+            'Location' => '/campaigns?' . http_build_query($data)
+        ]);
+    }
 
+    /**
+     * Get list of segments for campaign form
+     */
+    private function getListSegments(): array
+    {
         $listSegments = $this->db->query(
-            "SELECT 
-                s.id, 
-                s.name, 
+            "SELECT
+                s.id,
+                s.name,
                 s.description,
                 (SELECT GROUP_CONCAT(DISTINCT `value` SEPARATOR '|')
                  FROM segment_goals sg
@@ -135,133 +152,285 @@ class CampaignController extends BaseController
             ];
         }, $listSegments);
 
-        $listSegments = array_filter($listSegments);
+        return array_filter($listSegments);
+    }
 
-        if ($isEdit) {
-            $campaign = $campaignObj->get($id);
-            if (!$campaign || !in_array($campaign['status'], ['draft', 'scheduled', 'cancelled'])) {
-                return $this->render('main/campaigns', [
-                    'error' => _e('error_not_allowed_edit_campaign')
-                ]);
-            }
-        }
-
-        if ($request->getMethod() === 'POST') {
-            $params = (array)$request->getParsedBody();
-            $data = [
-                'name' => $params['name'] ?? '',
-                'push_title' => $params['push_title'] ?? '',
-                'push_body' => $params['push_body'] ?? '',
-                'push_icon' => $params['push_icon'] ?? null,
-                'push_image' => $params['push_image'] ?? null,
-                'push_url' => $params['push_url'] ?? null,
-                'send_at' => $params['send_at'] ? date('Y-m-d H:i:s', strtotime($params['send_at'])) : null,
-                'push_requireInteraction' => isset($params['push_requireInteraction']),
-                'push_badge' => $params['push_badge'] ?? null,
-                'push_renotify' => isset($params['push_renotify']),
-                'push_silent' => isset($params['push_silent']),
-                'segments' => isset($params['segments']) && is_array($params['segments'])
-                    ? json_encode(array_filter($params['segments']))
-                    : null
-            ];
-
-            if (empty($data['name']) || empty($data['push_title']) || empty($data['push_body'])) {
-                return $this->render('main/campaign', [
-                    'title' => $isEdit ? _e('campaign_edit') : _e('campaign_create'),
-                    'error' => _e('error_name_title_body_required'),
-                    'campaign' => $isEdit ? array_merge($campaign, $data) : $data,
-                    'isEdit' => $isEdit,
-                    'segments' => $params['segments'] ?? null,
-                    'listSegments' => $listSegments,
-                    'client' => [
-                        'icon' => $this->config->get('client.icon') ?? null,
-                        'badge' => $this->config->get('client.badge') ?? null,
-                    ]
-                ]);
-            }
-
-            try {
-                $action = $params['action'] ?? 'save';
-                $data['status'] = $action === 'draft' ? 'draft' : 'scheduled';
-
-                $currentUserId = $this->getCurrentUserId();
-                if ($currentUserId === null) {
-                    return $this->render('main/campaign', [
-                        'title' => $isEdit ? _e('campaign_edit') : _e('campaign_create'),
-                        'error' => _e('error_authentication_required'),
-                        'campaign' => $isEdit ? array_merge($campaign, $data) : $data,
-                        'isEdit' => $isEdit,
-                        'segments' => $params['segments'] ?? null,
-                        'listSegments' => $listSegments,
-                        'client' => [
-                            'icon' => $this->config->get('client.icon') ?? null,
-                            'badge' => $this->config->get('client.badge') ?? null,
-                        ]
-                    ]);
-                }
-
-                if ($isEdit) {
-                    if ($action !== 'draft') {
-                        $data['status'] = 'scheduled';
-                    }
-                    $result = $campaignObj->update($id, $data, $currentUserId);
-                } else {
-                    $result = $campaignObj->create($data, $currentUserId);
-                }
-
-                if ($result) {
-                    return $this->render('main/campaign', [
-                        'title' => $isEdit ? _e('campaign_edit') : _e('campaign_create'),
-                        'success' => _e('success_to') . ($isEdit ? _e('update') : _e('create')),
-                        'campaign' => $isEdit ? array_merge($campaign, $data) : $data,
-                        'isEdit' => $isEdit,
-                        'segments' => $params['segments'] ?? null,
-                        'listSegments' => $listSegments,
-                        'client' => [
-                            'icon' => $this->config->get('client.icon') ?? null,
-                            'badge' => $this->config->get('client.badge') ?? null,
-                        ]
-                    ]);
-                } else {
-                    return $this->render('main/campaign', [
-                        'title' => $isEdit ? _e('campaign_edit') : _e('campaign_create'),
-                        'error' => _e('error_failed_to') . ($isEdit ? _e('update') : _e('create')),
-                        'campaign' => $isEdit ? array_merge($campaign, $data) : $data,
-                        'isEdit' => $isEdit,
-                        'segments' => $params['segments'] ?? null,
-                        'listSegments' => $listSegments,
-                        'client' => [
-                            'icon' => $this->config->get('client.icon') ?? null,
-                            'badge' => $this->config->get('client.badge') ?? null,
-                        ]
-                    ]);
-                }
-            } catch (Exception $e) {
-                return $this->render('main/campaign', [
-                    'title' => $isEdit ? _e('campaign_edit') : _e('campaign_create'),
-                    'error' => $e->getMessage(),
-                    'campaign' => $isEdit ? array_merge($campaign, $data) : $data,
-                    'isEdit' => $isEdit,
-                    'segments' => $params['segments'] ?? null,
-                    'listSegments' => $listSegments,
-                    'client' => [
-                        'icon' => $this->config->get('client.icon') ?? null,
-                        'badge' => $this->config->get('client.badge') ?? null,
-                    ]
-                ]);
-            }
-        }
+    /**
+     * View campaign creation form (GET)
+     */
+    public function viewCampaign(ServerRequestInterface $request): ResponseInterface
+    {
+        $listSegments = $this->getListSegments();
 
         return $this->render('main/campaign', [
-            'title' => $isEdit ? _e('campaign_edit') : _e('campaign_create'),
-            'campaign' => $campaign,
-            'isEdit' => $isEdit,
+            'title' => _e('campaign_create'),
+            'campaign' => null,
+            'isEdit' => false,
             'listSegments' => $listSegments,
             'client' => [
                 'icon' => $this->config->get('client.icon') ?? null,
                 'badge' => $this->config->get('client.badge') ?? null,
             ]
         ]);
+    }
+
+    /**
+     * View campaign edit form (GET)
+     */
+    public function viewEditCampaign(ServerRequestInterface $request, array $args = []): ResponseInterface
+    {
+        $id = $args['id'] ?? null;
+        if (!$id) {
+            return new Response(302, ['Location' => '/campaigns']);
+        }
+
+        $campaignObj = new \Pushbase\Campaign();
+        $campaign = $campaignObj->get($id);
+        
+        if (!$campaign || !in_array($campaign['status'], ['draft', 'scheduled', 'cancelled'])) {
+            return $this->render('main/campaigns', [
+                'error' => _e('error_not_allowed_edit_campaign')
+            ]);
+        }
+
+        $listSegments = $this->getListSegments();
+
+        return $this->render('main/campaign', [
+            'title' => _e('campaign_edit'),
+            'campaign' => $campaign,
+            'isEdit' => true,
+            'listSegments' => $listSegments,
+            'client' => [
+                'icon' => $this->config->get('client.icon') ?? null,
+                'badge' => $this->config->get('client.badge') ?? null,
+            ]
+        ]);
+    }
+
+    /**
+     * Process campaign creation (POST)
+     */
+    public function processCampaign(ServerRequestInterface $request): ResponseInterface
+    {
+        $listSegments = $this->getListSegments();
+        $params = (array)$request->getParsedBody();
+        $data = [
+            'name' => $params['name'] ?? '',
+            'push_title' => $params['push_title'] ?? '',
+            'push_body' => $params['push_body'] ?? '',
+            'push_icon' => $params['push_icon'] ?? null,
+            'push_image' => $params['push_image'] ?? null,
+            'push_url' => $params['push_url'] ?? null,
+            'send_at' => $params['send_at'] ? date('Y-m-d H:i:s', strtotime($params['send_at'])) : null,
+            'push_requireInteraction' => isset($params['push_requireInteraction']),
+            'push_badge' => $params['push_badge'] ?? null,
+            'push_renotify' => isset($params['push_renotify']),
+            'push_silent' => isset($params['push_silent']),
+            'segments' => isset($params['segments']) && is_array($params['segments'])
+                ? json_encode(array_filter($params['segments']))
+                : null
+        ];
+
+        if (empty($data['name']) || empty($data['push_title']) || empty($data['push_body'])) {
+            return $this->render('main/campaign', [
+                'title' => _e('campaign_create'),
+                'error' => _e('error_name_title_body_required'),
+                'campaign' => $data,
+                'isEdit' => false,
+                'segments' => $params['segments'] ?? null,
+                'listSegments' => $listSegments,
+                'client' => [
+                    'icon' => $this->config->get('client.icon') ?? null,
+                    'badge' => $this->config->get('client.badge') ?? null,
+                ]
+            ]);
+        }
+
+        try {
+            $action = $params['action'] ?? 'save';
+            $data['status'] = $action === 'draft' ? 'draft' : 'scheduled';
+
+            $currentUserId = $this->getCurrentUserId();
+            if ($currentUserId === null) {
+                return $this->render('main/campaign', [
+                    'title' => _e('campaign_create'),
+                    'error' => _e('error_authentication_required'),
+                    'campaign' => $data,
+                    'isEdit' => false,
+                    'segments' => $params['segments'] ?? null,
+                    'listSegments' => $listSegments,
+                    'client' => [
+                        'icon' => $this->config->get('client.icon') ?? null,
+                        'badge' => $this->config->get('client.badge') ?? null,
+                    ]
+                ]);
+            }
+
+            $campaignObj = new \Pushbase\Campaign();
+            $result = $campaignObj->create($data, $currentUserId);
+
+            if ($result) {
+                return $this->render('main/campaign', [
+                    'title' => _e('campaign_create'),
+                    'success' => _e('success_to') . _e('create'),
+                    'campaign' => $data,
+                    'isEdit' => false,
+                    'segments' => $params['segments'] ?? null,
+                    'listSegments' => $listSegments,
+                    'client' => [
+                        'icon' => $this->config->get('client.icon') ?? null,
+                        'badge' => $this->config->get('client.badge') ?? null,
+                    ]
+                ]);
+            } else {
+                return $this->render('main/campaign', [
+                    'title' => _e('campaign_create'),
+                    'error' => _e('error_failed_to') . _e('create'),
+                    'campaign' => $data,
+                    'isEdit' => false,
+                    'segments' => $params['segments'] ?? null,
+                    'listSegments' => $listSegments,
+                    'client' => [
+                        'icon' => $this->config->get('client.icon') ?? null,
+                        'badge' => $this->config->get('client.badge') ?? null,
+                    ]
+                ]);
+            }
+        } catch (Exception $e) {
+            return $this->render('main/campaign', [
+                'title' => _e('campaign_create'),
+                'error' => $e->getMessage(),
+                'campaign' => $data,
+                'isEdit' => false,
+                'segments' => $params['segments'] ?? null,
+                'listSegments' => $listSegments,
+                'client' => [
+                    'icon' => $this->config->get('client.icon') ?? null,
+                    'badge' => $this->config->get('client.badge') ?? null,
+                ]
+            ]);
+        }
+    }
+
+    /**
+     * Process campaign edit (POST)
+     */
+    public function processEditCampaign(ServerRequestInterface $request, array $args = []): ResponseInterface
+    {
+        $id = $args['id'] ?? null;
+        if (!$id) {
+            return new Response(302, ['Location' => '/campaigns']);
+        }
+
+        $campaignObj = new \Pushbase\Campaign();
+        $campaign = $campaignObj->get($id);
+        
+        if (!$campaign || !in_array($campaign['status'], ['draft', 'scheduled', 'cancelled'])) {
+            return $this->render('main/campaigns', [
+                'error' => _e('error_not_allowed_edit_campaign')
+            ]);
+        }
+
+        $listSegments = $this->getListSegments();
+        $params = (array)$request->getParsedBody();
+        $data = [
+            'name' => $params['name'] ?? '',
+            'push_title' => $params['push_title'] ?? '',
+            'push_body' => $params['push_body'] ?? '',
+            'push_icon' => $params['push_icon'] ?? null,
+            'push_image' => $params['push_image'] ?? null,
+            'push_url' => $params['push_url'] ?? null,
+            'send_at' => $params['send_at'] ? date('Y-m-d H:i:s', strtotime($params['send_at'])) : null,
+            'push_requireInteraction' => isset($params['push_requireInteraction']),
+            'push_badge' => $params['push_badge'] ?? null,
+            'push_renotify' => isset($params['push_renotify']),
+            'push_silent' => isset($params['push_silent']),
+            'segments' => isset($params['segments']) && is_array($params['segments'])
+                ? json_encode(array_filter($params['segments']))
+                : null
+        ];
+
+        if (empty($data['name']) || empty($data['push_title']) || empty($data['push_body'])) {
+            return $this->render('main/campaign', [
+                'title' => _e('campaign_edit'),
+                'error' => _e('error_name_title_body_required'),
+                'campaign' => array_merge($campaign, $data),
+                'isEdit' => true,
+                'segments' => $params['segments'] ?? null,
+                'listSegments' => $listSegments,
+                'client' => [
+                    'icon' => $this->config->get('client.icon') ?? null,
+                    'badge' => $this->config->get('client.badge') ?? null,
+                ]
+            ]);
+        }
+
+        try {
+            $action = $params['action'] ?? 'save';
+            $data['status'] = $action === 'draft' ? 'draft' : 'scheduled';
+
+            $currentUserId = $this->getCurrentUserId();
+            if ($currentUserId === null) {
+                return $this->render('main/campaign', [
+                    'title' => _e('campaign_edit'),
+                    'error' => _e('error_authentication_required'),
+                    'campaign' => array_merge($campaign, $data),
+                    'isEdit' => true,
+                    'segments' => $params['segments'] ?? null,
+                    'listSegments' => $listSegments,
+                    'client' => [
+                        'icon' => $this->config->get('client.icon') ?? null,
+                        'badge' => $this->config->get('client.badge') ?? null,
+                    ]
+                ]);
+            }
+
+            if ($action !== 'draft') {
+                $data['status'] = 'scheduled';
+            }
+            $result = $campaignObj->update($id, $data, $currentUserId);
+
+            if ($result) {
+                return $this->render('main/campaign', [
+                    'title' => _e('campaign_edit'),
+                    'success' => _e('success_to') . _e('update'),
+                    'campaign' => array_merge($campaign, $data),
+                    'isEdit' => true,
+                    'segments' => $params['segments'] ?? null,
+                    'listSegments' => $listSegments,
+                    'client' => [
+                        'icon' => $this->config->get('client.icon') ?? null,
+                        'badge' => $this->config->get('client.badge') ?? null,
+                    ]
+                ]);
+            } else {
+                return $this->render('main/campaign', [
+                    'title' => _e('campaign_edit'),
+                    'error' => _e('error_failed_to') . _e('update'),
+                    'campaign' => array_merge($campaign, $data),
+                    'isEdit' => true,
+                    'segments' => $params['segments'] ?? null,
+                    'listSegments' => $listSegments,
+                    'client' => [
+                        'icon' => $this->config->get('client.icon') ?? null,
+                        'badge' => $this->config->get('client.badge') ?? null,
+                    ]
+                ]);
+            }
+        } catch (Exception $e) {
+            return $this->render('main/campaign', [
+                'title' => _e('campaign_edit'),
+                'error' => $e->getMessage(),
+                'campaign' => array_merge($campaign, $data),
+                'isEdit' => true,
+                'segments' => $params['segments'] ?? null,
+                'listSegments' => $listSegments,
+                'client' => [
+                    'icon' => $this->config->get('client.icon') ?? null,
+                    'badge' => $this->config->get('client.badge') ?? null,
+                ]
+            ]);
+        }
     }
 
     public function cancelCampaign(ServerRequestInterface $request, array $args = []): ResponseInterface
