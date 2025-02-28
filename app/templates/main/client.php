@@ -177,7 +177,7 @@ pushbaseBtn.addEventListener('click', async () => {
             const enableCustomSegments = enableCustomSegmentsCheckbox.checked;
 
             let code = `<script type="module">
-    import PushBaseClient from '<?= $app->url ?>/clientSDK';
+    import PushBaseClient from '<?= $appUrl ?>/clientSDK';
     const pushBaseConfig = {
         registrationMode: '${registrationMode}'`;
 
