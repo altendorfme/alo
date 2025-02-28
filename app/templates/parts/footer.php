@@ -32,7 +32,7 @@
         </div>
     </div>
 </footer>
-
+<div class="ldld full"></div>
 <script>
     <?php
     $bootstrap = "/dist/scripts/bootstrap.min.js";
@@ -40,4 +40,20 @@
         include $_SERVER['DOCUMENT_ROOT'] . $bootstrap;
     }
     ?>
+</script>
+<script>
+    <?php
+    $ldLoaderJSPath = "/dist/scripts/ldloader.min.js";
+    if (file_exists($_SERVER['DOCUMENT_ROOT'] . $ldLoaderJSPath)) {
+        include $_SERVER['DOCUMENT_ROOT'] . $ldLoaderJSPath;
+    }
+    ?>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('submit', function(event) {
+            if (event.target.tagName === 'FORM') {
+                new ldloader({root: ".ldld.full"}).on();
+            }
+        });
+    });
 </script>

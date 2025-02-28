@@ -476,6 +476,7 @@
             }
 
             try {
+                new ldloader({root: ".ldld.full"}).on();
                 const response = await fetch('/api/campaign/import/metadata', {
                     method: 'POST',
                     headers: {
@@ -508,6 +509,7 @@
             } catch (error) {
                 alert('<?= _e('error_network_response') ?>');
             } finally {
+                new ldloader({root: ".ldld.full"}).off();
                 imagePreview('push_image');
                 imagePreview('push_icon');
                 imagePreview('push_badge');

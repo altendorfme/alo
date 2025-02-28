@@ -10,3 +10,11 @@
     }
     ?>
 </style>
+<style>
+    <?php
+    $ldLoaderCSSPath = "/dist/styles/ldloader.min.css";
+    if (file_exists($_SERVER['DOCUMENT_ROOT'] . $ldLoaderCSSPath)) {
+        include $_SERVER['DOCUMENT_ROOT'] . $ldLoaderCSSPath;
+    }
+    ?>
+</style>

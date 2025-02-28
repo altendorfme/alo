@@ -36,6 +36,20 @@ const paths = {
             ],
             dest: 'public/dist/scripts'
         }
+    },
+    ldloader: {
+        styles: {
+            src: [
+                'node_modules/ldloader/index.min.css'
+            ],
+            dest: 'public/dist/styles'
+        },
+        scripts: {
+            src: [
+                'node_modules/ldloader/index.min.js'
+            ],
+            dest: 'public/dist/scripts'
+        }
     }
 };
 
@@ -67,6 +81,24 @@ function chartJS() {
         .pipe(gulp.dest(paths.chart.scripts.dest))
 }
 
+function ldloaderJS() {
+    return gulp.src(paths.ldloader.scripts.src)
+        .pipe(sourcemaps.init())
+        .pipe(concat('ldloader.min.js'))
+        .pipe(gulp.dest(paths.ldloader.scripts.dest))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(paths.ldloader.scripts.dest))
+}
+
+function ldloaderCSS() {
+    return gulp.src(paths.ldloader.styles.src)
+        .pipe(sourcemaps.init())
+        .pipe(concat('ldloader.min.css'))
+        .pipe(gulp.dest(paths.ldloader.styles.dest))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(paths.ldloader.styles.dest))
+}
+
 function bootstrapFonts() {
     return gulp.src(paths.bootstrap.fonts.src)
         .pipe(gulp.dest(paths.bootstrap.fonts.dest))
@@ -77,9 +109,11 @@ function watch() {
     gulp.watch(paths.bootstrap.scripts.src, bootstrapJS);
     gulp.watch(paths.bootstrap.fonts.src, bootstrapFonts);
     gulp.watch(paths.chart.scripts.src, chartJS);
+    gulp.watch(paths.ldloader.scripts.src, ldloaderJS);
+    gulp.watch(paths.ldloader.styles.src, ldloaderCSS);
 }
 
 exports.default = gulp.series(
-    gulp.parallel(bootstrapCSS, bootstrapJS, chartJS, bootstrapFonts),
+    gulp.parallel(bootstrapCSS, bootstrapJS, bootstrapFonts, chartJS, ldloaderCSS, ldloaderJS),
     watch
 );

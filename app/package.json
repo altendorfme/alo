@@ -10,7 +10,8 @@
 		"bootstrap-icons": "^1.11.3",
 		"chart.js": "^4.4.7",
 		"chartjs-adapter-date-fns": "^3.0.0",
-		"date-fns": "^4.1.0"
+		"date-fns": "^4.1.0",
+		"ldloader": "^3.0.3"
 	},
 	"devDependencies": {
 		"gulp": "^4.0.2",
