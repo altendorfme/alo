@@ -77,27 +77,26 @@ return function (RouteCollector $r) {
 
         // User Management
         $r->addGroup('/user', function (RouteCollector $r) {
-            // GET routes for viewing
             $r->addRoute('GET', '', [UserController::class, 'viewUserCreate']);
             $r->addRoute('GET', '/edit/{id:\d+}', [UserController::class, 'viewUserEdit']);
             
-            // POST routes for actions
             $r->addRoute('POST', '', [UserController::class, 'createUser']);
             $r->addRoute('POST', '/edit/{id:\d+}', [UserController::class, 'updateUser']);
             $r->addRoute('POST', '/token/{id:\d+}', [UserController::class, 'generateApiKey']);
         });
-        // Users Listing
+        //-- Listing
         $r->addGroup('/users', function (RouteCollector $r) {
-            $r->addRoute('GET', '[/page/{page:\d+}]', [UserController::class, 'users']);
+            $r->addRoute('GET', '[/page/{page:\d+}]', [UserController::class, 'viewUsers']);
         });
 
         // Segment Management
         $r->addGroup('/segment', function (RouteCollector $r) {
-            $r->addRoute(['GET', 'POST'], '/edit/{id:\d+}', [SegmentController::class, 'segment']);
+            $r->addRoute('GET', '/edit/{id:\d+}', [SegmentController::class, 'viewSegment']);
+            $r->addRoute('POST', '/edit/{id:\d+}', [SegmentController::class, 'updateSegment']);
         });
-        // Segments Listing
+        //-- Listing
         $r->addGroup('/segments', function (RouteCollector $r) {
-            $r->addRoute('GET', '[/page/{page:\d+}]', [SegmentController::class, 'segments']);
+            $r->addRoute('GET', '[/page/{page:\d+}]', [SegmentController::class, 'viewSegments']);
         });
 
         // Client Config

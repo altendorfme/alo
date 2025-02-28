@@ -23,7 +23,7 @@ class SegmentController extends BaseController
         $this->config = $container->get(Config::class);
     }
 
-    public function segments(ServerRequestInterface $request, array $args): ResponseInterface
+    public function viewSegments(ServerRequestInterface $request, array $args): ResponseInterface
     {
         $queryParams = $request->getQueryParams();
         $page = isset($args['page']) ? (int)$args['page'] : 1;
@@ -52,7 +52,10 @@ class SegmentController extends BaseController
         ]);
     }
 
-    public function segment(ServerRequestInterface $request, array $args): ResponseInterface
+    /**
+     * View segment details (GET method)
+     */
+    public function viewSegment(ServerRequestInterface $request, array $args): ResponseInterface
     {
         $id = $args['id'] ?? null;
 
@@ -61,21 +64,35 @@ class SegmentController extends BaseController
             return new Response(404, [], 'Segment not found');
         }
 
-        if ($request->getMethod() === 'POST') {
-            $postData = $request->getParsedBody();
-
-            $this->db->update('segments', [
-                'description' => $postData['description']
-            ], "id=%i", $id);
-
-            return $this->render('main/segment', [
-                'segment' => $segment,
-                'success' => _e('success_segment_edited')
-            ]);
-        }
-
         return $this->render('main/segment', [
             'segment' => $segment
+        ]);
+    }
+
+    /**
+     * Update segment (POST method)
+     */
+    public function updateSegment(ServerRequestInterface $request, array $args): ResponseInterface
+    {
+        $id = $args['id'] ?? null;
+
+        $segment = $this->db->queryFirstRow("SELECT * FROM segments WHERE id = %i", $id);
+        if (!$segment) {
+            return new Response(404, [], 'Segment not found');
+        }
+
+        $postData = $request->getParsedBody();
+
+        $this->db->update('segments', [
+            'description' => $postData['description']
+        ], "id=%i", $id);
+        
+        // Fetch the updated segment data after the update
+        $updatedSegment = $this->db->queryFirstRow("SELECT * FROM segments WHERE id = %i", $id);
+
+        return $this->render('main/segment', [
+            'segment' => $updatedSegment,
+            'success' => _e('success_segment_edited')
         ]);
     }
 

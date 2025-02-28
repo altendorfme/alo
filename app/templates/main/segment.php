@@ -26,9 +26,8 @@ $this->layout('layout/default', ['title' => _e('edit_segment')]) ?>
 
         <div class="col-12 col-md-6">
             <label for="description" class="form-label"><?= _e('description') ?></label>
-            <textarea class="form-control" id="description" name="description" rows="3"><?=
-                                                                                        htmlspecialchars($segment['description'] ?? '')
-                                                                                        ?></textarea>
+            <input type="text" class="form-control" id="description" name="description"
+                   value="<?= htmlspecialchars($segment['description'] ?? '') ?>">
         </div>
     </div>
 </form>

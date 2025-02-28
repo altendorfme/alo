@@ -28,7 +28,7 @@ $this->layout('layout/default', ['title' => _e('segments')]) ?>
                         </a>
                     </td>
                     <td class="small"><?= htmlspecialchars($segment['name']) ?></td>
-                    <td class="small"><?= htmlspecialchars($segment['description'] ?? _e('no_description')) ?></td>
+                    <td class="small"><?= !empty($segment['description']) ? htmlspecialchars($segment['description']) : _e('no_description') ?></td>
                 </tr>
             <?php } ?>
         </tbody>

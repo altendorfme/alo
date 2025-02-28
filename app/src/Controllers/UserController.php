@@ -29,7 +29,7 @@ class UserController extends BaseController
         $this->config = $container->get(Config::class);
     }
 
-    public function users(ServerRequestInterface $request, array $args = []): ResponseInterface
+    public function viewUsers(ServerRequestInterface $request, array $args = []): ResponseInterface
     {
         $currentPage = isset($args['page']) ? (int)$args['page'] : 1;
         if ($currentPage < 1) $currentPage = 1;
