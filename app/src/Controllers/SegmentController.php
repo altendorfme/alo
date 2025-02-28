@@ -69,9 +69,6 @@ class SegmentController extends BaseController
         ]);
     }
 
-    /**
-     * Update segment (POST method)
-     */
     public function updateSegment(ServerRequestInterface $request, array $args): ResponseInterface
     {
         $id = $args['id'] ?? null;
@@ -87,7 +84,6 @@ class SegmentController extends BaseController
             'description' => $postData['description']
         ], "id=%i", $id);
         
-        // Fetch the updated segment data after the update
         $updatedSegment = $this->db->queryFirstRow("SELECT * FROM segments WHERE id = %i", $id);
 
         return $this->render('main/segment', [

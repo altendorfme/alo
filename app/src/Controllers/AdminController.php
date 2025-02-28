@@ -23,7 +23,6 @@ class AdminController extends BaseController
 
     public function dashboard(ServerRequestInterface $request): ResponseInterface
     {
-        // Segment analytics query function
         $getSegmentData = function ($segmentType) {
             $query = "
                 SELECT 

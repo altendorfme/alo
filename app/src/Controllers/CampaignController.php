@@ -91,7 +91,6 @@ class CampaignController extends BaseController
             'statuses' => $statuses
         ];
 
-        // Check for query parameters that might have been set by redirects
         if (isset($queryParams['error'])) {
             $data['error'] = $queryParams['error'];
         }
@@ -120,15 +119,11 @@ class CampaignController extends BaseController
             $data['deleted'] = $params['deleted'];
         }
         
-        // Redirect to GET endpoint with parameters
         return new Response(302, [
             'Location' => '/campaigns?' . http_build_query($data)
         ]);
     }
 
-    /**
-     * Get list of segments for campaign form
-     */
     private function getListSegments(): array
     {
         $listSegments = $this->db->query(

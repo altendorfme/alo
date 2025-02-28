@@ -29,7 +29,6 @@ class AuthController extends BaseController
 
     public function index(ServerRequestInterface $request): ResponseInterface
     {
-        // Render the index page
         return $this->render('index/index');
     }
 
@@ -37,9 +36,7 @@ class AuthController extends BaseController
     {
 
         if ($request->getMethod() === 'GET') {
-            // Check if user is already authenticated
             if ($this->auth->isAuthenticated()) {
-                // Redirect to dashboard if already logged in
                 return new Response(
                     302,
                     ['Location' => '/dashboard']
@@ -60,7 +57,6 @@ class AuthController extends BaseController
                 ]);
             }
 
-            // Attempt login
             if ($this->auth->login($email, $password, $rememberMe)) {
                 $this->auth->setSessionCookie();
                 return new Response(
@@ -69,7 +65,6 @@ class AuthController extends BaseController
                 );
             }
 
-            // Login failed
             return $this->render('login/login', [
                 'error' => _e('error_authentication_failed')
             ]);
@@ -78,11 +73,9 @@ class AuthController extends BaseController
 
     public function logout(ServerRequestInterface $request): ResponseInterface
     {
-        // Get session code from cookies
         $cookies = $request->getCookieParams();
         $sessionCode = $cookies['session'] ?? null;
 
-        // Check if session code exists and invalidate session
         if ($sessionCode) {
             $this->db->query(
                 "UPDATE user_sessions SET status = 'expired' WHERE session_code = %s",
@@ -90,7 +83,6 @@ class AuthController extends BaseController
             );
         }
 
-        // Redirect to login page after logout
         return new Response(
             302,
             [
@@ -134,7 +126,6 @@ class AuthController extends BaseController
                 ]);
             }
 
-            // Check if email exists in the database
             $user = $this->db->query(
                 "SELECT * FROM users WHERE email = %s",
                 $email
@@ -155,7 +146,6 @@ class AuthController extends BaseController
                     ]);
                 }
             } else {
-                // Email not found
                 return $this->render('login/forgot_password', [
                     'error' => _e('error_email_not_found')
                 ]);
