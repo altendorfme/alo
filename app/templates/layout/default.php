@@ -106,7 +106,7 @@
                         </span>
                         <?php if ($user['role'] != 'editor') { ?>
                             <a href="/client" title="<?= _e('client_configuration') ?>"
-                                class="nav-link border rounded border-secondary py-1 px-2 d-inline-block my-1 my-md-0 me-md-2">
+                                class="nav-link border rounded border-secondary py-1 px-2 d-inline-block my-1 my-md-0 me-md-2 <?= in_array($route, ['client']) ? 'active' : '' ?>">
                                 <i class="bi bi-magic"></i>
                             </a>
                         <?php } ?>
