@@ -8,6 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Nyholm\Psr7\Response;
 use Pushbase\Middleware\CorsMiddleware;
 use DI\Container;
+use Pushbase\Auth;
 
 class RequestHandler
 {
@@ -48,23 +49,96 @@ class RequestHandler
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
 
-                if (is_array($handler)) {
-                    $controller = $this->container->get($handler[0]);
-                    $method = $handler[1];
-                    $response = $controller->$method($request, $vars);
+                $response = new Response();
 
-                    if (is_array($response)) {
-                        return new Response(200, [], json_encode($response));
-                    }
-                    if (is_string($response)) {
-                        return new Response(200, ['Content-Type' => 'text/html'], $response);
-                    }
-                    if ($response instanceof ResponseInterface) {
-                        return $response;
-                    }
+                if ($this->isProtectedRoute($request->getUri()->getPath())) {
+                    $next = function (ServerRequestInterface $request, ResponseInterface $response) use ($handler, $vars) {
+                        return $this->executeHandler($handler, $request, $response, $vars);
+                    };
+
+                    return $this->authenticate($request, $response, $next);
                 }
 
-                return new Response(500, [], json_encode(['error' => 'Invalid response from handler']));
+                return $this->executeHandler($handler, $request, $response, $vars);
         }
+    }
+    
+    private function authenticate(ServerRequestInterface $request, ResponseInterface $response, callable $next)
+    {
+        $auth = Auth::getInstance();
+
+        if (!$auth->check()) {
+            return new Response(
+                302,
+                [
+                    'Location' => '/login',
+                    'X-Error-Message' => 'Sessão expirada. Por favor, faça login novamente.'
+                ]
+            );
+        }
+
+        $user = $auth->getUser();
+
+        if ($user['status'] !== 'active') {
+            return new Response(
+                302,
+                [
+                    'Location' => '/login',
+                    'X-Error-Message' => 'Conta inativa. Entre em contato com o administrador.'
+                ]
+            );
+        }
+
+        return $next($request, $response);
+    }
+
+    private function isProtectedRoute(string $path): bool
+    {
+        $publicRoutes = [
+            '/',
+            '/clientSDK',
+            '/serviceWorker'
+        ];
+        
+        if (strpos($path, '/login') === 0) {
+            return false;
+        }
+
+        if (strpos($path, '/install') === 0) {
+            return false;
+        }
+
+        if (strpos($path, '/api/subscriber') === 0) {
+            return false;
+        }
+
+        foreach ($publicRoutes as $publicRoute) {
+            if ($path === $publicRoute) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
+    private function executeHandler($handler, ServerRequestInterface $request, ResponseInterface $response, array $vars): ResponseInterface
+    {
+        if (is_array($handler)) {
+            $controller = $this->container->get($handler[0]);
+            $method = $handler[1];
+            $result = $controller->$method($request, $vars);
+            
+            if (is_array($result)) {
+                return new Response(200, [], json_encode($result));
+            }
+            if (is_string($result)) {
+                return new Response(200, ['Content-Type' => 'text/html'], $result);
+            }
+            if ($result instanceof ResponseInterface) {
+                return $result;
+            }
+        }
+        
+        return new Response(500, [], json_encode(['error' => 'Invalid response from handler']));
     }
 }

@@ -20,8 +20,7 @@ use Pushbase\Controllers\{
     ClientConfigController
 };
 use Pushbase\Middleware\{
-    CorsMiddleware,
-    AuthMiddleware
+    CorsMiddleware
 };
 use Pushbase\Commands\Campaign\{
     SendCommand,
@@ -68,7 +67,6 @@ class ContainerFactory
             UserController::class => \DI\autowire(UserController::class),
 
             // Middleware
-            AuthMiddleware::class => \DI\autowire(AuthMiddleware::class),
             CorsMiddleware::class => \DI\autowire(CorsMiddleware::class),
 
             // Analytics

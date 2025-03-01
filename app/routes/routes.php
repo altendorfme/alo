@@ -13,7 +13,6 @@ use Pushbase\Controllers\SegmentController;
 use Pushbase\Controllers\AuthController;
 use Pushbase\Controllers\InstallController;
 use Pushbase\Controllers\SDKController;
-use Pushbase\Middleware\AuthMiddleware;
 use Pushbase\Analytics\SubscribersAnalytics;
 
 return function (RouteCollector $r) {
@@ -113,5 +112,5 @@ return function (RouteCollector $r) {
                 $r->addRoute('GET', '/values/{id:\d+}', [SegmentController::class, 'getSegments']);
             });
         });
-    }, [AuthMiddleware::class, 'authenticate']); 
+    });
 };
