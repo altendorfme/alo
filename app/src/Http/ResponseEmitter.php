@@ -7,9 +7,13 @@ use RuntimeException;
 
 class ResponseEmitter
 {
+    private const BUFFER_SIZE = 8192;
+
     public function emit(ResponseInterface $response): void
     {
-        ob_start();
+        if (ob_get_level() === 0) {
+            ob_start();
+        }
 
         if (headers_sent($filename, $linenum)) {
             ob_end_clean();
@@ -18,6 +22,12 @@ class ResponseEmitter
                 "Ensure no output occurs before headers are set."
             );
         }
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        ob_start();
 
         $statusLine = sprintf(
             'HTTP/%s %s %s',
@@ -34,14 +44,22 @@ class ResponseEmitter
         }
 
         $stream = $response->getBody();
+
         if ($stream->isSeekable()) {
             $stream->rewind();
         }
 
         while (!$stream->eof()) {
-            echo $stream->read(1024 * 8);
+            echo $stream->read(self::BUFFER_SIZE);
+
+            if (ob_get_level() > 0) {
+                ob_flush();
+                flush();
+            }
         }
 
-        ob_end_flush();
+        if (ob_get_level() > 0) {
+            ob_end_flush();
+        }
     }
 }

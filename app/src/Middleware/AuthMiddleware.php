@@ -14,29 +14,29 @@ class AuthMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $auth = Auth::getInstance();
-        
+
         if (!$auth->check()) {
-            return new Response(
-                302,
-                [
-                    'Location' => '/login',
-                    'X-Error-Message' => 'Sessão expirada. Por favor, faça login novamente.'
-                ]
-            );
+            return $this->createRedirectResponse('Session expired. Please login again.');
         }
-        
+
         $user = $auth->getUser();
-        
+
         if ($user['status'] !== 'active') {
-            return new Response(
-                302,
-                [
-                    'Location' => '/login',
-                    'X-Error-Message' => 'Conta inativa. Entre em contato com o administrador.'
-                ]
-            );
+            return $this->createRedirectResponse('Inactive account.');
         }
+
+        $request = $request->withAttribute('user', $user);
         
         return $handler->handle($request);
+    }
+    private function createRedirectResponse(string $errorMessage): ResponseInterface
+    {
+        return new Response(
+            302,
+            [
+                'Location' => '/login',
+                'X-Error-Message' => $errorMessage
+            ]
+        );
     }
 }

@@ -9,14 +9,15 @@ use Psr\Http\Message\ResponseInterface;
 
 class Auth
 {
-    private static $instance = null;
+    private static ?Auth $instance = null;
     private $db;
-    private $user = null;
-    private $sessionCode = null;
-    private $cookieExpiration = null;
-    private $authErrorMessage = null;
+    private ?array $user = null;
+    private ?string $sessionCode = null;
+    private ?int $cookieExpiration = null;
+    private ?string $authErrorMessage = null;
     private const DEFAULT_SESSION_DURATION = 7;
     private const EXTENDED_SESSION_DURATION = 30;
+    private const SESSION_COOKIE_NAME = 'session';
 
     private function __construct()
     {
@@ -57,21 +58,11 @@ class Auth
 
             $expiresAt = date('Y-m-d H:i:s', strtotime("+{$sessionDays} days"));
 
-            $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
-            if (!$ipAddress || $ipAddress === '127.0.0.1' || $ipAddress === '::1' || $ipAddress === 'localhost') {
-                try {
-                    $ipAddress = trim(file_get_contents('https://ifconfig.me/ip'));
-                } catch (\Exception $e) {
-                    $ipAddress = '127.0.0.1';
-                }
-            }
-
             $this->db->insert('user_sessions', [
                 'user_id' => $user['id'],
                 'session_code' => $this->sessionCode,
                 'created_at' => $this->db->sqleval('NOW()'),
                 'expires_at' => $expiresAt,
-                'ip_address' => $ipAddress,
                 'status' => 'active'
             ]);
 
@@ -92,7 +83,6 @@ class Auth
             return false;
         }
     }
-
     public function setSessionCookie(): void
     {
         if (!$this->sessionCode || !$this->cookieExpiration) {
@@ -100,21 +90,20 @@ class Auth
         }
 
         setcookie(
-            "session",
+            self::SESSION_COOKIE_NAME,
             $this->sessionCode,
             [
                 'expires' => $this->cookieExpiration,
                 'path' => '/',
                 'httponly' => true,
                 'samesite' => 'Strict',
-                'secure' => isset($_SERVER['HTTPS'])
+                'secure' => $this->isSecureConnection()
             ]
         );
     }
-
     private function validateSession(?string $sessionCode = null): array|false
     {
-        $sessionCode = $sessionCode ?? $_COOKIE['session'] ?? null;
+        $sessionCode = $sessionCode ?? $_COOKIE[self::SESSION_COOKIE_NAME] ?? null;
 
         if (!$sessionCode) {
             $this->authErrorMessage = "No session cookie found";
@@ -123,7 +112,7 @@ class Auth
 
         try {
             $session = $this->db->queryFirstRow(
-                "SELECT u.*, s.status as session_status, s.expires_at 
+                "SELECT u.*, s.status as session_status, s.expires_at, s.id as session_id
                 FROM users u
                 JOIN user_sessions s ON u.id = s.user_id
                 WHERE s.session_code = %s
@@ -143,6 +132,12 @@ class Auth
                 $this->invalidateSession($sessionCode);
                 return false;
             }
+            $this->db->update(
+                'user_sessions',
+                ['last_activity' => $this->db->sqleval('NOW()')],
+                'id=%i',
+                $session['session_id']
+            );
 
             return $session;
         } catch (\Exception $e) {
@@ -177,6 +172,26 @@ class Auth
         return $this->check();
     }
 
+    public function getErrorMessage(): ?string
+    {
+        return $this->authErrorMessage;
+    }
+
+    public function logout(): bool
+    {
+        $sessionCode = $_COOKIE[self::SESSION_COOKIE_NAME] ?? null;
+        
+        if ($sessionCode) {
+            $this->invalidateSession($sessionCode);
+        }
+        
+        $this->user = null;
+        $this->sessionCode = null;
+        $this->cookieExpiration = null;
+        
+        return true;
+    }
+
     private function invalidateSession(string $sessionCode): void
     {
         $this->db->update(
@@ -186,9 +201,55 @@ class Auth
             $sessionCode
         );
 
-        setcookie("session", "", [
+        setcookie(self::SESSION_COOKIE_NAME, "", [
             'expires' => 1,
-            'path' => '/'
+            'path' => '/',
+            'httponly' => true,
+            'samesite' => 'Strict',
+            'secure' => $this->isSecureConnection()
         ]);
+    }
+
+    private function getClientIpAddress(): string
+    {
+        $ip = null;
+        $ipServices = [
+            'https://checkip.amazonaws.com',
+            'https://icanhazip.com',
+            'https://ifconfig.me/ip'
+        ];
+        
+        foreach ($ipServices as $service) {
+            try {
+                $context = stream_context_create([
+                    'http' => [
+                        'timeout' => 2
+                    ]
+                ]);
+                $ip = trim(file_get_contents($service, false, $context));
+                if ($ip && filter_var($ip, FILTER_VALIDATE_IP)) {
+                    break;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+        
+        if (!$ip) {
+            return '127.0.0.1';
+        }
+
+        if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP)) {
+            return '127.0.0.1';
+        }
+
+        return $ip;
+    }
+
+    private function isSecureConnection(): bool
+    {
+        return isset($_SERVER['HTTPS']) &&
+               $_SERVER['HTTPS'] !== 'off' ||
+               (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
     }
 }

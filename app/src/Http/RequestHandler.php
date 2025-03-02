@@ -24,32 +24,50 @@ class RequestHandler
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $adapter = new RequestHandlerAdapter(function ($request) {
+        $adapter = new RequestHandlerAdapter(function (ServerRequestInterface $request): ResponseInterface {
             return $this->handleRoute($request);
         });
-        $response = $this->corsMiddleware->process($request, $adapter);
-
-        return $response;
+        
+        return $this->corsMiddleware->process($request, $adapter);
     }
 
     private function handleRoute(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            // Dispatch the request to the router
             $response = $this->router->dispatch($request);
-            
-            // If the response is a string (e.g., HTML content), wrap it in a Response object
+
             if (is_string($response)) {
                 return new Response(200, ['Content-Type' => 'text/html'], $response);
             }
             
             return $response;
         } catch (\League\Route\Http\Exception\NotFoundException $e) {
-            return new Response(404, [], json_encode(['error' => 'Not found']));
+            return new Response(
+                404,
+                ['Content-Type' => 'application/json'],
+                json_encode(['error' => 'Resource not found', 'path' => $request->getUri()->getPath()])
+            );
         } catch (\League\Route\Http\Exception\MethodNotAllowedException $e) {
-            return new Response(405, [], json_encode(['error' => 'Method not allowed']));
+            return new Response(
+                405,
+                ['Content-Type' => 'application/json'],
+                json_encode([
+                    'error' => 'Method not allowed',
+                    'method' => $request->getMethod(),
+                    'allowed_methods' => $e->getAllowedMethods()
+                ])
+            );
         } catch (\Exception $e) {
-            return new Response(500, [], json_encode(['error' => $e->getMessage()]));
+            error_log('Error handling request: ' . $e->getMessage());
+            
+            return new Response(
+                500,
+                ['Content-Type' => 'application/json'],
+                json_encode([
+                    'error' => 'Internal server error',
+                    'message' => $e->getMessage()
+                ])
+            );
         }
     }
 }
