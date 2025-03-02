@@ -1,8 +1,4 @@
 <?php
-use FastRoute\RouteCollector;
-use FastRoute\Dispatcher;
-use FastRoute\DataGenerator\GroupCountBased;
-use FastRoute\RouteParser\Std;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Pushbase\Container\ContainerFactory;
@@ -27,8 +23,8 @@ function _e(string $key): string {
 
         $translationPath = __DIR__ . '/../languages/' . $language . '.php';
         
-        $translations = file_exists($translationPath) 
-            ? require $translationPath 
+        $translations = file_exists($translationPath)
+            ? require $translationPath
             : require __DIR__ . '/../languages/en.php';
     }
 
@@ -48,13 +44,14 @@ $creator = new ServerRequestCreator(
 $request = $creator->fromGlobals();
 
 // Configure router with application routes
-$dispatcher = \FastRoute\simpleDispatcher(require __DIR__ . '/../routes/routes.php');
+$routesFunction = require __DIR__ . '/../routes/routes.php';
+$router = $routesFunction($container);
 
 // Create CORS middleware
 $corsMiddleware = new CorsMiddleware($config);
 
 // Create request handler
-$requestHandler = new RequestHandler($container, $dispatcher, $corsMiddleware);
+$requestHandler = new RequestHandler($container, $router, $corsMiddleware);
 
 // Handle the request
 $response = $requestHandler->handle($request);
