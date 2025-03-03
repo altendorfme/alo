@@ -40,11 +40,17 @@ class Auth
                 $email
             );
 
-            if (!$user || !password_verify($password, $user['password'])) {
-                $this->authErrorMessage = "Invalid credentials";
+            if (!$user) {
+                $this->authErrorMessage = "Invalid credentials - User not found";
                 return false;
             }
 
+            $passwordVerified = password_verify($password, $user['password']);
+            
+            if (!$passwordVerified) {
+                return false;
+            }
+            
             if ($user['status'] !== 'active') {
                 $this->authErrorMessage = "User account is not active";
                 return false;
@@ -58,20 +64,29 @@ class Auth
 
             $expiresAt = date('Y-m-d H:i:s', strtotime("+{$sessionDays} days"));
 
-            $this->db->insert('user_sessions', [
-                'user_id' => $user['id'],
-                'session_code' => $this->sessionCode,
-                'created_at' => $this->db->sqleval('NOW()'),
-                'expires_at' => $expiresAt,
-                'status' => 'active'
-            ]);
+            try {
+                $this->db->insert('user_sessions', [
+                    'user_id' => $user['id'],
+                    'session_code' => $this->sessionCode,
+                    'created_at' => $this->db->sqleval('NOW()'),
+                    'expires_at' => $expiresAt,
+                    'ip_address' => $this->getClientIpAddress(),
+                    'status' => 'active'
+                ]);
+            } catch (\Exception $e) {
+                throw $e;
+            }
 
-            $this->db->update(
-                'users',
-                ['last_login' => $this->db->sqleval('NOW()')],
-                'id=%i',
-                $user['id']
-            );
+            try {
+                $this->db->update(
+                    'users',
+                    ['last_login' => $this->db->sqleval('NOW()')],
+                    'id=%i',
+                    $user['id']
+                );
+            } catch (\Exception $e) {
+                // Not throwing here as it's not critical
+            }
 
             $this->cookieExpiration = strtotime($expiresAt);
 
@@ -79,17 +94,16 @@ class Auth
             $this->authErrorMessage = null;
             return true;
         } catch (\Exception $e) {
-            $this->authErrorMessage = "Authentication error: " . $e->getMessage();
             return false;
         }
     }
     public function setSessionCookie(): void
-    {
+    {        
         if (!$this->sessionCode || !$this->cookieExpiration) {
             return;
         }
 
-        setcookie(
+        $result = setcookie(
             self::SESSION_COOKIE_NAME,
             $this->sessionCode,
             [
@@ -100,6 +114,7 @@ class Auth
                 'secure' => $this->isSecureConnection()
             ]
         );
+        
     }
     private function validateSession(?string $sessionCode = null): array|false
     {
@@ -132,12 +147,6 @@ class Auth
                 $this->invalidateSession($sessionCode);
                 return false;
             }
-            $this->db->update(
-                'user_sessions',
-                ['last_activity' => $this->db->sqleval('NOW()')],
-                'id=%i',
-                $session['session_id']
-            );
 
             return $session;
         } catch (\Exception $e) {
@@ -194,14 +203,18 @@ class Auth
 
     private function invalidateSession(string $sessionCode): void
     {
-        $this->db->update(
-            'user_sessions',
-            ['status' => 'expired'],
-            'session_code=%s',
-            $sessionCode
-        );
+        try {
+            $this->db->update(
+                'user_sessions',
+                ['status' => 'expired'],
+                'session_code=%s',
+                $sessionCode
+            );
+        } catch (\Exception $e) {
+            // Error invalidating session in database
+        }
 
-        setcookie(self::SESSION_COOKIE_NAME, "", [
+        $result = setcookie(self::SESSION_COOKIE_NAME, "", [
             'expires' => 1,
             'path' => '/',
             'httponly' => true,
@@ -248,8 +261,9 @@ class Auth
 
     private function isSecureConnection(): bool
     {
-        return isset($_SERVER['HTTPS']) &&
-               $_SERVER['HTTPS'] !== 'off' ||
-               (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        $https = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+        $port443 = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443;
+        
+        return $https || $port443;
     }
 }
