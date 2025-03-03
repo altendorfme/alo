@@ -30,6 +30,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 COPY app/ /app/
 
 WORKDIR /app
+
+RUN composer config platform.php-64bit 8.3
 RUN composer install --no-interaction --optimize-autoloader
 
 FROM base
