@@ -9,9 +9,11 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
         <h1 class="h4"><?= $isEdit ? _e('user_edit') : _e('user_create'); ?></h1>
     </div>
     <div class="btn-toolbar">
-        <button type="submit" form="userForm" name="action" value="save" class="btn btn-primary">
-            <?= $isEdit ? _e('user_edit') : _e('user_create'); ?>
-        </button>
+        <?php if($userData['id'] != 1) { ?>
+            <button type="submit" form="userForm" name="action" value="save" class="btn btn-primary">
+                <?= $isEdit ? _e('user_edit') : _e('user_create'); ?>
+            </button>
+        <?php } ?>
     </div>
 </div>
 
@@ -52,7 +54,8 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
                     </label>
                     <input type="email" class="form-control" id="email" name="email"
                         value="<?= $isEdit ? htmlspecialchars($userData['email']) : '' ?>"
-                        required>
+                        required
+                        <?= $userData['id'] == 1 ? 'disabled' : '' ?>>
                 </div>
             </div>
             <div class="col-12 col-md-4">
@@ -61,7 +64,7 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
                         <i class="bi bi-dice-3 me-2"></i>
                         <?= _e('role') ?>
                     </label>
-                    <select class="form-control" id="role" name="role" required>
+                    <select class="form-control" id="role" name="role" required <?= $userData['id'] == 1 ? 'disabled' : '' ?>>
                         <option value="admin" <?= $userData['role'] === 'admin' ? 'selected' : '' ?>><?= _e('role_admin') ?></option>
                         <option value="editor" <?= $userData['role'] === 'editor' ? 'selected' : '' ?>><?= _e('role_editor') ?></option>
                     </select>
@@ -73,7 +76,7 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
                         <i class="bi bi-person-check me-2"></i>
                         <?= _e('status') ?>
                     </label>
-                    <select class="form-control" id="status" name="status" required>
+                    <select class="form-control" id="status" name="status" required <?= $userData['id'] == 1 ? 'disabled' : '' ?>>
                         <option value="active" <?= $userData['status'] === 'active' ? 'selected' : '' ?>><?= _e('active') ?></option>
                         <option value="inactive" <?= $userData['status'] === 'inactive' ? 'selected' : '' ?>><?= _e('inactive') ?></option>
                     </select>

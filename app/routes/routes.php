@@ -18,6 +18,7 @@ use Pushbase\Controllers\ClientConfigController;
 use Pushbase\Analytics\SubscribersAnalytics;
 use Pushbase\Http\ContainerAwareStrategy;
 use Pushbase\Middleware\AuthMiddleware;
+use Pushbase\Middleware\ApiAuthMiddleware;
 use DI\Container;
 
 return function (Container $container): Router {
@@ -52,6 +53,12 @@ return function (Container $container): Router {
     $router->delete('/api/subscriber/unsubscribe', [SubscriberController::class, 'unsubscribe']);
     $router->post('/api/subscriber/status', [SubscriberController::class, 'status']);
     $router->post('/api/subscriber/analytics', [SubscribersAnalytics::class, 'trackAnalytics']);
+    
+    // Bearer Token Authentication
+    //-- API
+    $apiAuthMiddleware = new ApiAuthMiddleware();
+    $router->post('/api/campaign/create', [CampaignController::class, 'apiCreateCampaign'])
+        ->middleware($apiAuthMiddleware);
     
     // Protected Routes (Requires Authentication)
     $router->group('', function (RouteGroup $route) {

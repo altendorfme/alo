@@ -55,11 +55,9 @@ if ($roleFilter) {
             <?php foreach ($users as $user) { ?>
                 <tr>
                     <td>
-                        <?php if ($user['id'] != 1) { ?>
-                            <a href="/user/edit/<?= $user['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                        <?php } ?>
+                        <a href="/user/edit/<?= $user['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
                     </td>
                     <td class="small"><?= htmlspecialchars($user['email']) ?></td>
                     <td>

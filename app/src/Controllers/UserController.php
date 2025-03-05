@@ -99,9 +99,6 @@ class UserController extends BaseController
     public function viewUserEdit(ServerRequestInterface $request, array $args = []): ResponseInterface
     {
         $id = $args['id'] ?? null;
-        if ($id == 1) {
-            return new Response(302, ['Location' => '/users']);
-        }
 
         $userData = $this->db->queryFirstRow(
             "SELECT * FROM users WHERE id = %d",
@@ -292,9 +289,6 @@ class UserController extends BaseController
     public function generateApiKey(ServerRequestInterface $request, array $args = []): ResponseInterface
     {
         $id = $args['id'] ?? null;
-        if ($id == 1) {
-            return new Response(302, ['Location' => '/users']);
-        }
 
         $userData = $this->db->queryFirstRow(
             "SELECT * FROM users WHERE id = %d",

@@ -108,7 +108,7 @@ class CampaignController extends BaseController
     {
         $params = (array)$request->getParsedBody();
         $data = [];
-        
+
         if (isset($params['error'])) {
             $data['error'] = $params['error'];
         }
@@ -118,7 +118,7 @@ class CampaignController extends BaseController
         if (isset($params['deleted'])) {
             $data['deleted'] = $params['deleted'];
         }
-        
+
         return new Response(302, [
             'Location' => '/campaigns?' . http_build_query($data)
         ]);
@@ -150,9 +150,6 @@ class CampaignController extends BaseController
         return array_filter($listSegments);
     }
 
-    /**
-     * View campaign creation form (GET)
-     */
     public function viewCampaign(ServerRequestInterface $request): ResponseInterface
     {
         $listSegments = $this->getListSegments();
@@ -169,9 +166,6 @@ class CampaignController extends BaseController
         ]);
     }
 
-    /**
-     * View campaign edit form (GET)
-     */
     public function viewEditCampaign(ServerRequestInterface $request, array $args = []): ResponseInterface
     {
         $id = $args['id'] ?? null;
@@ -181,7 +175,7 @@ class CampaignController extends BaseController
 
         $campaignObj = new \Pushbase\Campaign();
         $campaign = $campaignObj->get($id);
-        
+
         if (!$campaign || !in_array($campaign['status'], ['draft', 'cancelled'])) {
             return $this->render('main/campaigns', [
                 'error' => _e('error_not_allowed_edit_campaign')
@@ -202,9 +196,6 @@ class CampaignController extends BaseController
         ]);
     }
 
-    /**
-     * Process campaign creation (POST)
-     */
     public function processCampaign(ServerRequestInterface $request): ResponseInterface
     {
         $listSegments = $this->getListSegments();
@@ -298,9 +289,6 @@ class CampaignController extends BaseController
         }
     }
 
-    /**
-     * Process campaign edit (POST)
-     */
     public function processEditCampaign(ServerRequestInterface $request, array $args = []): ResponseInterface
     {
         $id = $args['id'] ?? null;
@@ -310,7 +298,7 @@ class CampaignController extends BaseController
 
         $campaignObj = new \Pushbase\Campaign();
         $campaign = $campaignObj->get($id);
-        
+
         if (!$campaign || !in_array($campaign['status'], ['draft', 'scheduled', 'cancelled'])) {
             return $this->render('main/campaigns', [
                 'error' => _e('error_not_allowed_edit_campaign')
@@ -681,7 +669,7 @@ class CampaignController extends BaseController
         try {
             $campaignObj = new \Pushbase\Campaign();
             $result = $campaignObj->delete($id);
-            
+
             $redirectParams = $result
                 ? ['deleted' => 'success_campaign_deleted']
                 : ['error' => 'error_not_allowed_delete'];
@@ -694,5 +682,75 @@ class CampaignController extends BaseController
                 'Location' => '/campaigns?error=' . urlencode($e->getMessage())
             ]);
         }
+    }
+
+    public function apiCreateCampaign(ServerRequestInterface $request): ResponseInterface
+    {
+        try {
+            $user = $request->getAttribute('user');
+            if (!$user) {
+                return $this->createApiErrorResponse('Authentication required', 401);
+            }
+
+            $body = $request->getBody()->getContents();
+            $data = json_decode($body, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return $this->createApiErrorResponse('Invalid JSON: ' . json_last_error_msg(), 400);
+            }
+
+            $requiredFields = ['name', 'push_title', 'push_body'];
+            foreach ($requiredFields as $field) {
+                if (empty($data[$field])) {
+                    return $this->createApiErrorResponse("Field '{$field}' is required", 400);
+                }
+            }
+
+            $campaignData = [
+                'name' => $data['name'],
+                'push_title' => $data['push_title'],
+                'push_body' => $data['push_body'],
+                'push_icon' => $data['push_icon'] ?? null,
+                'push_image' => $data['push_image'] ?? null,
+                'push_url' => $data['push_url'] ?? null,
+                'send_at' => isset($data['send_at']) ? date('Y-m-d H:i:s', strtotime($data['send_at'])) : null,
+                'push_requireInteraction' => $data['push_requireInteraction'] ?? false,
+                'push_badge' => $data['push_badge'] ?? null,
+                'push_renotify' => $data['push_renotify'] ?? false,
+                'push_silent' => $data['push_silent'] ?? false,
+                'segments' => isset($data['segments']) && is_array($data['segments'])
+                    ? json_encode(array_filter($data['segments']))
+                    : null,
+                'status' => 'draft'
+            ];
+
+            $campaignObj = new \Pushbase\Campaign();
+            $result = $campaignObj->create($campaignData, $user['id']);
+
+            if (!$result) {
+                return $this->createApiErrorResponse('Failed to create campaign', 500);
+            }
+
+            return new Response(
+                201,
+                ['Content-Type' => 'application/json'],
+                json_encode([
+                    'success' => true,
+                    'message' => 'Campaign created successfully',
+                    'campaign' => $result
+                ])
+            );
+        } catch (Exception $e) {
+            return $this->createApiErrorResponse('Error: ' . $e->getMessage(), 500);
+        }
+    }
+
+    private function createApiErrorResponse(string $message, int $statusCode = 400): ResponseInterface
+    {
+        return new Response(
+            $statusCode,
+            ['Content-Type' => 'application/json'],
+            json_encode(['error' => $message])
+        );
     }
 }
