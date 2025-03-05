@@ -96,6 +96,14 @@ else
     log_success "Timezone set to UTC for both system and PHP"
 fi
 
+# Set Workers
+if [ -z "$WORKERS" ]; then
+    log_info "No WORKERS environment variable set, using 1 as default"
+    export WORKERS=1
+else
+    log_success "Using $WORKERS worker(s)"
+fi
+
 # PHP-FPM
 if [ ! -d /var/run/php ]; then
     log_info "Creating PHP-FPM directory..."
