@@ -4,7 +4,8 @@ services:
     image: ghcr.io/altendorfme/pushbase:latest
     container_name: pushbase
     environment:
-      TZ: ${TZ}
+      TZ: ${TZ:-UTC}
+      WORKERS: ${WORKERS:-1}
     ports:
       - 8088:8088
     volumes:

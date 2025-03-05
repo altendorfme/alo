@@ -20,6 +20,17 @@ Edit environment:
 
 `nano .env`
 
+| Variable | Default | Description |
+|----------|---------|-------------|
+| TZ | UTC | Timezone for the application |
+| WORKERS | 1 | Each worker is a push service, each worker sends 5-6 pushes per second. Increasing the number of workers will directly impact database usage. |
+| RABBITMQ_DEFAULT_USER | Empty | Username for RabbitMQ message broker authentication |
+| RABBITMQ_DEFAULT_PASS | Empty | Password for RabbitMQ message broker authentication |
+| RABBITMQ_DEFAULT_VHOST | pushbase | Virtual host for RabbitMQ to isolate applications |
+| MYSQL_DATABASE | pushbase | Name of the MySQL database for PushBase |
+| MYSQL_USER | pushbase | Username for MySQL database authentication |
+| MYSQL_PASSWORD | Empty | Password for MySQL database authentication |
+
 Now just run `docker compose up -d`
 
 ## First-Time Setup 🔧
