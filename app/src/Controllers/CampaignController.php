@@ -182,7 +182,7 @@ class CampaignController extends BaseController
         $campaignObj = new \Pushbase\Campaign();
         $campaign = $campaignObj->get($id);
         
-        if (!$campaign || !in_array($campaign['status'], ['draft', 'scheduled', 'cancelled'])) {
+        if (!$campaign || !in_array($campaign['status'], ['draft', 'cancelled'])) {
             return $this->render('main/campaigns', [
                 'error' => _e('error_not_allowed_edit_campaign')
             ]);
@@ -265,17 +265,8 @@ class CampaignController extends BaseController
             $result = $campaignObj->create($data, $currentUserId);
 
             if ($result) {
-                return $this->render('main/campaign', [
-                    'title' => _e('campaign_create'),
-                    'success' => _e('success_to') . _e('create'),
-                    'campaign' => $data,
-                    'isEdit' => false,
-                    'segments' => $params['segments'] ?? null,
-                    'listSegments' => $listSegments,
-                    'client' => [
-                        'icon' => $this->config->get('client.icon') ?? null,
-                        'badge' => $this->config->get('client.badge') ?? null,
-                    ]
+                return new Response(302, [
+                    'Location' => '/campaigns?success=' . urlencode('success_campaign_published')
                 ]);
             } else {
                 return $this->render('main/campaign', [

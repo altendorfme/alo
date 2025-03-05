@@ -104,7 +104,7 @@ if ($statusFilter) {
                         <?php } ?>
                     </td>
                     <td>
-                        <?php if (in_array($campaign['status'], ['draft', 'scheduled', 'cancelled'])) { ?>
+                        <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
                             <a href="/campaign/edit/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
                                 <i class="bi bi-pencil-square"></i>
                             </a>

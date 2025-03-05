@@ -215,6 +215,7 @@ return [
     'error_import_metadata' => 'Falha ao importar metadados',
     'error_not_allowed_delete' => 'Não é permitido excluir esta campanha',
     'success_to' => 'Sucesso ao ',
+    'success_campaign_published' => 'Campanha publicada com sucesso',
     'success_campaign_cancelled' => 'Campanha cancelada com sucesso',
     'success_campaign_deleted' => 'Campanha excluída com sucesso',
     'success_segment_edited' => 'Segmento editado com sucesso',

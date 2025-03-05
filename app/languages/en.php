@@ -215,6 +215,7 @@ return [
     'error_import_metadata' => 'Failed to import metadata',
     'error_not_allowed_delete' => 'It is not allowed to delete this campaign',
     'success_to' => 'Success to ',
+    'success_campaign_published' => 'Campaign successfully published',
     'success_campaign_cancelled' => 'Campaign successfully cancelled',
     'success_campaign_deleted' => 'Campaign successfully deleted',
     'success_segment_edited' => 'Segment successfully edited',
