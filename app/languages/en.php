@@ -271,5 +271,8 @@ return [
     'error_user_not_found' => 'User not found!',
     'subscribers_status_trend' => 'Subscribers Trend',
     'subscribers_count' => 'Subscribers Count',
-    'date' => 'Date'
+    'date' => 'Date',
+    'rabbitmq_status' => 'RabbitMQ Status',
+    'connected' => 'Connected',
+    'disconnected' => 'Disconnected'
 ];

@@ -271,5 +271,8 @@ return [
     'error_user_not_found' => 'Usuario não encontrado!',
     'subscribers_status_trend' => 'Tendência dos Assinantes',
     'subscribers_count' => 'Quantidade de Assinantes',
-    'date' => 'Data'
+    'date' => 'Data',
+    'rabbitmq_status' => 'Status do RabbitMQ',
+    'connected' => 'Conectado',
+    'disconnected' => 'Desconectado'
 ];

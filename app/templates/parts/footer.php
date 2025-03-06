@@ -9,23 +9,66 @@
             </div>
 
             <div class="nerd-metrics text-end">
-                <div class="d-inline-block me-3 text-nowrap">
-                    <i class="bi bi-memory" title="<?= _e('memory_usage') ?>"></i>
-                    <?= round(memory_get_peak_usage() / 1024 / 1024, 2) ?> MB
-                </div>
+                <?php if ($user['role'] != 'editor') { ?>
+                    <div class="d-inline-block me-3 text-nowrap" title="<?= _e('rabbitmq_status') ?>">
+                        <i class="bi bi-chat-right-dots"></i>
+                        <?php
+                        function checkRabbitMQConnection()
+                        {
+                            try {
+                                global $container;
+                                $config = $container->get('config');
+                                $rabbitmqConfig = $config->get('rabbitmq');
 
-                <div class="d-inline-block me-3 text-nowrap">
-                    <i class="bi bi-hourglass-split" title="<?= _e('load_time') ?>"></i>
-                    <?= round((microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true))) * 1000, 2) ?> ms
-                </div>
+                                if (!class_exists('PhpAmqpLib\Connection\AMQPStreamConnection')) {
+                                    return false;
+                                }
 
-                <div class="d-inline-block me-3 text-nowrap">
-                    <i class="bi bi-clock" title="<?= _e('timezone') ?>"></i>
+                                $connection = new PhpAmqpLib\Connection\AMQPStreamConnection(
+                                    $rabbitmqConfig['host'],
+                                    $rabbitmqConfig['port'],
+                                    $rabbitmqConfig['user'],
+                                    $rabbitmqConfig['password'],
+                                    $rabbitmqConfig['vhost']
+                                );
+
+                                $isConnected = $connection->isConnected();
+
+                                $connection->close();
+
+                                return $isConnected;
+                            } catch (Exception $e) {
+                                return false;
+                            }
+                        }
+                        $rabbitmqConnected = checkRabbitMQConnection();
+
+                        if ($rabbitmqConnected) { ?>
+                            <span><?= _e('connected') ?></span>
+                        <?php } else { ?>
+                            <span class="text-danger"><?= _e('disconnected') ?></span>
+                        <?php }
+                        ?>
+                    </div>
+
+                    <div class="d-inline-block me-3 text-nowrap" title="<?= _e('memory_usage') ?>">
+                        <i class="bi bi-memory"></i>
+                        <?= round(memory_get_peak_usage() / 1024 / 1024, 2) ?> MB
+                    </div>
+
+                    <div class="d-inline-block me-3 text-nowrap" title="<?= _e('load_time') ?>">
+                        <i class="bi bi-hourglass-split"></i>
+                        <?= round((microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true))) * 1000, 2) ?> ms
+                    </div>
+                <?php } ?>
+
+                <div class="d-inline-block me-3 text-nowrap" title="<?= _e('timezone') ?>">
+                    <i class="bi bi-clock"></i>
                     <?= date_default_timezone_get() ?>
                 </div>
 
-                <div class="d-inline-block me-3 text-nowrap">
-                    <i class="bi bi-translate" title="<?= _e('lang_full') ?>"></i>
+                <div class="d-inline-block me-3 text-nowrap"title="<?= _e('language') ?>">
+                    <i class="bi bi-translate" ></i>
                     <?= _e('lang_full') ?>
                 </div>
             </div>
@@ -52,7 +95,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('submit', function(event) {
             if (event.target.tagName === 'FORM') {
-                new ldloader({root: ".ldld.full"}).on();
+                new ldloader({
+                    root: ".ldld.full"
+                }).on();
             }
         });
     });
