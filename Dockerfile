@@ -50,6 +50,9 @@ COPY supervisord.conf /etc/supervisor/conf.d
 RUN chown -R www-data:www-data /app \
     && chmod -R 755 /app
 
+ENV WORKERS
+ENV TZ
+
 EXPOSE 8088
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

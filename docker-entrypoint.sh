@@ -59,12 +59,15 @@ check_php_fpm() {
 
 check_supervisord() {
     log_info "Checking Supervisord process status..."
+    
+    # Forcefully restart supervisord as the first step
+    log_info "Forcefully restarting supervisord..."
+    pkill supervisord || true
+    sleep 2
+    /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+    
     local max_attempts=30
     local attempt=0
-    
-    log_info "Reloading supervisord configuration..."
-    supervisorctl -c /etc/supervisor/supervisord.conf reread
-    supervisorctl -c /etc/supervisor/supervisord.conf update
     
     while [ $attempt -lt $max_attempts ]; do
         if supervisorctl -c /etc/supervisor/supervisord.conf status | grep -q "RUNNING"; then
