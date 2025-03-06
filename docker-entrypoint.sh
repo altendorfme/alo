@@ -60,8 +60,7 @@ check_php_fpm() {
 check_supervisord() {
     log_info "Checking Supervisord process status..."
     
-    # Forcefully restart supervisord as the first step
-    log_info "Forcefully restarting supervisord..."
+    log_info "Restarting supervisord..."
     pkill supervisord || true
     sleep 2
     /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

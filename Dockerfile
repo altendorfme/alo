@@ -50,8 +50,8 @@ COPY supervisord.conf /etc/supervisor/conf.d
 RUN chown -R www-data:www-data /app \
     && chmod -R 755 /app
 
-ENV WORKERS
-ENV TZ
+ENV WORKERS=1
+ENV TZ=UTC
 
 EXPOSE 8088
 
