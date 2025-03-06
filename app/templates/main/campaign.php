@@ -27,10 +27,10 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-12 col-md-8">
                             <input type="url" class="form-control" id="importUrl" placeholder="Enter URL to import metadata">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-12 col-md-4 mt-2 mt-md-0">
                             <button type="button" class="btn btn-primary w-100" id="importButton">
                                 <span class="d-flex align-items-center justify-content-center">
                                     <span class="import-text"><?= _e('import_metadata') ?></span>

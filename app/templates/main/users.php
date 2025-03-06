@@ -19,7 +19,7 @@ if ($roleFilter) {
         <i class="bi bi-people me-2 fs-5"></i>
         <h1 class="h4"><?= _e('users') ?></h1>
     </div>
-    <div class="d-flex align-items-center">
+    <div class="d-flex align-items-center flex-wrap">
         <form class="me-2 d-flex align-items-center" method="get" action="/users">
             <select name="status" class="form-select form-select-sm me-2 " onchange="this.form.submit()">
                 <option value=""><?= _e('all_statuses') ?></option>
@@ -32,7 +32,7 @@ if ($roleFilter) {
                 <option value="editor" <?= $roleFilter === 'editor' ? 'selected' : '' ?>><?= _e('editor') ?></option>
             </select>
         </form>
-        <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-toolbar mb-2 mb-md-0 mt-2 mt-md-0">
             <a href="/user" class="btn btn-sm btn-outline-primary">
                 <i class="bi bi-plus-circle me-2"></i><?= _e('user_create') ?>
             </a>
@@ -40,7 +40,7 @@ if ($roleFilter) {
     </div>
 </div>
 
-<div class="table-responsive bg-white rounded border border-bottom-0 overflow-hidden">
+<div class="table-responsive bg-white rounded border border-bottom-0">
     <table class="table table-striped table-hover align-middle mb-0">
         <thead>
             <tr>

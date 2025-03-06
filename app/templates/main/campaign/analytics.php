@@ -22,7 +22,7 @@ $statusClass = match ($campaign['status']) {
 </div>
 
 <div class="row">
-    <div class="col-6">
+    <div class="col-12 col-md-6">
         <div class="card mb-4">
             <div class="card-body p-0">
                 <table class="table table-striped mb-0">
@@ -85,7 +85,7 @@ $statusClass = match ($campaign['status']) {
         </div>
     </div>
 
-    <div class=" col-6">
+    <div class="col-12 col-md-6">
                                     <div class="card mb-4">
                                         <div class="card-header fw-bold">
                                             <?= _e('details') ?>

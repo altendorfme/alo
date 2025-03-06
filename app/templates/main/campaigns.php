@@ -16,7 +16,7 @@ if ($statusFilter) {
         <i class="bi bi-megaphone me-2 fs-5"></i>
         <h1 class="h4"><?= _e('campaigns') ?></h1>
     </div>
-    <div class="d-flex align-items-center">
+    <div class="d-flex align-items-center flex-wrap">
         <form class="me-2" method="get" action="/campaigns">
             <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
                 <option value=""><?= _e('all_statuses') ?></option>
@@ -27,7 +27,7 @@ if ($statusFilter) {
                 <?php } ?>
             </select>
         </form>
-        <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-toolbar mb-2 mb-md-0 mt-2 mt-md-0">
             <div class="btn-group me-2">
                 <a href="/campaigns/export/xlsx" class="btn btn-sm btn-outline-secondary" title="<?= _e('export_excel') ?>">
                     <i class="bi bi-file-earmark-excel me-1"></i>Excel
@@ -43,7 +43,7 @@ if ($statusFilter) {
     </div>
 </div>
 
-<div class="table-responsive bg-white rounded border border-bottom-0 overflow-hidden">
+<div class="table-responsive bg-white rounded border border-bottom-0">
     <table class="table table-striped table-hover align-middle mb-0">
         <thead>
             <tr>

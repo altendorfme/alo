@@ -10,7 +10,7 @@ $this->layout('layout/default', ['title' => _e('segments')]) ?>
     </div>
 </div>
 
-<div class="table-responsive bg-white rounded border border-bottom-0 overflow-hidden">
+<div class="table-responsive bg-white rounded border border-bottom-0">
     <table class="table table-striped table-hover align-middle mb-0">
         <thead>
             <tr>
