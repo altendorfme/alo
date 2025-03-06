@@ -61,7 +61,11 @@ check_supervisord() {
     log_info "Checking Supervisord process status..."
     local max_attempts=30
     local attempt=0
-
+    
+    log_info "Reloading supervisord configuration..."
+    supervisorctl -c /etc/supervisor/supervisord.conf reread
+    supervisorctl -c /etc/supervisor/supervisord.conf update
+    
     while [ $attempt -lt $max_attempts ]; do
         if supervisorctl -c /etc/supervisor/supervisord.conf status | grep -q "RUNNING"; then
             log_success "Supervisord configuration is valid and processes are running"
