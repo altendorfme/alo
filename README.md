@@ -4,6 +4,8 @@
 [![Stars](https://img.shields.io/github/stars/altendorfme/pushbase)](https://github.com/altendorfme/pushbase/stargazers)
 [![Issues](https://img.shields.io/github/issues/altendorfme/pushbase)](https://github.comaltendorfme/pushbasea/issues)
 
+![PushBase](https://github.com/altendorfme/pushbase/blob/main/pushbase.gif?raw=true)
+
 PushBase is a tool for managing and registering Web Push notifications. It also provides features for campaign management, analytics, and user segmentation.
 
 PushBase is the open source alternative to OneSignal, PushNews, SendPulse, PushAlert, and others.
