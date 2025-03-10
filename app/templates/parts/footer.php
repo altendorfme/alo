@@ -9,7 +9,7 @@
             </div>
 
             <div class="nerd-metrics text-end">
-                <?php if ($user['role'] != 'editor') { ?>
+                <?php if (isset($user) && $user['role'] != 'editor') { ?>
                     <div class="d-inline-block me-3 text-nowrap" title="<?= _e('rabbitmq_status') ?>">
                         <i class="bi bi-chat-right-dots"></i>
                         <?php
