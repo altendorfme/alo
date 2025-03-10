@@ -44,7 +44,6 @@ class PushBase {
         const supportedBrowsers = {
             'Google Chrome': { minVersion: 42 },
             'Mozilla Firefox': { minVersion: 45 },
-            'Safari': { minVersion: 11 },
             'Microsoft Edge': { minVersion: 79 },
             'Opera': { minVersion: 36 }
         };
