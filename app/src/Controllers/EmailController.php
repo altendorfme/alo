@@ -31,30 +31,23 @@ class EmailController extends BaseController
         $this->templateEngine->registerFunction('get', function($key, $default = null) {
             return $this->templateEngine->getData($key) ?? $default;
         });
-
-        $this->translations = $this->loadTranslations();
     }
 
-    private function loadTranslations(): array
-    {
+    function _e(string $key): string {
         static $translations = null;
-
+        
         if ($translations === null) {
-            $language = $this->config->get('app.language');
-
+            $config = new \Pushbase\Config\Config();
+            $language = $config->get('app.language');
+    
             $translationPath = __DIR__ . '/../../languages/' . $language . '.php';
-
+            
             $translations = file_exists($translationPath)
                 ? require $translationPath
                 : require __DIR__ . '/../../languages/en.php';
         }
-
-        return $translations;
-    }
-
-    private function _e(string $key): string
-    {
-        return $this->translations[$key] ?? '<span style="background: red">' . $key . '</span>';
+    
+        return $translations[$key] ?? '<span style="background: red">'.$key.'</span>';
     }
 
     private function configureSMTP(): void
@@ -66,6 +59,7 @@ class EmailController extends BaseController
         $this->mailer->SMTPSecure = trim($this->smtp['security']);
         $this->mailer->Username = trim($this->smtp['user']);
         $this->mailer->Password = trim($this->smtp['pass']);
+        $this->mailer->CharSet = 'UTF-8';
 
         $fromEmail = $this->smtp['from'];
         $fromName = $this->smtp['fromName'];
@@ -86,7 +80,7 @@ class EmailController extends BaseController
             $templateData = [
                 'lang' => $this->config->get('app.lang'),
                 'resetLink' => $resetLink,
-                'emailTitle' => $this->_e('email_password_reset_title'),
+                'title' => $this->_e('email_password_reset_title'),
                 'line1' => $this->_e('email_password_reset_line1'),
                 'line2' => $this->_e('email_password_reset_line2'),
                 'line3' => $this->_e('email_password_reset_line3'),
@@ -119,7 +113,7 @@ class EmailController extends BaseController
                 'loginLink' => $loginLink,
                 'emailText' => $this->_e('email'),
                 'passwordText' => $this->_e('password'),
-                'emailTitle' => $this->_e('email_welcome_title'),
+                'title' => $this->_e('email_welcome_title'),
                 'line1' => $this->_e('email_welcome_line1'),
                 'button' => $this->_e('email_welcome_button')
             ];

@@ -2,9 +2,19 @@
 
 <?php $this->start('page_content') ?>
 
-<p><?= $line1 ?></p>
-<p><?= $emailText ?>: <?= $email ?></p>
-<p><?= $passwordText ?>: <?= $password ?></p>
-<p><a href='<?= $loginLink ?>'><?= $button ?></a>!</p>
+<tr>
+    <td class="header">
+        <h1><?= $title ?></h1>
+    </td>
+</tr>
+
+<tr>
+    <td class="content">
+        <p><?= $line1 ?></p>
+        <p><?= $emailText ?>: <b><?= $email ?></b></p>
+        <p><?= $passwordText ?>: <b><?= $password ?></b></p>
+        <p><b><a href='<?= $loginLink ?>'><?= $button ?></a>!</b></p>
+    </td>
+</tr>
 
 <?php $this->end() ?>

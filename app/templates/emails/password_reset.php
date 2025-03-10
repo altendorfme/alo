@@ -2,9 +2,19 @@
 
 <?php $this->start('page_content') ?>
 
-<p><?= $line1 ?></p>
-<p><a href='<?= $resetLink ?>'><?= $button ?></a></p>
-<p><?= $line2 ?></p>
-<p><?= $line3 ?></p>
+<tr>
+    <td class="header">
+        <h1><?= $title ?></h1>
+    </td>
+</tr>
+
+<tr>
+    <td class="content">
+        <p><?= $line1 ?></p>
+        <p><b><a href='<?= $resetLink ?>'><?= $button ?></a></b></p>
+        <p><?= $line2 ?></p>
+        <p><?= $line3 ?></p>
+    </td>
+</tr>
 
 <?php $this->end() ?>

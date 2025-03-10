@@ -106,17 +106,7 @@
             <tr>
                 <td align="center">
                     <table class="container" role="presentation" cellspacing="0" cellpadding="0" border="0">
-                        <tr>
-                            <td class="header">
-                                <h1><?= $this->get('emailTitle') ?></h1>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="content">
-                                <?= $this->section('page_content') ?>
-                            </td>
-                        </tr>
+                        <?= $this->section('page_content') ?>
 
                         <tr>
                             <td class="footer">
