@@ -43,6 +43,107 @@ Now just run `docker compose up -d`
 ## Who is using it?
 - [Manual do Usuário](https://manualdousuario.net)
 
+## PushBase SDK 📱
+
+You'll need the PushBase Client SDK on all your pages:
+
+```javascript
+import PushBaseClient from 'https://pushbase-server.xyz/clientSDK';
+```
+
+Just drop this in, and you're ready to roll! The SDK gets set up with different options depending on what you want to do with it.
+
+### Automatic Subscription ⚡
+
+This option will show the permission prompt after a short delay - no user clicks needed!
+
+```javascript
+const pushBaseConfig = {
+    customSegments: {
+        tag: 'tag-teste-auto',
+        category: 'cat-teste-auto'
+    },
+    registrationMode: 'auto',  // ← Magic happens here!
+    registrationDelay: 3000,   // Just 3 seconds wait
+    enableLogging: true,
+    onRegistrationSuccess: () => {
+        alert('Push notification registration successful!');
+    },
+    onRegistrationError: (error) => {
+        alert('Registration failed: ' + error.message);
+    }
+};
+const pushBaseClient = new PushBaseClient(pushBaseConfig);
+```
+
+The secret sauce here is `registrationMode: 'auto'` - this tells PushBase to automatically ask for permission. You can control how long to wait with the `registrationDelay` setting.
+
+### Manual Subscription 👆
+
+Prefer to let users decide when to subscribe? This approach requires a click before asking for permission.
+
+```javascript
+const pushBaseConfig = {
+    customSegments: {
+        tag: 'tag-test-manual',
+        category: 'cat-test-manual'
+    },
+    registrationMode: 'manual',  // ← User control!
+    enableLogging: true
+};
+const pushBaseClient = new PushBaseClient(pushBaseConfig);
+
+subscribeBtn.addEventListener('click', async () => {
+    try {
+        await pushBaseClient.subscribe();
+        alert('Push notification subscription successful!');
+        subscribeBtn.disabled = true;
+    } catch (error) {
+        alert('Subscription failed: ' + error.message);
+    }
+});
+```
+
+With `registrationMode: 'manual'`, PushBase waits patiently until you call `subscribe()`. Perfect for adding to a "Subscribe" button!
+
+### Unsubscription 👋
+
+Sometimes users want to say goodbye to notifications. Here's how to let them unsubscribe:
+
+```javascript
+const pushBaseConfig = {
+    customSegments: {
+        tag: 'tag-test-unsubscribe',
+        category: 'cat-test-unsubscribe'
+    },
+    enableLogging: true
+};
+
+const pushBaseClient = new PushBaseClient(pushBaseConfig);
+
+unsubscribeBtn.addEventListener('click', async () => {
+    try {
+        await pushBaseClient.unsubscribe();
+        alert('Push notification unsubscription successful!');
+        unsubscribeBtn.disabled = true;
+    } catch (error) {
+        alert('Unsubscription failed:' + error.message);
+    }
+});
+```
+
+Just hook up an "Unsubscribe" button to the `unsubscribe()` method, and you're good to go!
+
+### 🤖 Service Worker
+
+Your notifications need a Service Worker to function even when users aren't on your site:
+
+```javascript
+importScripts('https://pushbase-server.xyz/serviceWorker');
+```
+
+Just put this in your `pushBaseSW.js` file, and PushBase handles all the background notification magic for you! ✨
+
 ## API 📡
 
 ### Create Campaign
@@ -66,7 +167,7 @@ Creates a new campaign with `draft` status.
 **cURL Example**:
 ```bash
 curl -X POST \
-  https://your-pushbase-instance.com/api/campaign/create \
+  https://pushbase-server.xyz/api/campaign/create \
   -H 'Authorization: Bearer YOUR_API_TOKEN' \
   -H 'Content-Type: application/json' \
   -d '{
