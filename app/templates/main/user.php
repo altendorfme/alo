@@ -9,7 +9,7 @@ $this->layout('layout/default', ['title' => _e('user_edit')]) ?>
         <h1 class="h4"><?= $isEdit ? _e('user_edit') : _e('user_create'); ?></h1>
     </div>
     <div class="btn-toolbar">
-        <?php if($userData['id'] != 1) { ?>
+        <?php if(isset($userData) && $userData['id'] != 1) { ?>
             <button type="submit" form="userForm" name="action" value="save" class="btn btn-primary">
                 <?= $isEdit ? _e('user_edit') : _e('user_create'); ?>
             </button>
