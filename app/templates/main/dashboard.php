@@ -28,7 +28,7 @@
                     <div class="col-6 col-md-3">
                         <small class="text-muted"><?= _e('unsubscribed') ?>: <?= number_format($subscribers['status']['unsubscribed']) ?></small>
                     </div>
-                    <div class="col-6 col-md-3">
+                    <div class="col-6 col-12">
                         <small class="text-muted"><?= _e('total') ?>: <?= number_format($subscribers['status']['total']) ?></small>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                 <h2 class="metric-value"><?= number_format($campaigns['total']) ?></h2>
                 <div class="row mt-2">
                     <?php foreach (['draft', 'scheduled', 'sent', 'sending', 'cancelled'] as $status) { ?>
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-4">
                             <small class="text-muted">
                                 <?= _e('status_' . $status) ?>: <?= number_format($campaigns['status'][$status] ?? 0) ?>
                             </small>
