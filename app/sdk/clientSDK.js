@@ -304,6 +304,11 @@ class PushBase {
 
     async subscribe(registration = null) {
         try {
+            if (!this.isBrowserSupported()) {
+                this.logger.log('Browser not supported for push notifications', 'error');
+                throw new Error('Browser not supported for push notifications');
+            }
+            
             const registrations = await navigator.serviceWorker.getRegistrations();
             
             for (let reg of registrations) {
@@ -527,9 +532,9 @@ class PushBaseClient extends PushBase {
 
         if (this.registrationMode === 'auto') {
             const browser = this.detectBrowserDetails();
-            const isFirefoxOrSafari = browser.name === 'Mozilla Firefox' || browser.name === 'Safari';
+            const interactionSubscriber = browser.name === 'Mozilla Firefox';
             
-            if (isFirefoxOrSafari) {
+            if (interactionSubscriber) {
                 this.logger.log(`Browser is ${browser.name}. Waiting for user interaction before subscribing.`, 'info');
                 const userInteractionEvents = ['click', 'keydown', 'touchstart', 'mousedown'];
                 
