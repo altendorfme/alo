@@ -189,10 +189,9 @@ class UserController extends BaseController
 
             $userData['id'] = $id;
 
-            return $this->render('main/users', [
-                'title' => _e('users'),
-                'success' => _e('success_user_created')
-            ], 302);
+            return new Response(302, [
+                'Location' => '/users?success=' . urlencode('success_user_created')
+            ]);
         } catch (Exception $e) {
             return $this->render('main/user', [
                 'title' => _e('user_create'),
