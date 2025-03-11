@@ -227,7 +227,6 @@ class Auth
     {
         $ip = null;
         $ipServices = [
-            'https://checkip.amazonaws.com',
             'https://icanhazip.com',
             'https://ifconfig.me/ip'
         ];
