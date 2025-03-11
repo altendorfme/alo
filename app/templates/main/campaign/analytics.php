@@ -234,11 +234,22 @@ $statusClass = match ($campaign['status']) {
         </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                function isDarkMode() {
+                    return document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                }
+                
+                function getThemeColors() {
+                    return {
+                        gridColor: isDarkMode() ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                        textColor: isDarkMode() ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)'
+                    };
+                }
+                
                 const ctx = document.getElementById('interactionTimeline').getContext('2d');
-
+                const themeColors = getThemeColors();
                 const labels = <?= json_encode($interactionTimeline['labels']) ?>.map(dateStr => dateStr);
 
-                new Chart(ctx, {
+                const chart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: labels,
@@ -278,6 +289,11 @@ $statusClass = match ($campaign['status']) {
                         plugins: {
                             title: {
                                 display: false,
+                            },
+                            legend: {
+                                labels: {
+                                    color: themeColors.textColor
+                                }
                             }
                         },
                         scales: {
@@ -285,18 +301,65 @@ $statusClass = match ($campaign['status']) {
                                 beginAtZero: true,
                                 title: {
                                     display: true,
-                                    text: '<?= _e('interactions') ?>'
+                                    text: '<?= _e('interactions') ?>',
+                                    color: themeColors.textColor
+                                },
+                                grid: {
+                                    color: themeColors.gridColor
+                                },
+                                ticks: {
+                                    color: themeColors.textColor
                                 }
                             },
                             x: {
                                 title: {
                                     display: true,
-                                    text: '<?= _e('date_and_time') ?>'
+                                    text: '<?= _e('date_and_time') ?>',
+                                    color: themeColors.textColor
+                                },
+                                grid: {
+                                    color: themeColors.gridColor
+                                },
+                                ticks: {
+                                    color: themeColors.textColor
                                 }
                             }
                         }
                     }
                 });
+                
+                const darkModeSwitch = document.getElementById('darkModeSwitch');
+                if (darkModeSwitch) {
+                    darkModeSwitch.addEventListener('change', function() {
+                        setTimeout(() => {
+                            const newThemeColors = getThemeColors();
+    
+                            if (chart.options.plugins.legend) {
+                                chart.options.plugins.legend.labels.color = newThemeColors.textColor;
+                            }
+                            
+                            if (chart.options.scales) {
+                                if (chart.options.scales.x) {
+                                    chart.options.scales.x.grid.color = newThemeColors.gridColor;
+                                    chart.options.scales.x.ticks.color = newThemeColors.textColor;
+                                    if (chart.options.scales.x.title) {
+                                        chart.options.scales.x.title.color = newThemeColors.textColor;
+                                    }
+                                }
+                                
+                                if (chart.options.scales.y) {
+                                    chart.options.scales.y.grid.color = newThemeColors.gridColor;
+                                    chart.options.scales.y.ticks.color = newThemeColors.textColor;
+                                    if (chart.options.scales.y.title) {
+                                        chart.options.scales.y.title.color = newThemeColors.textColor;
+                                    }
+                                }
+                            }
+                            
+                            chart.update();
+                        }, 50);
+                    });
+                }
             });
         </script>
         <?php $this->end() ?>

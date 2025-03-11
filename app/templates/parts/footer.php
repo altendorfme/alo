@@ -1,7 +1,15 @@
-<footer class="border-top bg-white">
+<footer class="border-top">
     <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-center py-3 small text-body-secondary">
             <div class="col-md-4 d-flex align-items-center">
+                <div class="d-flex align-items-center me-3">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="darkModeSwitch">
+                        <label class="form-check-label" for="darkModeSwitch">
+                            <i class="bi bi-moon-stars"></i>
+                        </label>
+                    </div>
+                </div>
                 <i class="bi bi-bell-fill me-2"></i>
                 <span class="mb-3 mb-md-0">
                     Pushbase &copy; <?= date('Y') ?>
@@ -75,7 +83,6 @@
         </div>
     </div>
 </footer>
-<div class="ldld full"></div>
 <script>
     <?php
     $bootstrap = "/dist/scripts/bootstrap.min.js";
@@ -84,6 +91,7 @@
     }
     ?>
 </script>
+<div class="ldld full"></div>
 <script>
     <?php
     $ldLoaderJSPath = "/dist/scripts/ldloader.min.js";
@@ -98,6 +106,33 @@
                 new ldloader({
                     root: ".ldld.full"
                 }).on();
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const darkModeSwitch = document.getElementById('darkModeSwitch');
+        const htmlElement = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            htmlElement.setAttribute('data-bs-theme', 'dark');
+            darkModeSwitch.checked = true;
+        } else {
+            htmlElement.setAttribute('data-bs-theme', 'light');
+            darkModeSwitch.checked = false;
+        }
+        
+        darkModeSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                htmlElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                htmlElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
             }
         });
     });

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<?= _e('lang') ?>">
+<html lang="<?= _e('lang') ?>" data-bs-theme="light">
 
 <head>
     <?= $this->insert('parts/head', ['title' => $title ?? 'Pushbase', 'css' => $css ?? null]) ?>
@@ -7,7 +7,7 @@
     <?= $this->section('page_styles'); ?>
 </head>
 
-<body class="bg-light d-flex flex-column vh-100">
+<body class="d-flex flex-column vh-100">
     <main class="w-100 m-auto">
         <div class="container">
             <div class="row justify-content-center">

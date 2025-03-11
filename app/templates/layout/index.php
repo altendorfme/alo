@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<?= _e('lang') ?>">
+<html lang="<?= _e('lang') ?>" data-bs-theme="light">
 
 <head>
     <?= $this->insert('parts/head', ['title' => 'PushBase']) ?>

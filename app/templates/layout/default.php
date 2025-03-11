@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<?= _e('lang') ?>">
+<html lang="<?= _e('lang') ?>" data-bs-theme="light">
 
 <head>
     <?= $this->insert('parts/head', ['title' => $title ?? 'PushBase', 'css' => $css ?? null]) ?>
@@ -7,9 +7,9 @@
     <?= $this->section('page_styles'); ?>
 </head>
 
-<body class="bg-light">
+<body>
     <!-- Main Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Main navigation">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom" aria-label="Main navigation">
         <div class="container">
             <!-- Branding Section -->
             <div class="brand">

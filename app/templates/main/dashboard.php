@@ -183,22 +183,39 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        function isDarkMode() {
+            return document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        }
+        
+        function getThemeColors() {
+            return {
+                gridColor: isDarkMode() ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                textColor: isDarkMode() ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
+                pieColors: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                    'rgba(255, 159, 64, 0.8)'
+                ]
+            };
+        }
+        
+        const chartInstances = [];
+        
         function createPieChart(canvasId, labels, data) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            new Chart(ctx, {
+            const themeColors = getThemeColors();
+            
+            const chartInstance = new Chart(ctx, {
                 type: 'polarArea',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: data,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.8)',
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 206, 86, 0.8)',
-                            'rgba(75, 192, 192, 0.8)',
-                            'rgba(153, 102, 255, 0.8)',
-                            'rgba(255, 159, 64, 0.8)'
-                        ]
+                        backgroundColor: themeColors.pieColors,
+                        borderWidth: 0
                     }]
                 },
                 options: {
@@ -206,10 +223,26 @@
                     plugins: {
                         legend: {
                             position: 'top',
+                            labels: {
+                                color: themeColors.textColor
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            grid: {
+                                color: themeColors.gridColor
+                            },
+                            ticks: {
+                                color: themeColors.textColor
+                            }
                         }
                     }
                 }
             });
+            
+            chartInstances.push(chartInstance);
+            return chartInstance;
         }
 
         createPieChart(
@@ -237,7 +270,9 @@
         );
         
         const subscribersCtx = document.getElementById('subscribersTrendChart').getContext('2d');
-        new Chart(subscribersCtx, {
+        const themeColors = getThemeColors();
+        
+        const subscribersChart = new Chart(subscribersCtx, {
             type: 'line',
             data: {
                 labels: <?= json_encode(array_column($subscribers_trend['dates'] ?? [], 'date')) ?>,
@@ -277,6 +312,9 @@
                 plugins: {
                     legend: {
                         position: 'top',
+                        labels: {
+                            color: themeColors.textColor
+                        }
                     },
                     title: {
                         display: false
@@ -290,18 +328,73 @@
                     x: {
                         title: {
                             display: false
+                        },
+                        grid: {
+                            color: themeColors.gridColor
+                        },
+                        ticks: {
+                            color: themeColors.textColor
                         }
                     },
                     y: {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: '<?= _e('subscribers_count') ?>'
+                            text: '<?= _e('subscribers_count') ?>',
+                            color: themeColors.textColor
+                        },
+                        grid: {
+                            color: themeColors.gridColor
+                        },
+                        ticks: {
+                            color: themeColors.textColor
                         }
                     }
                 }
             }
         });
+        
+        chartInstances.push(subscribersChart);
+        
+        const darkModeSwitch = document.getElementById('darkModeSwitch');
+        if (darkModeSwitch) {
+            darkModeSwitch.addEventListener('change', function() {
+                setTimeout(() => {
+                    const newThemeColors = getThemeColors();
+                    
+                    chartInstances.forEach(chart => {
+                        if (chart.options.plugins.legend) {
+                            chart.options.plugins.legend.labels.color = newThemeColors.textColor;
+                        }
+                        
+                        if (chart.options.scales) {
+                            if (chart.options.scales.x) {
+                                chart.options.scales.x.grid.color = newThemeColors.gridColor;
+                                chart.options.scales.x.ticks.color = newThemeColors.textColor;
+                                if (chart.options.scales.x.title) {
+                                    chart.options.scales.x.title.color = newThemeColors.textColor;
+                                }
+                            }
+                            
+                            if (chart.options.scales.y) {
+                                chart.options.scales.y.grid.color = newThemeColors.gridColor;
+                                chart.options.scales.y.ticks.color = newThemeColors.textColor;
+                                if (chart.options.scales.y.title) {
+                                    chart.options.scales.y.title.color = newThemeColors.textColor;
+                                }
+                            }
+                            
+                            if (chart.options.scales.r) {
+                                chart.options.scales.r.grid.color = newThemeColors.gridColor;
+                                chart.options.scales.r.ticks.color = newThemeColors.textColor;
+                            }
+                        }
+                        
+                        chart.update();
+                    });
+                }, 50);
+            });
+        }
     });
 </script>
 <?php $this->end() ?>
