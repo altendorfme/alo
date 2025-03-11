@@ -229,6 +229,37 @@ class PushBase {
     async collectAnalyticsData() {
         const browser = this.detectBrowserDetails();
         const os = await this.detectOsDetails();
+
+        let userIp = null;
+        const ipServices = [
+            'https://api.ipify.org/',
+            'https://icanhazip.com',
+            'https://ifconfig.me/ip'
+        ];
+        
+        for (const service of ipServices) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                
+                const response = await fetch(service, {
+                    signal: controller.signal,
+                    headers: { 'Accept': 'text/plain' }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    userIp = await response.text();
+                    userIp = userIp.trim();
+                    this.logger.log(`Collected user IP from ${service}: ${userIp}`, 'info');
+                    break;
+                }
+            } catch (error) {
+                this.logger.log(`Failed to collect user IP from ${service}: ${error.message}`, 'error');
+            }
+        }
+        
         const analyticsData = {
             browser: {
                 name: browser.name,
@@ -245,7 +276,8 @@ class PushBase {
             },
             language: navigator.language,
             tag: this.options.customSegments.tag,
-            category: this.options.customSegments.category
+            category: this.options.customSegments.category,
+            ip: userIp
         };
 
         this.logger.log(`Collected analytics data: ${JSON.stringify(analyticsData)}`, 'info');

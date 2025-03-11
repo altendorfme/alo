@@ -225,33 +225,56 @@ class Auth
 
     private function getClientIpAddress(): string
     {
-        $ip = null;
-        $ipServices = [
-            'https://icanhazip.com',
-            'https://ifconfig.me/ip'
+        $ipSources = [
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR'
         ];
         
-        foreach ($ipServices as $service) {
-            try {
-                $context = stream_context_create([
-                    'http' => [
-                        'timeout' => 2
-                    ]
-                ]);
-                $ip = trim(file_get_contents($service, false, $context));
-                if ($ip && filter_var($ip, FILTER_VALIDATE_IP)) {
-                    break;
+        foreach ($ipSources as $key) {
+            if (isset($_SERVER[$key])) {
+                $ips = explode(',', $_SERVER[$key]);
+                $ip = trim($ips[0]);
+                
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
                 }
-            } catch (\Exception $e) {
-                continue;
             }
         }
         
+        if (isset($_POST['client_ip']) && filter_var($_POST['client_ip'], FILTER_VALIDATE_IP)) {
+            return $_POST['client_ip'];
+        }
+        
+        if (isset($_GET['client_ip']) && filter_var($_GET['client_ip'], FILTER_VALIDATE_IP)) {
+            return $_GET['client_ip'];
+        }
+        
+        $jsonInput = file_get_contents('php://input');
+        if (!empty($jsonInput)) {
+            try {
+                $data = json_decode($jsonInput, true);
+                if (isset($data['client_ip']) && filter_var($data['client_ip'], FILTER_VALIDATE_IP)) {
+                    return $data['client_ip'];
+                }
+            } catch (\Exception $e) {
+                // Failed to parse JSON
+            }
+        }
+
         if (!$ip) {
             return '127.0.0.1';
         }
 
-        if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP)) {
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            return '127.0.0.1';
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             return '127.0.0.1';
         }
 

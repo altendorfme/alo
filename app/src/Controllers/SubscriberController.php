@@ -87,7 +87,7 @@ class SubscriberController extends BaseController
                     'last_active' => $this->db->sqleval('NOW()'),
                     'status' => 'active'
                 ], "id = %i", $existingSubscriber['id']);
-                
+
                 $subscriber = $this->db->queryFirstRow(
                     "SELECT * FROM subscribers WHERE id = %i",
                     $existingSubscriber['id']
@@ -125,7 +125,10 @@ class SubscriberController extends BaseController
 
             try {
                 $analyticsToStore = $analyticsData ?? [];
-                $locationData = $this->getLocationData();
+
+                $clientIp = $analyticsData['ip'] ?? null;
+
+                $locationData = $this->getLocationData($clientIp);
                 if (!empty($locationData)) {
                     $analyticsToStore['location'] = $locationData;
                 }
@@ -148,7 +151,7 @@ class SubscriberController extends BaseController
 
             $statusCode = $existingSubscriber ? 200 : 201;
             $message = $existingSubscriber ? _e('success_subscription_updated') : _e('success_subscription_created');
-            
+
             return new Response(
                 $statusCode,
                 ['Content-Type' => 'application/json'],
@@ -321,68 +324,48 @@ class SubscriberController extends BaseController
         );
     }
 
-    private function getLocationData(): array
+    private function getLocationData($clientIp = null): array
     {
         if (!file_exists(self::GEOIP_DB_PATH)) {
             return [];
         }
 
-        try {
-            $ip = null;
-            $ipServices = [
-                'https://icanhazip.com',
-                'https://ifconfig.me/ip'
-            ];
-            
-            foreach ($ipServices as $service) {
-                try {
-                    $context = stream_context_create([
-                        'http' => [
-                            'timeout' => 2
-                        ]
-                    ]);
-                    $ip = trim(file_get_contents($service, false, $context));
-                    if ($ip && filter_var($ip, FILTER_VALIDATE_IP)) {
-                        break;
-                    }
-                } catch (\Exception $e) {
-                    continue;
-                }
-            }
-            
-            if (!$ip) {
-                return [];
-            }
+        $ip = $clientIp;
 
-            if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP)) {
-                return [];
-            }
-
-            $reader = new Reader(self::GEOIP_DB_PATH);
-            $record = $reader->city($ip);
-
-            if (!$record) {
-                return [];
-            }
-
-            $locationData = [
-                'timezone' => $record->location->timeZone ?? null,
-                'country' => $record->country->name ?? null,
-                'country_code' => $record->country->isoCode ?? null,
-                'region' => $record->mostSpecificSubdivision->name ?? null,
-                'region_code' => $record->mostSpecificSubdivision->isoCode ?? null,
-                'city' => $record->city->name ?? null,
-                'postal_code' => $record->postal->code ?? null,
-                'latitude' => $record->location->latitude ?? null,
-                'longitude' => $record->location->longitude ?? null
-            ];
-
-            return array_filter($locationData, function ($value) {
-                return $value !== null;
-            });
-        } catch (\Exception $e) {
+        if (!$ip) {
             return [];
         }
+
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            return [];
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return [];
+        }
+
+        $reader = new Reader(self::GEOIP_DB_PATH);
+        $record = $reader->city($ip);
+
+        if (!$record) {
+            return [];
+        }
+
+        $locationData = [
+            'timezone' => $record->location->timeZone ?? null,
+            'country' => $record->country->name ?? null,
+            'country_code' => $record->country->isoCode ?? null,
+            'region' => $record->mostSpecificSubdivision->name ?? null,
+            'region_code' => $record->mostSpecificSubdivision->isoCode ?? null,
+            'city' => $record->city->name ?? null,
+            'postal_code' => $record->postal->code ?? null,
+            'latitude' => $record->location->latitude ?? null,
+            'longitude' => $record->location->longitude ?? null
+        ];
+
+        return array_filter($locationData, function ($value) {
+            return $value !== null;
+        });
     }
 
     private function storeAnalyticsData(int $subscriberId, array $analyticsData): void
