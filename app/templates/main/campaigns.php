@@ -76,7 +76,7 @@ if ($statusFilter) {
                         };
                         ?>
                         <span class="badge <?= $statusClass ?>">
-                            <?= ucfirst(htmlspecialchars($campaign['status'])) ?>
+                            <?= _e('status_' . $campaign['status']) ?>
                         </span>
                     </td>
                     <td class="small">
