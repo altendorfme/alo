@@ -110,7 +110,7 @@
                         <?php
                         $segments = isset($campaign['segments']) ? json_decode($campaign['segments'], true) : null;
 
-                        if (isset($segments)) {
+                        if (isset($segments) && is_array($segments)) {
                             foreach ($segments as $key => $segment) {
                                 $values = null;
                                 foreach ($listSegments as $listSegment) {
