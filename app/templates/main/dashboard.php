@@ -95,6 +95,7 @@
                                     <th><?= _e('campaign_name') ?></th>
                                     <th><?= _e('status') ?></th>
                                     <th><?= _e('history') ?></th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -122,6 +123,11 @@
                                         <td class="text-nowrap">
                                             <?= _e('created_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?><br />
                                             <?= _e('ended_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['ended_at'])) ?>
+                                        </td>
+                                        <td>
+                                            <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
+                                                <i class="bi bi-graph-up"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php } ?>
