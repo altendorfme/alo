@@ -10,6 +10,7 @@ services:
       - 8088:8088
     volumes:
       - ./pushbase/config:/app/config
+    restart: unless-stopped
     depends_on:
       - mariadb
       - rabbitmq
