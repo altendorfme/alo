@@ -117,10 +117,7 @@ $statusClass = match ($campaign['status']) {
                                                         <th><?= _e('created_by') ?></th>
                                                         <td>
                                                             <?php if (!empty($campaign['created_by'])) { ?>
-                                                                <?= htmlspecialchars($campaign['created_by']) ?>
-                                                                <?php if (!empty($campaign['created_by_email'])) { ?>
-                                                                    (<?= htmlspecialchars($campaign['created_by_email']) ?>)
-                                                                <?php } ?>
+                                                                <?= htmlspecialchars($campaign['created_by_email']) ?> (<?= htmlspecialchars($campaign['created_by']) ?>)
                                                             <?php } else { ?>
                                                                 <em><?= _e('not_specified') ?></em>
                                                             <?php } ?>
@@ -134,10 +131,7 @@ $statusClass = match ($campaign['status']) {
                                                         <th><?= _e('updated_by') ?></th>
                                                         <td>
                                                             <?php if (!empty($campaign['updated_by'])) { ?>
-                                                                <?= htmlspecialchars($campaign['updated_by']) ?>
-                                                                <?php if (!empty($campaign['updated_by_email'])) { ?>
-                                                                    (<?= htmlspecialchars($campaign['updated_by_email']) ?>)
-                                                                <?php } ?>
+                                                                <?= htmlspecialchars($campaign['updated_by_email']) ?> (<?= htmlspecialchars($campaign['updated_by']) ?>)
                                                             <?php } else { ?>
                                                                 <em><?= _e('not_specified') ?></em>
                                                             <?php } ?>
@@ -146,6 +140,36 @@ $statusClass = match ($campaign['status']) {
                                                     <tr>
                                                         <th><?= _e('updated_at') ?></th>
                                                         <td><?= !empty($campaign['updated_at']) ? htmlspecialchars($campaign['updated_at']) : '<em>' . _e('not_specified') . '</em>' ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th><?= _e('segments') ?></th>
+                                                        <td>
+                                                            <?php if (!empty($campaign['segments'])) {
+                                                                $segments = json_decode($campaign['segments'], true);
+                                                                if (is_array($segments) && count($segments) > 0) {
+                                                                    foreach ($segments as $segment) {
+                                                                        if (isset($segment['type']) && isset($segment['values']) && is_array($segment['values'])) {
+                                                                            $segmentInfo = \Pushbase\Database\Database::getInstance()->queryFirstRow(
+                                                                                "SELECT name, description FROM segments WHERE id = %i",
+                                                                                $segment['type']
+                                                                            );
+                                                                            
+                                                                            $segmentName = $segmentInfo['description'] ? $segmentInfo['description'] : $segmentInfo['name'];
+                                                                            ?>
+                                                                                <p class="m-0">
+                                                                                    <strong><?= htmlspecialchars($segmentName) ?>: </strong>
+                                                                                    <?= htmlspecialchars(implode(', ', $segment['values'])) ?>
+                                                                                </p>
+                                                                            <?php
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    echo '<em>' . _e('not_specified') . '</em>';
+                                                                }
+                                                            } else { ?>
+                                                                <em><?= _e('not_specified') ?></em>
+                                                            <?php } ?>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>

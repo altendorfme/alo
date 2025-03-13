@@ -212,8 +212,8 @@ class CampaignController extends BaseController
             'push_badge' => $params['push_badge'] ?? null,
             'push_renotify' => isset($params['push_renotify']),
             'push_silent' => isset($params['push_silent']),
-            'segments' => isset($params['segments']) && is_array($params['segments'])
-                ? json_encode(array_filter($params['segments']))
+            'segments' => (isset($params['segments']) && is_array($params['segments']) && !empty(array_filter($params['segments'])))
+                ? array_filter($params['segments'])
                 : null
         ];
 
@@ -319,8 +319,8 @@ class CampaignController extends BaseController
             'push_badge' => $params['push_badge'] ?? null,
             'push_renotify' => isset($params['push_renotify']),
             'push_silent' => isset($params['push_silent']),
-            'segments' => isset($params['segments']) && is_array($params['segments'])
-                ? json_encode(array_filter($params['segments']))
+            'segments' => (isset($params['segments']) && is_array($params['segments']) && !empty(array_filter($params['segments'])))
+                ? array_filter($params['segments'])
                 : null
         ];
 
@@ -718,8 +718,8 @@ class CampaignController extends BaseController
                 'push_badge' => $data['push_badge'] ?? null,
                 'push_renotify' => $data['push_renotify'] ?? false,
                 'push_silent' => $data['push_silent'] ?? false,
-                'segments' => isset($data['segments']) && is_array($data['segments'])
-                    ? json_encode(array_filter($data['segments']))
+                'segments' => (isset($data['segments']) && is_array($data['segments']) && !empty(array_filter($data['segments'])))
+                    ? array_filter($data['segments'])
                     : null,
                 'status' => 'draft'
             ];

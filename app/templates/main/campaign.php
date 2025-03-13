@@ -108,7 +108,14 @@
                     <div id="segmentsContainer">
 
                         <?php
-                        $segments = isset($campaign['segments']) ? json_decode($campaign['segments'], true) : null;
+                        $segments = null;
+                        if (isset($campaign['segments'])) {
+                            if (is_array($campaign['segments'])) {
+                                $segments = $campaign['segments'];
+                            } else {
+                                $segments = json_decode($campaign['segments'], true);
+                            }
+                        }
 
                         if (isset($segments) && is_array($segments)) {
                             foreach ($segments as $key => $segment) {
@@ -317,6 +324,31 @@
                 });
         }
 
+        function updateSelectedSegmentTypes() {
+            const segmentRows = document.querySelectorAll('.segment-row');
+            const selectedTypes = new Set();
+            
+            segmentRows.forEach(row => {
+                const segmentSelect = row.querySelector('.segment-select');
+                if (segmentSelect.value) {
+                    selectedTypes.add(segmentSelect.value);
+                }
+            });
+            
+            segmentRows.forEach(row => {
+                const segmentSelect = row.querySelector('.segment-select');
+                const currentValue = segmentSelect.value;
+                
+                Array.from(segmentSelect.options).forEach(option => {
+                    if (option.value && option.value !== currentValue) {
+                        option.disabled = selectedTypes.has(option.value);
+                    }
+                });
+            });
+            
+            return selectedTypes;
+        }
+
         function updateUserCount() {
             const segmentRows = document.querySelectorAll('.segment-row');
             const segmentData = [];
@@ -339,6 +371,8 @@
                     }
                 }
             });
+
+            updateSelectedSegmentTypes();
 
             fetch('/api/segments', {
                     method: 'POST',
@@ -370,8 +404,10 @@
         }
 
         addSegmentBtn.addEventListener('click', function() {
+            const selectedTypes = updateSelectedSegmentTypes();
+
             const segmentOptionsHTML = segmentsArray.map(segment =>
-                `<option value="${segment.id}">${segment.description || segment.name}</option>`
+                `<option value="${segment.id}" ${selectedTypes.has(segment.id.toString()) ? 'disabled' : ''}>${segment.description || segment.name}</option>`
             ).join('');
 
             const newRow = document.createElement('div');
@@ -399,6 +435,7 @@
 
             segmentSelect.addEventListener('change', function() {
                 fetchSegmentValues(this);
+                updateSelectedSegmentTypes();
             });
 
             valuesSelect.addEventListener('change', updateUserCount);
@@ -416,6 +453,7 @@
         document.querySelectorAll('.segment-select').forEach(select => {
             select.addEventListener('change', function() {
                 fetchSegmentValues(this);
+                updateSelectedSegmentTypes();
             });
         });
 
@@ -427,6 +465,7 @@
             removeBtn.addEventListener('click', function() {
                 this.closest('.segment-row').remove();
                 reindexSegments();
+                updateSelectedSegmentTypes();
                 updateUserCount();
             });
         });

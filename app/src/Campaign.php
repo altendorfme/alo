@@ -25,7 +25,7 @@ class Campaign
             'push_silent' => $data['push_silent'] ?? false,
             'status' => $data['status'] ?? 'draft',
             'send_at' => $data['send_at'] ?? null,
-            'segments' => json_encode($data['segments']) ?? null,
+            'segments' => isset($data['segments']) ? json_encode($data['segments']) : null,
             'created_by' => $userId,
             'created_at' => $db->sqleval('NOW()'),
             'updated_by' => $userId,
@@ -62,7 +62,11 @@ class Campaign
         ];
 
         foreach ($data as $field => $value) {
-            $updateData[$field] = $value;
+            if ($field === 'segments' && isset($value)) {
+                $updateData[$field] = json_encode($value);
+            } else {
+                $updateData[$field] = $value;
+            }
         }
 
         $db->update('campaigns', $updateData, 'id=%i', $campaign['id']);
