@@ -40,9 +40,9 @@ services:
     hostname: rabbitmq
     environment:
       TZ: ${TZ}
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}
+      RABBITMQ_DEFAULT_USER: ${AMQP_USER}
+      RABBITMQ_DEFAULT_PASS: ${AMQP_PASS}
+      RABBITMQ_DEFAULT_VHOST: ${AMQP_VHOST}
     volumes:
       - ./rabbitmq/data:/var/lib/rabbitmq
     ports:
