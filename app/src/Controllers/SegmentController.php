@@ -127,7 +127,7 @@ class SegmentController extends BaseController
         $data = json_decode($request->getBody()->getContents(), true);
 
         if (empty($data)) {
-            $userCount = $this->db->queryFirstField("SELECT COUNT(DISTINCT id) FROM subscribers");
+            $userCount = $this->db->queryFirstField("SELECT COUNT(DISTINCT id) FROM subscribers WHERE status = 'active'");
             return new Response(
                 200,
                 ['Content-Type' => 'application/json'],
@@ -136,9 +136,9 @@ class SegmentController extends BaseController
         }
 
         $query = "SELECT COUNT(DISTINCT s.id) as user_count
-                    FROM subscribers s
-                    INNER JOIN segment_goals sg ON s.id = sg.subscriber_id
-                    WHERE 1=1";
+                             FROM subscribers s
+                             INNER JOIN segment_goals sg ON s.id = sg.subscriber_id
+                             WHERE s.status = 'active'";
 
         $queryParams = [];
         $conditions = [];

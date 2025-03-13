@@ -58,6 +58,11 @@ class QueueCommand
                 continue;
             }
 
+            if (empty($values)) {
+                $this->climate->yellow()->out("Empty segment values. Skipping.");
+                continue;
+            }
+
             switch ($type) {
                 case '31':
                     $numericValues = array_map('floatval', $values);
@@ -68,15 +73,21 @@ class QueueCommand
                     }
                     break;
                 case '33':
-                    if (!empty($values)) {
-                        $placeholders = implode(',', array_fill(0, count($values), '%s'));
-                        $segmentConditions[] = "(custom_field = %s AND custom_value IN ($placeholders))";
-                        $params[] = $type; 
-                        $params = array_merge($params, $values);
-                    }
+                    $placeholders = implode(',', array_fill(0, count($values), '%s'));
+                    $segmentConditions[] = "(custom_field = %s AND custom_value IN ($placeholders))";
+                    $params[] = $type;
+                    $params = array_merge($params, $values);
                     break;
                 default:
-                    $this->climate->yellow()->out("Unsupported segment type: {$type}. Skipping.");
+                    $placeholders = implode(',', array_fill(0, count($values), '%s'));
+                    $segmentConditions[] = "EXISTS (
+                        SELECT 1 FROM segment_goals sg
+                        WHERE sg.subscriber_id = s.id
+                        AND sg.segment_id = %s
+                        AND sg.value IN ($placeholders)
+                    )";
+                    $params[] = $type;
+                    $params = array_merge($params, $values);
             }
         }
 
@@ -89,9 +100,9 @@ class QueueCommand
         $whereClause = implode(' OR ', $segmentConditions);
 
         $query = "
-            SELECT id, uuid, endpoint, p256dh, authKey 
-            FROM subscribers 
-            WHERE status = 'active' AND ({$whereClause})
+            SELECT DISTINCT s.id, s.uuid, s.endpoint, s.p256dh, s.authKey
+            FROM subscribers s
+            WHERE s.status = 'active' AND ({$whereClause})
         ";
 
         $fullQueryParams = array_merge([$query], $params);
@@ -159,7 +170,7 @@ class QueueCommand
                         WHERE id = %s
                     ", $campaign['id']);
 
-                    $segments = !empty($campaign['segments']) ? json_decode($campaign['segments'], true) : [];
+                    $segments = empty($campaign['segments']) ? null : $campaign['segments'];
 
                     $subscriptions = $this->filterSubscribersBySegments($segments);
 
