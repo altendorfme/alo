@@ -44,6 +44,7 @@
         display: inline-block;
         font-size: 4rem;
         animation: bell-shake 1s ease-in-out infinite;
+        text-shadow: 0 0 20px rgba(0,0,0,.1);
     }
 </style>
 <?php $this->end() ?>

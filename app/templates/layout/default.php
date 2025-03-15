@@ -9,11 +9,11 @@
 
 <body>
     <!-- Main Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom" aria-label="Main navigation">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom shadow" aria-label="Main navigation">
         <div class="container">
             <!-- Branding Section -->
             <div class="brand">
-                <i class="text-white me-2 bi bi-bell-fill fs-4"></i>
+                <a title="Dashboard" href="/dashboard"><i class="text-white me-2 bi bi-bell-fill fs-4"></i></a>
             </div>
 
             <!-- Mobile Menu Toggle -->

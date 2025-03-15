@@ -101,7 +101,7 @@
                             <tbody>
                                 <?php foreach ($campaigns['recent'] as $campaign) { ?>
                                     <tr>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <a class="link-secondary" href="/campaign/analytics/<?= $campaign['id']; ?>"><?= htmlspecialchars($campaign['name']) ?></a><br />
                                             <?= htmlspecialchars($campaign['push_title']) ?>
                                         </td>

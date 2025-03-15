@@ -7,7 +7,7 @@
     <?= $this->section('page_styles'); ?>
 </head>
 
-<body class="bg-light d-flex flex-column vh-100">
+<body class="d-flex flex-column vh-100">
     <main class="w-100 m-auto">
         <div class="container">
             <div class="row justify-content-center">
@@ -19,4 +19,18 @@
     </main>
 </body>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const htmlElement = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            htmlElement.setAttribute('data-bs-theme', 'dark');
+        } else {
+            htmlElement.setAttribute('data-bs-theme', 'light');
+        }
+    });
+</script>
 </html>

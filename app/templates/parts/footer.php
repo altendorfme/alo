@@ -1,4 +1,4 @@
-<footer class="border-top">
+<footer class="border-top shadow">
     <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-center py-3 small text-body-secondary">
             <div class="col-md-4 d-flex align-items-center">
