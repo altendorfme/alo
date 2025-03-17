@@ -309,6 +309,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 indexAxis: 'x',
                 plugins: {
                     legend: {
