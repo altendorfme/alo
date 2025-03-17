@@ -241,7 +241,16 @@
                         legend: {
                             position: 'top',
                             labels: {
-                                color: themeColors.textColor
+                                color: themeColors.textColor,
+                                filter: function(legendItem, chartData) {
+                                    let pairs = [];
+                                    for (let i = 0; i < chartData.labels.length; i++) {
+                                        pairs.push({ label: chartData.labels[i], value: chartData.datasets[0].data[i], index: i });
+                                    }
+                                    pairs.sort((a, b) => b.value - a.value);
+                                    const topIndices = pairs.slice(0, 5).map(pair => pair.index);
+                                    return topIndices.includes(legendItem.index);
+                                }
                             }
                         },
                         tooltip: {
@@ -304,6 +313,21 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const labels = context[0].chart.data.labels;
+                                const data = context[0].chart.data.datasets[0].data;
+
+                                let pairs = [];
+                                for (let i = 0; i < labels.length; i++) {
+                                    pairs.push({ label: labels[i], value: data[i], index: i });
+                                }
+
+                                return labels[context[0].dataIndex];
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -317,7 +341,25 @@
                             color: themeColors.gridColor
                         },
                         ticks: {
-                            color: themeColors.textColor
+                            color: themeColors.textColor,
+                            callback: function(value, index) {
+                                const labels = this.chart.data.labels;
+                                const data = this.chart.data.datasets[0].data;
+
+                                let pairs = [];
+                                for (let i = 0; i < labels.length; i++) {
+                                    pairs.push({ label: labels[i], value: data[i], index: i });
+                                }
+
+                                pairs.sort((a, b) => b.value - a.value);
+
+                                const topIndices = pairs.slice(0, 20).map(pair => pair.index);
+
+                                if (topIndices.includes(index)) {
+                                    return labels[index];
+                                }
+                                return '';
+                            }
                         }
                     },
                     y: {
