@@ -191,33 +191,33 @@ $statusClass = match ($campaign['status']) {
                                                 $totalDeliveredPercentage = round(($deliveredCount / $totalRecipients) * 100, 2);
                                                 $totalErrorPercentage = round(($errorCount / $totalRecipients) * 100, 2);
                                                 ?>
-                                                <div class="col-3">
+                                                <div class="col-12 col-md-6">
                                                     <div class="badge text-bg-primary fs-2">
-                                                        <?= $totalRecipients ?>
+                                                        <?= number_format($totalRecipients) ?>
                                                     </div>
                                                     <div class="d-block pt-1"><?= _e('total') ?></div>
                                                 </div>
-                                                <div class="col-3">
+                                                <div class="col-12 col-md-6">
                                                     <div class="badge text-bg-success fs-2">
-                                                        <?= $deliveredCount ?>
+                                                        <?= number_format($deliveredCount) ?>
                                                     </div>
                                                     <div class="d-block pt-1"><?= _e('successfully') ?></div>
                                                     <small class="d-block text-muted">
                                                         <?= $totalDeliveredPercentage ?>% <?= _e('of_total') ?>
                                                     </small>
                                                 </div>
-                                                <div class="col-3">
+                                                <div class="col-12 col-md-6">
                                                     <div class="badge text-bg-danger fs-2">
-                                                        <?= $errorCount ?>
+                                                        <?= number_format($errorCount) ?>
                                                     </div>
                                                     <div class="d-block pt-1"><?= _e('error') ?></div>
                                                     <small class="d-block text-muted">
                                                         <?= $totalErrorPercentage ?>% <?= _e('of_total') ?>
                                                     </small>
                                                 </div>
-                                                <div class="col-3">
+                                                <div class="col-12 col-md-6">
                                                     <div class="badge text-bg-info fs-2">
-                                                        <?= $totalClicked ?>
+                                                        <?= number_format($totalClicked) ?>
                                                     </div>
                                                     <div class="d-block pt-1">
                                                         <?= _e('clicked') ?>

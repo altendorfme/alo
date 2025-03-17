@@ -61,7 +61,7 @@ if ($statusFilter) {
                     <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
                     <td class="small">
                         <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
-                        <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? htmlspecialchars(substr($campaign['push_body'], 0, 60)) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                        <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
                     </td>
                     <td>
                         <?php
