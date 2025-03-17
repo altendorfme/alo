@@ -144,14 +144,6 @@
 <div class="row mt-4">
     <div class="col-12 col-md-3 mb-4">
         <div class="card">
-            <div class="card-header"><?= _e('category') ?></div>
-            <div class="card-body">
-                <canvas id="categoryChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-md-3 mb-4">
-        <div class="card">
             <div class="card-header"><?= _e('browser') ?></div>
             <div class="card-body">
                 <canvas id="browserChart"></canvas>
@@ -171,6 +163,24 @@
             <div class="card-header"><?= _e('device_type') ?></div>
             <div class="card-body">
                 <canvas id="deviceChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3 mb-4">
+        <div class="card">
+            <div class="card-header"><?= _e('country') ?></div>
+            <div class="card-body">
+                <canvas id="countryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row" style="<?= isset($segments['category']['data']) && empty($segments['category']['data']) ?? 'display: none;'?>">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header"><?= _e('category') ?></div>
+            <div class="card-body" style="height: 400px;">
+                <canvas id="categoryChart"></canvas>
             </div>
         </div>
     </div>
@@ -207,21 +217,22 @@
                 ]
             };
         }
+        const themeColors = getThemeColors();
         
         const chartInstances = [];
-        
         function createPieChart(canvasId, labels, data) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             const themeColors = getThemeColors();
             
             const chartInstance = new Chart(ctx, {
-                type: 'polarArea',
+                type: 'pie',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: data,
                         backgroundColor: themeColors.pieColors,
-                        borderWidth: 0
+                        borderWidth: 1,
+                        borderColor: isDarkMode() ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
                     }]
                 },
                 options: {
@@ -232,15 +243,16 @@
                             labels: {
                                 color: themeColors.textColor
                             }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            grid: {
-                                color: themeColors.gridColor
-                            },
-                            ticks: {
-                                color: themeColors.textColor
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
                             }
                         }
                     }
@@ -250,13 +262,7 @@
             chartInstances.push(chartInstance);
             return chartInstance;
         }
-
-        createPieChart(
-            'categoryChart',
-            <?= json_encode(array_map('ucfirst', $segments['category']['labels'])) ?>,
-            <?= json_encode($segments['category']['data']) ?>
-        );
-
+        
         createPieChart(
             'browserChart',
             <?= json_encode($segments['browser_name']['labels']) ?>,
@@ -274,10 +280,65 @@
             <?= json_encode(array_map('ucfirst', $segments['device_type']['labels'])) ?>,
             <?= json_encode($segments['device_type']['data']) ?>
         );
-        
+
+        createPieChart(
+            'countryChart',
+            <?= json_encode(array_map('ucfirst', $segments['country']['labels'])) ?>,
+            <?= json_encode($segments['country']['data']) ?>
+        );
+
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode(array_map('ucfirst', $segments['category']['labels'])) ?>,
+                datasets: [{
+                    data: <?= json_encode($segments['category']['data']) ?>,
+                    backgroundColor: themeColors.pieColors,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'x',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '<?= _e('total') ?>',
+                            color: themeColors.textColor
+                        },
+                        grid: {
+                            color: themeColors.gridColor
+                        },
+                        ticks: {
+                            color: themeColors.textColor
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '<?= _e('category') ?>',
+                            color: themeColors.textColor
+                        },
+                        grid: {
+                            color: themeColors.gridColor
+                        },
+                        ticks: {
+                            color: themeColors.textColor
+                        }
+                    }
+                }
+            }
+        });
+        chartInstances.push(categoryChart);
+
         const subscribersCtx = document.getElementById('subscribersTrendChart').getContext('2d');
-        const themeColors = getThemeColors();
-        
         const subscribersChart = new Chart(subscribersCtx, {
             type: 'line',
             data: {
@@ -359,7 +420,6 @@
                 }
             }
         });
-        
         chartInstances.push(subscribersChart);
         
         const darkModeSwitch = document.getElementById('darkModeSwitch');
@@ -390,9 +450,10 @@
                                 }
                             }
                             
-                            if (chart.options.scales.r) {
-                                chart.options.scales.r.grid.color = newThemeColors.gridColor;
-                                chart.options.scales.r.ticks.color = newThemeColors.textColor;
+                            if (chart.config.type === 'pie') {
+                                chart.data.datasets.forEach(dataset => {
+                                    dataset.borderColor = isDarkMode() ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                                });
                             }
                         }
                         

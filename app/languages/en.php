@@ -274,5 +274,6 @@ return [
     'date' => 'Date',
     'rabbitmq_status' => 'RabbitMQ Status',
     'connected' => 'Connected',
-    'disconnected' => 'Disconnected'
+    'disconnected' => 'Disconnected',
+    'country' => 'Country'
 ];

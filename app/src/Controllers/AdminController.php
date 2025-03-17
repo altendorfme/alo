@@ -36,7 +36,6 @@ class AdminController extends BaseController
                     s.name = %s
                 ORDER BY
                     a.count DESC
-                LIMIT 5
             ";
 
             $results = $this->db->query($query, $segmentType);
@@ -157,7 +156,8 @@ class AdminController extends BaseController
                 'browser_name' => $getSegmentData('browser_name'),
                 'os_name' => $getSegmentData('os_name'),
                 'device_type' => $getSegmentData('device_type'),
-                'category' => $getSegmentData('category')
+                'category' => $getSegmentData('category'),
+                'country' => $getSegmentData('country')
             ],
             'subscribers_trend' => $subscribers_trend
         ];
