@@ -9,7 +9,7 @@
     </div>
     <div class="btn-toolbar">
         <button type="submit" form="campaignForm" name="action" value="save" class="btn btn-primary me-2">
-            <?= $isEdit ? _e('campaign_publish') : _e('campaign_publish'); ?>
+            <?= _e('campaign_publish'); ?>
         </button>
         <button type="submit" form="campaignForm" name="action" value="draft" class="btn btn-secondary">
             <?= _e('save_as_draft') ?>
@@ -253,11 +253,44 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const segmentsContainer = document.getElementById('segmentsContainer');
-        const addSegmentBtn = document.getElementById('addSegmentBtn');
-        const subscriberBySegmentCount = document.getElementById('subscriberBySegmentCount');
-        const existingSegments = document.querySelectorAll('.segment-row');
-        let segmentIndex = existingSegments.length > 0 ? existingSegments.length : 0;
+            const campaignForm = document.getElementById('campaignForm');
+            const publishButton = document.querySelector('button[name="action"][value="save"]');
+            
+            if (publishButton && campaignForm) {
+                publishButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const sendAtInput = document.getElementById('send_at');
+                    const isScheduled = sendAtInput && sendAtInput.value.trim() !== '';
+                    
+                    let confirmMessage = '<?= _e('confirm_campaign_publish') ?>';
+                    if (isScheduled) {
+                        const scheduledDate = new Date(sendAtInput.value);
+                        const formattedDate = scheduledDate.toLocaleDateString();
+                        const formattedTime = scheduledDate.toLocaleTimeString();
+                        
+                        let scheduledMessage = '<?= _e('confirm_campaign_scheduled') ?>';                        
+                        confirmMessage = scheduledMessage
+                            .replace('{date}', formattedDate)
+                            .replace('{time}', formattedTime) + '\n' +  confirmMessage;
+                    }
+                    
+                    if (confirm(confirmMessage)) {
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'action';
+                        hiddenInput.value = 'save';
+                        campaignForm.appendChild(hiddenInput);
+                        campaignForm.submit();
+                    }
+                });
+            }
+            
+            const segmentsContainer = document.getElementById('segmentsContainer');
+            const addSegmentBtn = document.getElementById('addSegmentBtn');
+            const subscriberBySegmentCount = document.getElementById('subscriberBySegmentCount');
+            const existingSegments = document.querySelectorAll('.segment-row');
+            let segmentIndex = existingSegments.length > 0 ? existingSegments.length : 0;
 
         const listSegments = JSON.parse(document.getElementById('listSegments').textContent);
         const segmentsArray = Object.values(listSegments);

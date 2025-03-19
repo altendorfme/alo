@@ -275,5 +275,7 @@ return [
     'rabbitmq_status' => 'Status do RabbitMQ',
     'connected' => 'Conectado',
     'disconnected' => 'Desconectado',
-    'country' => 'País'
+    'country' => 'País',
+    'confirm_campaign_publish' => 'Tem certeza que deseja publicar esta campanha?',
+    'confirm_campaign_scheduled' => 'Esta campanha está agendada para ser publicada em {date} às {time}'
 ];
