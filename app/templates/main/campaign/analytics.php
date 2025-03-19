@@ -102,7 +102,7 @@ $statusClass = match ($campaign['status']) {
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th><?= _e('send_at') ?></th>
+                                                        <th><?= _e('scheduled_for') ?></th>
                                                         <td><?= !empty($campaign['send_at']) ? htmlspecialchars($campaign['send_at']) : '<em>' . _e('not_specified') . '</em>' ?></td>
                                                     </tr>
                                                     <tr>

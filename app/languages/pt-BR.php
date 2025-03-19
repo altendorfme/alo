@@ -277,5 +277,7 @@ return [
     'disconnected' => 'Desconectado',
     'country' => 'País',
     'confirm_campaign_publish' => 'Tem certeza que deseja publicar esta campanha?',
-    'confirm_campaign_scheduled' => 'Esta campanha está agendada para ser publicada em {date} às {time}'
+    'confirm_campaign_scheduled' => 'Esta campanha está agendada para ser publicada em {date} às {time}',
+    'scheduled_campaigns' => 'Agendadas',
+    'scheduled_for' => 'Agendado para'
 ];
