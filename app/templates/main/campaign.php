@@ -57,7 +57,10 @@
                         <label for="push_title" class="form-label fw-bold"><i class="bi bi-card-heading me-2"></i><?= _e('push_title') ?></label>
                         <input type="text" class="form-control" id="push_title" name="push_title" required
                             value="<?= htmlspecialchars($campaign['push_title'] ?? ''); ?>">
-                        <small class="form-text text-muted"><?= _e('push_title_description') ?></small>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="form-text mt-0 text-muted"><?= _e('push_title_description') ?></small>
+                            <small class="char-counter" id="push_title_counter">0/65</small>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -65,7 +68,10 @@
                         <textarea class="form-control" id="push_body" name="push_body" rows="3" required><?php
                                                                                                             echo htmlspecialchars($campaign['push_body'] ?? '');
                                                                                                             ?></textarea>
-                        <small class="form-text text-muted"><?= _e('push_body_description') ?></small>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="form-text mt-0 text-muted"><?= _e('push_body_description') ?></small>
+                            <small class="char-counter" id="push_body_counter">0/180</small>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -170,7 +176,7 @@
                     <h5 class="card-title mb-0"><?= _e('schedule') ?> (<?= _e('optional') ?>)</h5>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
+                    <div>
                         <label for="send_at" class="form-label fw-bold"><i class="bi bi-calendar-event me-2"></i><?= _e('send_at') ?></label>
                         <input type="datetime-local" class="form-control" id="send_at" name="send_at"
                             value="<?= isset($campaign['send_at']) ? date('Y-m-d\TH:i', strtotime($campaign['send_at'])) : ''; ?>">
@@ -228,7 +234,7 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
+                    <div>
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="push_silent"
                                 name="push_silent" value="1"
@@ -537,6 +543,34 @@
         imagePreview('push_image');
         imagePreview('push_icon');
         imagePreview('push_badge');
+
+        function updateCharCounter(inputId, maxChars) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(inputId + '_counter');
+            const currentLength = input.value.length;
+            
+            counter.textContent = `${currentLength}/${maxChars}`;
+            if (currentLength > maxChars) {
+                counter.classList.add('text-danger');
+                counter.classList.add('fw-bold');
+                counter.classList.remove('text-muted');
+            } else {
+                counter.classList.remove('text-danger');
+                counter.classList.remove('fw-bold');
+                counter.classList.add('text-muted');
+            }
+        }
+
+        updateCharCounter('push_title', 65);
+        updateCharCounter('push_body', 180);
+
+        document.getElementById('push_title').addEventListener('input', function() {
+            updateCharCounter('push_title', 65);
+        });
+        
+        document.getElementById('push_body').addEventListener('input', function() {
+            updateCharCounter('push_body', 180);
+        });
 
         document.getElementById('importButton').addEventListener('click', async function(e) {
             const urlInput = document.getElementById('importUrl');
