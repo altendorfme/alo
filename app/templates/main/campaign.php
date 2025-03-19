@@ -85,7 +85,7 @@
                         <label for="push_image" class="form-label fw-bold"><i class="bi bi-image me-2"></i><?= _e('push_image_url') ?></label>
                         <div class="d-flex">
                             <input type="url" class="form-control" id="push_image" name="push_image"
-                            value="<?= htmlspecialchars($campaign['push_image'] ?? ''); ?>">
+                                value="<?= htmlspecialchars($campaign['push_image'] ?? ''); ?>">
                             <div id="push_image_preview" class="d-flex justify-content-center bg-light align-items-center rounded overflow-hidden ms-2 text-white" style="min-width: 38px; height: 38px;"></div>
                         </div>
                         <small class="form-text text-muted"><?= _e('push_image_url_description') ?></small>
@@ -194,7 +194,7 @@
                         <label for="push_icon" class="form-label fw-bold"><i class="bi bi-image-fill me-2"></i><?= _e('push_icon_url') ?> (<?= _e('optional') ?>)</label>
                         <div class="d-flex">
                             <input type="url" class="form-control" id="push_icon" name="push_icon"
-                            value="<?= $isEdit ? htmlspecialchars($campaign['push_icon'] ?? '') : htmlspecialchars($client['icon']); ?>">
+                                value="<?= $isEdit ? htmlspecialchars($campaign['push_icon'] ?? '') : htmlspecialchars($client['icon']); ?>">
                             <div id="push_icon_preview" class="d-flex justify-content-center bg-light align-items-center rounded overflow-hidden ms-2 text-white" style="min-width: 38px; height: 38px;"></div>
                         </div>
                         <small class="form-text text-muted"><?= _e('push_icon_url_description') ?></small>
@@ -204,7 +204,7 @@
                         <label for="push_badge" class="form-label fw-bold"><i class="bi bi-patch-check-fill me-2"></i><?= _e('push_badge_url') ?> (<?= _e('optional') ?>)</label>
                         <div class="d-flex">
                             <input type="url" class="form-control" id="push_badge" name="push_badge"
-                            value="<?= $isEdit ? htmlspecialchars($campaign['push_badge'] ?? '') : htmlspecialchars($client['badge']); ?>">
+                                value="<?= $isEdit ? htmlspecialchars($campaign['push_badge'] ?? '') : htmlspecialchars($client['badge']); ?>">
                             <div id="push_badge_preview" class="d-flex justify-content-center bg-light align-items-center rounded overflow-hidden ms-2 text-white" style="min-width: 38px; height: 38px;"></div>
                         </div>
                         <small class="form-text text-muted"><?= _e('push_badge_url_description') ?></small>
@@ -259,44 +259,46 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-            const campaignForm = document.getElementById('campaignForm');
-            const publishButton = document.querySelector('button[name="action"][value="save"]');
-            
-            if (publishButton && campaignForm) {
-                publishButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const sendAtInput = document.getElementById('send_at');
-                    const isScheduled = sendAtInput && sendAtInput.value.trim() !== '';
-                    
-                    let confirmMessage = '<?= _e('confirm_campaign_publish') ?>';
-                    if (isScheduled) {
-                        const scheduledDate = new Date(sendAtInput.value);
-                        const formattedDate = scheduledDate.toLocaleDateString();
-                        const formattedTime = scheduledDate.toLocaleTimeString();
-                        
-                        let scheduledMessage = '<?= _e('confirm_campaign_scheduled') ?>';                        
-                        confirmMessage = scheduledMessage
-                            .replace('{date}', formattedDate)
-                            .replace('{time}', formattedTime) + '\n' +  confirmMessage;
-                    }
-                    
-                    if (confirm(confirmMessage)) {
-                        const hiddenInput = document.createElement('input');
-                        hiddenInput.type = 'hidden';
-                        hiddenInput.name = 'action';
-                        hiddenInput.value = 'save';
-                        campaignForm.appendChild(hiddenInput);
-                        campaignForm.submit();
-                    }
-                });
-            }
-            
-            const segmentsContainer = document.getElementById('segmentsContainer');
-            const addSegmentBtn = document.getElementById('addSegmentBtn');
-            const subscriberBySegmentCount = document.getElementById('subscriberBySegmentCount');
-            const existingSegments = document.querySelectorAll('.segment-row');
-            let segmentIndex = existingSegments.length > 0 ? existingSegments.length : 0;
+        // Publish confirmation
+        const campaignForm = document.getElementById('campaignForm');
+        const publishButton = document.querySelector('button[name="action"][value="save"]');
+
+        if (publishButton && campaignForm) {
+            publishButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const sendAtInput = document.getElementById('send_at');
+                const isScheduled = sendAtInput && sendAtInput.value.trim() !== '';
+
+                let confirmMessage = '<?= _e('confirm_campaign_publish') ?>';
+                if (isScheduled) {
+                    const scheduledDate = new Date(sendAtInput.value);
+                    const formattedDate = scheduledDate.toLocaleDateString();
+                    const formattedTime = scheduledDate.toLocaleTimeString();
+
+                    let scheduledMessage = '<?= _e('confirm_campaign_scheduled') ?>';
+                    confirmMessage = scheduledMessage
+                        .replace('{date}', formattedDate)
+                        .replace('{time}', formattedTime) + '\n' + confirmMessage;
+                }
+
+                if (confirm(confirmMessage)) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'action';
+                    hiddenInput.value = 'save';
+                    campaignForm.appendChild(hiddenInput);
+                    campaignForm.submit();
+                }
+            });
+        }
+
+        // User and segments counter
+        const segmentsContainer = document.getElementById('segmentsContainer');
+        const addSegmentBtn = document.getElementById('addSegmentBtn');
+        const subscriberBySegmentCount = document.getElementById('subscriberBySegmentCount');
+        const existingSegments = document.querySelectorAll('.segment-row');
+        let segmentIndex = existingSegments.length > 0 ? existingSegments.length : 0;
 
         const listSegments = JSON.parse(document.getElementById('listSegments').textContent);
         const segmentsArray = Object.values(listSegments);
@@ -366,25 +368,25 @@
         function updateSelectedSegmentTypes() {
             const segmentRows = document.querySelectorAll('.segment-row');
             const selectedTypes = new Set();
-            
+
             segmentRows.forEach(row => {
                 const segmentSelect = row.querySelector('.segment-select');
                 if (segmentSelect.value) {
                     selectedTypes.add(segmentSelect.value);
                 }
             });
-            
+
             segmentRows.forEach(row => {
                 const segmentSelect = row.querySelector('.segment-select');
                 const currentValue = segmentSelect.value;
-                
+
                 Array.from(segmentSelect.options).forEach(option => {
                     if (option.value && option.value !== currentValue) {
                         option.disabled = selectedTypes.has(option.value);
                     }
                 });
             });
-            
+
             return selectedTypes;
         }
 
@@ -510,6 +512,7 @@
         });
         updateUserCount();
 
+        // Image Preview
         function updateImagePreview(preview, url) {
             preview.innerHTML = '';
 
@@ -530,7 +533,7 @@
 
         function imagePreview(inputId) {
             const input = document.getElementById(inputId);
-            const preview = document.getElementById(inputId+'_preview');
+            const preview = document.getElementById(inputId + '_preview');
 
             const initialUrl = input.value.trim();
             updateImagePreview(preview, initialUrl);
@@ -544,11 +547,12 @@
         imagePreview('push_icon');
         imagePreview('push_badge');
 
+        // Char Counter
         function updateCharCounter(inputId, maxChars) {
             const input = document.getElementById(inputId);
             const counter = document.getElementById(inputId + '_counter');
             const currentLength = input.value.length;
-            
+
             counter.textContent = `${currentLength}/${maxChars}`;
             if (currentLength > maxChars) {
                 counter.classList.add('text-danger');
@@ -560,18 +564,18 @@
                 counter.classList.add('text-muted');
             }
         }
-
         updateCharCounter('push_title', 65);
         updateCharCounter('push_body', 180);
 
         document.getElementById('push_title').addEventListener('input', function() {
             updateCharCounter('push_title', 65);
         });
-        
+
         document.getElementById('push_body').addEventListener('input', function() {
             updateCharCounter('push_body', 180);
         });
 
+        // Import Metadata
         document.getElementById('importButton').addEventListener('click', async function(e) {
             const urlInput = document.getElementById('importUrl');
             const url = urlInput.value.trim();
@@ -582,7 +586,9 @@
             }
 
             try {
-                new ldloader({root: ".ldld.full"}).on();
+                new ldloader({
+                    root: ".ldld.full"
+                }).on();
                 const response = await fetch('/api/campaign/import/metadata', {
                     method: 'POST',
                     headers: {
@@ -615,7 +621,11 @@
             } catch (error) {
                 alert('<?= _e('error_network_response') ?>');
             } finally {
-                new ldloader({root: ".ldld.full"}).off();
+                new ldloader({
+                    root: ".ldld.full"
+                }).off();
+                updateCharCounter('push_title', 65);
+                updateCharCounter('push_body', 180);
                 imagePreview('push_image');
                 imagePreview('push_icon');
                 imagePreview('push_badge');
