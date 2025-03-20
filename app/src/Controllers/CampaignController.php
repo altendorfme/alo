@@ -684,6 +684,65 @@ class CampaignController extends BaseController
         }
     }
 
+    public function duplicateCampaign(ServerRequestInterface $request, array $args = []): ResponseInterface
+    {
+        $id = $args['id'] ?? null;
+        if (!$id) {
+            return new Response(302, ['Location' => '/campaigns']);
+        }
+
+        try {
+            $campaignObj = new \Pushbase\Campaign();
+            $campaign = $campaignObj->get($id);
+
+            if (!$campaign) {
+                return new Response(302, [
+                    'Location' => '/campaigns?error=' . urlencode('error_campaign_not_found')
+                ]);
+            }
+
+            $currentUserId = $this->getCurrentUserId();
+            if ($currentUserId === null) {
+                return new Response(302, [
+                    'Location' => '/campaigns?error=' . urlencode('error_authentication_required')
+                ]);
+            }
+
+            // Create a new campaign with the same data but as draft
+            $newCampaignData = [
+                'name' => $campaign['name'],
+                'push_title' => $campaign['push_title'],
+                'push_body' => $campaign['push_body'],
+                'push_icon' => $campaign['push_icon'],
+                'push_image' => $campaign['push_image'],
+                'push_badge' => $campaign['push_badge'],
+                'push_requireInteraction' => $campaign['push_requireInteraction'],
+                'push_url' => $campaign['push_url'],
+                'push_renotify' => $campaign['push_renotify'],
+                'push_silent' => $campaign['push_silent'],
+                'created_by' => $currentUserId,
+                'segments' => !empty($campaign['segments']) ? json_decode($campaign['segments'], true) : null,
+                'status' => 'draft'
+            ];
+
+            $result = $campaignObj->create($newCampaignData, $currentUserId);
+
+            if ($result) {
+                return new Response(302, [
+                    'Location' => '/campaigns?success=' . urlencode('success_campaign_duplicated')
+                ]);
+            } else {
+                return new Response(302, [
+                    'Location' => '/campaigns?error=' . urlencode('error_failed_to_duplicate')
+                ]);
+            }
+        } catch (Exception $e) {
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode($e->getMessage())
+            ]);
+        }
+    }
+
     public function apiCreateCampaign(ServerRequestInterface $request): ResponseInterface
     {
         try {

@@ -60,7 +60,7 @@ usort($scheduledCampaigns, function ($a, $b) {
 });
 
 usort($otherCampaigns, function ($a, $b) {
-    return strtotime($a['created_at']) - strtotime($b['created_at']);
+    return strtotime($b['created_at']) - strtotime($a['created_at']);
 });
 ?>
 
@@ -99,6 +99,9 @@ usort($otherCampaigns, function ($a, $b) {
                         <td>
                             <a href="/campaign/cancel/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-warning" onclick="return confirm('<?= _e('confirm_cancel_campaign') ?>')" title="Cancel">
                                 <i class="bi bi-x-circle"></i>
+                            </a>
+                            <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                <i class="bi bi-files"></i>
                             </a>
                         </td>
                     </tr>
@@ -185,6 +188,9 @@ usort($otherCampaigns, function ($a, $b) {
                                 <i class="bi bi-graph-up"></i>
                             </a>
                         <?php } ?>
+                        <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                            <i class="bi bi-files"></i>
+                        </a>
                     </td>
                 </tr>
             <?php } ?>

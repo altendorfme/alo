@@ -72,6 +72,7 @@ return function (Container $container): Router {
         $route->post('/campaign/edit/{id:\d+}', [CampaignController::class, 'processEditCampaign']);
         $route->get('/campaign/delete/{id:\d+}', [CampaignController::class, 'deleteCampaign']);
         $route->get('/campaign/cancel/{id:\d+}', [CampaignController::class, 'cancelCampaign']);
+        $route->get('/campaign/duplicate/{id:\d+}', [CampaignController::class, 'duplicateCampaign']);
         $route->get('/campaign/analytics/{id:\d+}', [CampaignAnalyticsController::class, 'campaignAnalytics']);
         $route->get('/campaigns[/page/{page:\d+}]', [CampaignController::class, 'viewCampaigns']);
         $route->post('/campaigns', [CampaignController::class, 'processCampaigns']);
