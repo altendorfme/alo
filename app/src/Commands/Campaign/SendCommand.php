@@ -79,7 +79,7 @@ class SendCommand
                         $messagesProcessed = 0;
                         $messagesFailed = 0;
                         
-                        $batchSize = 100;
+                        $batchSize = 500;
                         $queuedMessages = [];
                         $queuedSubscriptions = [];
                         
