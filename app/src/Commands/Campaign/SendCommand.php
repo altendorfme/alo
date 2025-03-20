@@ -78,58 +78,101 @@ class SendCommand
                         $campaignQueueName = $campaign['uuid'];
                         $messagesProcessed = 0;
                         $messagesFailed = 0;
+                        
+                        $batchSize = 100;
+                        $queuedMessages = [];
+                        $queuedSubscriptions = [];
+                        
+                        while (true) {
+                            $currentBatchSize = 0;
+                            $queuedMessages = [];
+                            $queuedSubscriptions = [];
+                            
+                            while ($currentBatchSize < $batchSize && ($message = $channel->basic_get($campaignQueueName)) !== null) {
+                                try {
+                                    $payload = json_decode($message->getBody(), true);
+                                    
+                                    $subscription = new Subscription(
+                                        $payload['subscriber']['endpoint'],
+                                        $payload['subscriber']['keys']['p256dh'],
+                                        $payload['subscriber']['keys']['auth']
+                                    );
+                                    
+                                    $webPush->queueNotification(
+                                        $subscription,
+                                        json_encode($payload)
+                                    );
 
-                        while (($message = $channel->basic_get($campaignQueueName)) !== null) {
-                            try {
-                                $payload = json_decode($message->getBody(), true);
+                                    $queuedMessages[] = [
+                                        'message' => $message,
+                                        'payload' => $payload
+                                    ];
+                                    $queuedSubscriptions[] = $subscription;
+                                    
+                                    $currentBatchSize++;
+                                } catch (Exception $notificationError) {
+                                    $messagesFailed++;
+                                    $totalNotificationsFailed++;
+                                    
+                                    $this->climate->error(sprintf(
+                                        'Error queuing notification: %s',
+                                        $notificationError->getMessage()
+                                    ));
 
-                                $subscription = new Subscription(
-                                    $payload['subscriber']['endpoint'],
-                                    $payload['subscriber']['keys']['p256dh'],
-                                    $payload['subscriber']['keys']['auth']
-                                );
+                                    if (isset($message)) {
+                                        $channel->basic_ack($message->getDeliveryTag());
+                                    }
+                                }
+                            }
 
-                                $notificationPayload = $payload;
+                            if (empty($queuedMessages)) {
+                                break;
+                            }
+                            
+                            $this->climate->info(sprintf('Sending batch of %d notifications...', count($queuedMessages)));
 
-                                $result = $webPush->sendOneNotification(
-                                    $subscription,
-                                    json_encode($notificationPayload)
-                                );
-
-                                $endpoint = $result->getEndpoint();
-
-                                if ($result->isSuccess()) {
-                                    $this->climate->success( "Message sent successfully for subscription {$endpoint}." );
-
+                            $messageIndex = 0;
+                            foreach ($webPush->flush() as $report) {
+                                if ($messageIndex >= count($queuedMessages)) {
+                                    break;
+                                }
+                                
+                                $message = $queuedMessages[$messageIndex]['message'];
+                                $payload = $queuedMessages[$messageIndex]['payload'];
+                                $endpoint = $report->getRequest()->getUri()->__toString();
+                                
+                                if ($report->isSuccess()) {
+                                    $this->climate->success("Message sent successfully for subscription {$endpoint}.");
+                                    
                                     $messagesProcessed++;
                                     $totalNotificationsSent++;
-
+                                    
                                     $this->db->query("
                                         INSERT INTO analytics_campaign
                                         (campaign_id, subscriber_id, interaction_type)
                                         VALUES (%s, %s, 'sent')
                                     ", $campaign['id'], $payload['subscriber']['id']);
-
+                                    
                                     $channel->basic_ack($message->getDeliveryTag());
                                 } else {
-                                    $this->climate->error( "Message failed to sent for subscription {$endpoint}: {$result->getReason()}" );
-                            
+                                    $this->climate->error("Message failed to send for subscription {$endpoint}: {$report->getReason()}");
+                                    
                                     $messagesFailed++;
                                     $totalNotificationsFailed++;
-
+                                    
                                     $this->db->query("
                                         INSERT INTO analytics_campaign
                                         (campaign_id, subscriber_id, interaction_type)
                                         VALUES (%s, %s, 'failed')
                                     ", $campaign['id'], $payload['subscriber']['id']);
-
-                                    if ($result->isSubscriptionExpired()) {
+                                    
+                                    if ($report->isSubscriptionExpired()) {
                                         $this->db->query("
                                             UPDATE subscribers
                                             SET status = 'inactive'
                                             WHERE endpoint = %s
                                         ", $payload['subscriber']['endpoint']);
-
+                                        
                                         $this->db->query("
                                             INSERT INTO analytics_subscribers
                                             (subscriber_id, status)
@@ -143,14 +186,8 @@ class SendCommand
                                         $channel->basic_reject($message->getDeliveryTag(), true);
                                     }
                                 }
-                            } catch (Exception $notificationError) {
-                                $messagesFailed++;
-                                $totalNotificationsFailed++;
-
-                                $this->climate->error(sprintf(
-                                    'Error sending notification: %s',
-                                    $notificationError->getMessage()
-                                ));
+                                
+                                $messageIndex++;
                             }
                         }
 
