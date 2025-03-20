@@ -57,7 +57,7 @@ class CampaignAnalyticsController extends BaseController
         try {
             $interactionTimeline = $this->db->query(
                 "SELECT 
-                    DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS datetime, 
+                    DATE_FORMAT(created_at, '%Y-%m-%d %H:00') AS datetime,
                     interaction_type,
                     COUNT(*) AS count 
                 FROM 
