@@ -14,6 +14,7 @@ services:
     depends_on:
       - mariadb
       - rabbitmq
+      - redis
     networks:
       - alo
   # MariaDB
@@ -48,6 +49,19 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    restart: unless-stopped
+    networks:
+      - alo
+  # Redis
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    environment:
+      TZ: ${TZ}
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/data:/data
     restart: unless-stopped
     networks:
       - alo

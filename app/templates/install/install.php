@@ -219,6 +219,40 @@
                 </div>
 
                 <div class="card mb-4">
+                    <div class="card-header fw-bold"><?= _e('redis') ?></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="mb-3">
+                                    <label for="redis_host" class="form-label"><?= _e('host') ?></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-hdd-network"></i></span>
+                                        <input type="text" class="form-control" id="redis_host" required name="redis_host"
+                                            value="<?= htmlspecialchars($formData['redis_host'] ?? '') ?>">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-3">
+                                    <label for="redis_port" class="form-label"><?= _e('port') ?></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-door-open"></i></span>
+                                        <input type="number" class="form-control" id="redis_port" name="redis_port"
+                                            value="<?= htmlspecialchars($formData['redis_port'] ?? '') ?>" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div id="redisConnectionResult"></div>
+                                <button type="button" id="testRedisConnection" class="btn btn-secondary">
+                                    <i class="bi bi-plug"></i> <?= _e('test_redis_connection') ?>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
                     <div class="card-header fw-bold">Email (SMTP)</div>
                     <div class="card-body">
                         <div class="row">
@@ -468,6 +502,7 @@
 
         const testMySQLBtn = document.getElementById('testMySQLConnection');
         const testRabbitMQBtn = document.getElementById('testRabbitMQConnection');
+        const testRedisBtn = document.getElementById('testRedisConnection');
         const testSMTPBtn = document.getElementById('testSMTPConnection');
         const mysqlConnectionResult = document.getElementById('mysqlConnectionResult');
         const rabbitmqConnectionResult = document.getElementById('rabbitmqConnectionResult');
@@ -612,6 +647,50 @@
                 })
                 .finally(() => {
                     testRabbitMQBtn.disabled = false;
+                });
+        });
+
+        testRedisBtn.addEventListener('click', function() {
+            const host = document.getElementById('redis_host').value;
+            const port = document.getElementById('redis_port').value;
+
+            if (!host || !port) {
+                redisConnectionResult.innerHTML = '<div class="alert alert-warning"><?= _e('redis_fill_all') ?></div>';
+                return;
+            }
+
+            // Disable button during test
+            testRedisBtn.disabled = true;
+            redisConnectionResult.innerHTML = '<div class="alert alert-info"><?= _e('redis_testing') ?></div>';
+
+            fetch('/install/redis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        host: host,
+                        port: port
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        redisConnectionResult.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> <?= _e('redis_valid') ?></div>';
+                        redisTestPassed = true;
+                    } else {
+                        redisConnectionResult.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle"></i> <?= _e('redis_invalid') ?>: ${data.message}</div>`;
+                        redisTestPassed = false;
+                    }
+                    updateInstallButton();
+                })
+                .catch(error => {
+                    redisConnectionResult.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle"></i> <?= _e('redis_error') ?>: ${error.message}</div>`;
+                    redisTestPassed = false;
+                    updateInstallButton();
+                })
+                .finally(() => {
+                    testRedisBtn.disabled = false;
                 });
         });
 

@@ -7,7 +7,7 @@
     <?= $this->section('page_styles'); ?>
 </head>
 
-<body class="bg-light">
+<body>
 
     <div class="container py-4">
         <main>

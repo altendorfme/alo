@@ -282,5 +282,14 @@ return [
     'confirm_campaign_publish' => 'Tem certeza que deseja publicar esta campanha?',
     'confirm_campaign_scheduled' => 'Esta campanha está agendada para ser publicada em {date} às {time}',
     'scheduled_campaigns' => 'Agendadas',
-    'scheduled_for' => 'Agendado para'
+    'scheduled_for' => 'Agendado para',
+    'redis' => 'Redis',
+    'test_redis_connection' => 'Testar Conexão Redis',
+    'redis_status' => 'Status do Redis',
+    'redis_fill_all' => 'Por favor, preencha todos os dados de conexão Redis',
+    'redis_testing' => 'Testando conexão...',
+    'redis_valid' => 'Conexão Redis bem-sucedida!',
+    'redis_invalid' => 'Falha na conexão Redis:',
+    'redis_error' => 'Falha na conexão Redis:',
+    'rabbitmq_error' => 'Falha na conexão RabbitMQ:'
 ];

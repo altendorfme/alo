@@ -50,6 +50,12 @@ class Config
                 'user' => '',
                 'password' => '',
                 'vhost' => ''
+            ],
+            'redis' => [
+                'host' => '',
+                'port' => '',
+                'db' => 'alo',
+                'cache_ttl' => 7 * 24 * 60 * 60
             ]
         ];
 
@@ -102,6 +108,12 @@ class Config
                     'user' => $_ENV['RABBITMQ_USER'],
                     'password' => $_ENV['RABBITMQ_PASS'],
                     'vhost' => $_ENV['RABBITMQ_VHOST']
+                ],
+                'redis' => [
+                    'host' => $_ENV['REDIS_HOST'],
+                    'port' => $_ENV['REDIS_PORT'],
+                    'db' => 'alo',
+                    'cache_ttl' => 7 * 24 * 60 * 60
                 ]
             ];
         } catch (\Exception $e) {

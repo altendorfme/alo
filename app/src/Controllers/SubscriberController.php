@@ -9,6 +9,7 @@ use alo\Database\Database;
 use alo\Analytics\SubscribersAnalytics;
 use alo\Config\Config;
 use alo\Auth;
+use alo\Services\RedisService;
 use GeoIp2\Database\Reader;
 use Nyholm\Psr7\Response;
 use Ramsey\Uuid\Uuid;
@@ -20,6 +21,7 @@ class SubscriberController extends BaseController
     private $subscribersAnalytics;
     protected $db;
     protected $config;
+    protected $redis;
 
     public function __construct(ContainerInterface $container)
     {
@@ -27,6 +29,7 @@ class SubscriberController extends BaseController
         $this->db = Database::getInstance();
         $this->config = $container->get(Config::class);
         $this->subscribersAnalytics = new SubscribersAnalytics();
+        $this->redis = RedisService::getInstance($this->config);
     }
 
     public function subscribe(ServerRequestInterface $request): ResponseInterface
@@ -149,6 +152,9 @@ class SubscriberController extends BaseController
                 // Continue
             }
 
+            $cacheKey = 'subscriber:status:' . md5($data['endpoint']);
+            $this->redis->delete($cacheKey);
+            
             $statusCode = $existingSubscriber ? 200 : 201;
             $message = $existingSubscriber ? _e('success_subscription_updated') : _e('success_subscription_created');
 
@@ -185,26 +191,56 @@ class SubscriberController extends BaseController
             );
         }
 
+        $cacheKey = 'subscriber:status:' . md5($token);
+
+        $cachedResponse = $this->redis->get($cacheKey);
+        if ($cachedResponse !== null) {
+            $statusCode = $cachedResponse['status_code'] ?? 404;
+            $headers = $cachedResponse['headers'] ?? ['Content-Type' => 'application/json'];
+            $body = $cachedResponse['body'] ?? json_encode(['error' => _e('error_subscriber_not_found')]);
+            
+            return new Response(
+                $statusCode,
+                $headers,
+                $body
+            );
+        }
+
         $subscriber = $this->db->queryFirstRow(
             "SELECT * FROM subscribers WHERE endpoint = %s AND status = 'active'",
             $token
         );
 
         if ($subscriber) {
+            $responseData = [
+                'uuid' => $subscriber['uuid'],
+                'status' => 'active'
+            ];
+
+            $this->redis->set($cacheKey, [
+                'status_code' => 200,
+                'headers' => ['Content-Type' => 'application/json'],
+                'body' => json_encode($responseData)
+            ]);
+            
             return new Response(
                 200,
                 ['Content-Type' => 'application/json'],
-                json_encode([
-                    'uuid' => $subscriber['uuid'],
-                    'status' => 'active'
-                ])
+                json_encode($responseData)
             );
         }
 
+        $errorResponse = ['error' => _e('error_subscriber_not_found')];
+        $this->redis->set($cacheKey, [
+            'status_code' => 404,
+            'headers' => ['Content-Type' => 'application/json'],
+            'body' => json_encode($errorResponse)
+        ]);
+        
         return new Response(
             404,
             ['Content-Type' => 'application/json'],
-            json_encode(['error' => _e('error_subscriber_not_found')])
+            json_encode($errorResponse)
         );
     }
 
@@ -228,6 +264,9 @@ class SubscriberController extends BaseController
             );
 
             if ($this->db->affectedRows() > 0) {
+                $cacheKey = 'subscriber:status:' . md5($token);
+                $this->redis->delete($cacheKey);
+                
                 return new Response(
                     200,
                     ['Content-Type' => 'application/json'],
