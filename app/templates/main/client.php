@@ -203,7 +203,7 @@ aloBtn.addEventListener('click', async () => {
 
             code += `
     };
-    const aloClient = new aloClient(aloConfig);`;
+    const aloClientInit = new aloClient(aloConfig);`;
 
             if (registrationMode === 'manual') {
                 code += `
