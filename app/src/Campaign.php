@@ -1,8 +1,8 @@
 <?php
 
-namespace Pushbase;
+namespace alo;
 
-use Pushbase\Database\Database;
+use alo\Database\Database;
 use Ramsey\Uuid\Uuid;
 
 class Campaign

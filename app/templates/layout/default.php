@@ -2,7 +2,7 @@
 <html lang="<?= _e('lang') ?>" data-bs-theme="light">
 
 <head>
-    <?= $this->insert('parts/head', ['title' => $title ?? 'PushBase', 'css' => $css ?? null]) ?>
+    <?= $this->insert('parts/head', ['title' => $title ?? 'Alô', 'css' => $css ?? null]) ?>
 
     <?= $this->section('page_styles'); ?>
 </head>
@@ -13,7 +13,7 @@
         <div class="container">
             <!-- Branding Section -->
             <div class="brand">
-                <a title="Dashboard" href="/dashboard"><i class="text-white me-2 bi bi-bell-fill fs-4"></i></a>
+                <a title="Dashboard" href="/dashboard"><i class="text-white me-2 bi bi-megaphone-fill fs-4"></i></a>
             </div>
 
             <!-- Mobile Menu Toggle -->

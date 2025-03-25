@@ -1,22 +1,22 @@
-# PushBase 🚀📬
+# Alô 🚀📬
 
-[![Forks](https://img.shields.io/github/forks/altendorfme/pushbase)](https://github.com/altendorfme/pushbase/network/members)
-[![Stars](https://img.shields.io/github/stars/altendorfme/pushbase)](https://github.com/altendorfme/pushbase/stargazers)
-[![Issues](https://img.shields.io/github/issues/altendorfme/pushbase)](https://github.comaltendorfme/pushbasea/issues)
+[![Forks](https://img.shields.io/github/forks/altendorfme/alo)](https://github.com/altendorfme/alo/network/members)
+[![Stars](https://img.shields.io/github/stars/altendorfme/alo)](https://github.com/altendorfme/alo/stargazers)
+[![Issues](https://img.shields.io/github/issues/altendorfme/alo)](https://github.comaltendorfme/aloa/issues)
 
-![PushBase](https://github.com/altendorfme/pushbase/blob/main/pushbase.gif?raw=true)
+![alo](https://github.com/altendorfme/alo/blob/main/alo.gif?raw=true)
 
-PushBase is a tool for managing and registering Web Push notifications. It also provides features for campaign management, analytics, and user segmentation.
+Alô is a tool for managing and registering Web Push notifications. It also provides features for campaign management, analytics, and user segmentation.
 
-PushBase is the open source alternative to OneSignal, PushNews, SendPulse, PushAlert, and others.
+Alô is the open source alternative to OneSignal, PushNews, SendPulse, PushAlert, and others.
 
 ## Installation with Docker 🐳
 
 Install [Docker and Docker Compose](https://docs.docker.com/engine/install/)
 
-`curl -o ./docker-compose.yml https://raw.githubusercontent.com/altendorfme/pushbase/main/docker-compose.yml`
+`curl -o ./docker-compose.yml https://raw.githubusercontent.com/altendorfme/alo/main/docker-compose.yml`
 
-`curl -o ./.env https://raw.githubusercontent.com/altendorfme/pushbase/main/docker.env.example`
+`curl -o ./.env https://raw.githubusercontent.com/altendorfme/alo/main/docker.env.example`
 
 Edit environment:
 
@@ -28,9 +28,9 @@ Edit environment:
 | WORKERS | 1 | Each worker is a push service, each worker sends 5-6 pushes per second. Increasing the number of workers will directly impact database usage. |
 | AMQP_USER | Empty | Username for AMQP message broker authentication |
 | AMQP_PASS | Empty | Password for AMQP message broker authentication |
-| AMQP_VHOST | pushbase | Virtual host for AMQP to isolate applications |
-| MYSQL_DATABASE | pushbase | Name of the MySQL database for PushBase |
-| MYSQL_USER | pushbase | Username for MySQL database authentication |
+| AMQP_VHOST | alo | Virtual host for AMQP to isolate applications |
+| MYSQL_DATABASE | alo | Name of the MySQL database for alo |
+| MYSQL_USER | alo | Username for MySQL database authentication |
 | MYSQL_PASSWORD | Empty | Password for MySQL database authentication |
 
 **AMQP**: RabbitMQ is used by default, but LavinMQ has also been tested and works correctly.
@@ -44,13 +44,14 @@ Now just run `docker compose up -d`
 
 ## Who is using it?
 - [Manual do Usuário](https://manualdousuario.net)
+- [Catraca Livre](https://catracalivre.com.br)
 
-## PushBase SDK 📱
+## Alô SDK 📱
 
-You'll need the PushBase Client SDK on all your pages:
+You'll need the alo Client SDK on all your pages:
 
 ```javascript
-import PushBaseClient from 'https://pushbase-server.xyz/clientSDK';
+import aloClient from 'https://alo-server.xyz/clientSDK';
 ```
 
 Just drop this in, and you're ready to roll! The SDK gets set up with different options depending on what you want to do with it.
@@ -60,7 +61,7 @@ Just drop this in, and you're ready to roll! The SDK gets set up with different 
 This option will show the permission prompt after a short delay - no user clicks needed!
 
 ```javascript
-const pushBaseConfig = {
+const aloConfig = {
     customSegments: {
         tag: 'tag-teste-auto',
         category: 'cat-teste-auto'
@@ -75,17 +76,17 @@ const pushBaseConfig = {
         alert('Registration failed: ' + error.message);
     }
 };
-const pushBaseClient = new PushBaseClient(pushBaseConfig);
+const aloClient = new aloClient(aloConfig);
 ```
 
-The secret sauce here is `registrationMode: 'auto'` - this tells PushBase to automatically ask for permission. You can control how long to wait with the `registrationDelay` setting.
+The secret sauce here is `registrationMode: 'auto'` - this tells alo to automatically ask for permission. You can control how long to wait with the `registrationDelay` setting.
 
 ### Manual Subscription 👆
 
 Prefer to let users decide when to subscribe? This approach requires a click before asking for permission.
 
 ```javascript
-const pushBaseConfig = {
+const aloConfig = {
     customSegments: {
         tag: 'tag-test-manual',
         category: 'cat-test-manual'
@@ -93,11 +94,11 @@ const pushBaseConfig = {
     registrationMode: 'manual',  // ← User control!
     enableLogging: true
 };
-const pushBaseClient = new PushBaseClient(pushBaseConfig);
+const aloClient = new aloClient(aloConfig);
 
 subscribeBtn.addEventListener('click', async () => {
     try {
-        await pushBaseClient.subscribe();
+        await aloClient.subscribe();
         alert('Push notification subscription successful!');
         subscribeBtn.disabled = true;
     } catch (error) {
@@ -106,14 +107,14 @@ subscribeBtn.addEventListener('click', async () => {
 });
 ```
 
-With `registrationMode: 'manual'`, PushBase waits patiently until you call `subscribe()`. Perfect for adding to a "Subscribe" button!
+With `registrationMode: 'manual'`, alo waits patiently until you call `subscribe()`. Perfect for adding to a "Subscribe" button!
 
 ### Unsubscription 👋
 
 Sometimes users want to say goodbye to notifications. Here's how to let them unsubscribe:
 
 ```javascript
-const pushBaseConfig = {
+const aloConfig = {
     customSegments: {
         tag: 'tag-test-unsubscribe',
         category: 'cat-test-unsubscribe'
@@ -121,11 +122,11 @@ const pushBaseConfig = {
     enableLogging: true
 };
 
-const pushBaseClient = new PushBaseClient(pushBaseConfig);
+const aloClient = new aloClient(aloConfig);
 
 unsubscribeBtn.addEventListener('click', async () => {
     try {
-        await pushBaseClient.unsubscribe();
+        await aloClient.unsubscribe();
         alert('Push notification unsubscription successful!');
         unsubscribeBtn.disabled = true;
     } catch (error) {
@@ -141,10 +142,10 @@ Just hook up an "Unsubscribe" button to the `unsubscribe()` method, and you're g
 Your notifications need a Service Worker to function even when users aren't on your site:
 
 ```javascript
-importScripts('https://pushbase-server.xyz/serviceWorker');
+importScripts('https://alo-server.xyz/serviceWorker');
 ```
 
-Just put this in your `pushBaseSW.js` file, and PushBase handles all the background notification magic for you! ✨
+Just put this in your `aloSW.js` file, and alo handles all the background notification magic for you! ✨
 
 ## API 📡
 
@@ -169,7 +170,7 @@ Creates a new campaign with `draft` status.
 **cURL Example**:
 ```bash
 curl -X POST \
-  https://pushbase-server.xyz/api/campaign/create \
+  https://alo-server.xyz/api/campaign/create \
   -H 'Authorization: Bearer YOUR_API_TOKEN' \
   -H 'Content-Type: application/json' \
   -d '{

@@ -4,7 +4,7 @@
 
 <?php
 
-use Pushbase\Utilities\PaginationHelper;
+use alo\Utilities\PaginationHelper;
 
 $queryParams = [];
 if ($statusFilter) {

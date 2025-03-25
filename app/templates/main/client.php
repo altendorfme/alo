@@ -10,7 +10,7 @@
                 </div>
                 <div class="card-body">
                     <p class="card-text"><?= _e('service_worker_download_instruction') ?></p>
-                    <a href="/download/pushBaseSW" class="btn btn-primary" download><?= _e('download_pushbasesw_button') ?></a>
+                    <a href="/download/aloSW" class="btn btn-primary" download><?= _e('download_alosw_button') ?></a>
                     <div class="mt-3 alert alert-info mb-0">
                         <i class="fas fa-info-circle me-2"></i>
                         <?= _e('service_worker_placement_note') ?>
@@ -78,10 +78,10 @@
                                 </div>
                                 <div class="card bg-light">
                                     <div class="card-body">
-                                        <pre class="mb-0"><code>const pushbaseBtn = document.getElementById('subscribeBtn');
-pushbaseBtn.addEventListener('click', async () => {
+                                        <pre class="mb-0"><code>const aloBtn = document.getElementById('subscribeBtn');
+aloBtn.addEventListener('click', async () => {
     try {
-        await pushBaseClient.subscribe();
+        await aloClient.subscribe();
         console.log('Push notification subscription successful!');
     } catch (error) {
         console.log('Subscription failed: ' + error.message);
@@ -177,8 +177,8 @@ pushbaseBtn.addEventListener('click', async () => {
             const enableCustomSegments = enableCustomSegmentsCheckbox.checked;
 
             let code = `<script type="module">
-    import PushBaseClient from '<?= $appUrl ?>/clientSDK';
-    const pushBaseConfig = {
+    import aloClient from '<?= $appUrl ?>/clientSDK';
+    const aloConfig = {
         registrationMode: '${registrationMode}'`;
 
             if (registrationDelay !== 0) {
@@ -203,15 +203,15 @@ pushbaseBtn.addEventListener('click', async () => {
 
             code += `
     };
-    const pushBaseClient = new PushBaseClient(pushBaseConfig);`;
+    const aloClient = new aloClient(aloConfig);`;
 
             if (registrationMode === 'manual') {
                 code += `
     // Add this button to your HTML: <button id="subscribeBtn">Subscribe to Notifications</button>
-    const pushbaseBtn = document.getElementById('subscribeBtn');
-    pushbaseBtn.addEventListener('click', async () => {
+    const aloBtn = document.getElementById('subscribeBtn');
+    aloBtn.addEventListener('click', async () => {
         try {
-            await pushBaseClient.subscribe();
+            await aloClient.subscribe();
             console.log('Push notification subscription successful!');
         } catch (error) {
             console.log('Subscription failed: ' + error.message);

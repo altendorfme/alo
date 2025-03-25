@@ -10,9 +10,9 @@
                         </label>
                     </div>
                 </div>
-                <i class="bi bi-bell-fill me-2"></i>
+                <i class="bi bi-megaphone-fill me-2"></i>
                 <span class="mb-3 mb-md-0">
-                    Pushbase &copy; <?= date('Y') ?>
+                    Alô &copy; <?= date('Y') ?>
                 </span>
             </div>
 

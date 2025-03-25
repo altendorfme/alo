@@ -1,11 +1,11 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
-use Pushbase\Config\Config;
-use Pushbase\Auth;
+use alo\Config\Config;
+use alo\Auth;
 
 class ClientConfigController extends BaseController
 {

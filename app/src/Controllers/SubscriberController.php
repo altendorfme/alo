@@ -1,14 +1,14 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
-use Pushbase\Database\Database;
-use Pushbase\Analytics\SubscribersAnalytics;
-use Pushbase\Config\Config;
-use Pushbase\Auth;
+use alo\Database\Database;
+use alo\Analytics\SubscribersAnalytics;
+use alo\Config\Config;
+use alo\Auth;
 use GeoIp2\Database\Reader;
 use Nyholm\Psr7\Response;
 use Ramsey\Uuid\Uuid;

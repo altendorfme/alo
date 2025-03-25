@@ -1,17 +1,17 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
-use Pushbase\Auth;
-use Pushbase\Database\Database;
-use Pushbase\Config\Config;
+use alo\Auth;
+use alo\Database\Database;
+use alo\Config\Config;
 use MeekroDB;
 use Exception;
 use Nyholm\Psr7\Response;
-use Pushbase\Utilities\PasswordService;
+use alo\Utilities\PasswordService;
 
 class UserController extends BaseController
 {

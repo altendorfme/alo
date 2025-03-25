@@ -1,10 +1,10 @@
 <?php
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
-use Pushbase\Container\ContainerFactory;
-use Pushbase\Http\RequestHandler;
-use Pushbase\Http\ResponseEmitter;
-use Pushbase\Middleware\CorsMiddleware;
+use alo\Container\ContainerFactory;
+use alo\Http\RequestHandler;
+use alo\Http\ResponseEmitter;
+use alo\Middleware\CorsMiddleware;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -18,7 +18,7 @@ function _e(string $key): string {
     static $translations = null;
     
     if ($translations === null) {
-        $config = new \Pushbase\Config\Config();
+        $config = new \alo\Config\Config();
         $language = $config->get('app.language');
 
         $translationPath = __DIR__ . '/../languages/' . $language . '.php';

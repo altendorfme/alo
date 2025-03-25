@@ -1,18 +1,18 @@
 #!/usr/bin/env php
 <?php
 /**
- * Pushbase CLI Application
+ * Alô CLI Application
  * 
- * Provides command-line interface for various Pushbase operations
+ * Provides command-line interface for various Alô operations
  */
 
 require __DIR__ . '/../vendor/autoload.php';
 
 use League\CLImate\CLImate;
-use Pushbase\Container\ContainerFactory;
-use Pushbase\Commands\Campaign\QueueCommand;
-use Pushbase\Commands\Campaign\SendCommand;
-use Pushbase\Commands\GeoIP\UpdateCommand as GeoIPUpdateCommand;
+use alo\Container\ContainerFactory;
+use alo\Commands\Campaign\QueueCommand;
+use alo\Commands\Campaign\SendCommand;
+use alo\Commands\GeoIP\UpdateCommand as GeoIPUpdateCommand;
 
 // Create dependency injection container
 $container = ContainerFactory::create();
@@ -38,7 +38,7 @@ $commands = [
 
 // Check if a command was provided
 if (!isset($argv[1])) {
-    $climate->blue()->bold()->out("PushBase");
+    $climate->blue()->bold()->out("Alô");
     $climate->bold()->out("Available commands:");
     foreach (array_keys($commands) as $availableCommand) {
         $climate->out("  - {$availableCommand}");

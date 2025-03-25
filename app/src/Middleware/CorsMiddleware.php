@@ -1,13 +1,13 @@
 <?php
 
-namespace Pushbase\Middleware;
+namespace alo\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Nyholm\Psr7\Response;
-use Pushbase\Config\Config;
+use alo\Config\Config;
 
 class CorsMiddleware implements MiddlewareInterface
 {

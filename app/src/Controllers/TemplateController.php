@@ -1,6 +1,6 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use League\Plates\Engine;
 use Nyholm\Psr7\Response;
@@ -20,7 +20,7 @@ class TemplateController
             return '/assets/' . ltrim($path, '/');
         });
 
-        $this->auth = \Pushbase\Auth::getInstance();
+        $this->auth = \alo\Auth::getInstance();
     }
 
     public function render(string $template, array $data = [], int $statusCode = 200): ResponseInterface

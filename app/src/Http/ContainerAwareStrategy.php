@@ -1,6 +1,6 @@
 <?php
 
-namespace Pushbase\Http;
+namespace alo\Http;
 
 use League\Route\Route;
 use League\Route\Strategy\ApplicationStrategy;

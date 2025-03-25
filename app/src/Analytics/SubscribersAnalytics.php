@@ -1,8 +1,8 @@
 <?php
 
-namespace Pushbase\Analytics;
+namespace alo\Analytics;
 
-use Pushbase\Database\Database;
+use alo\Database\Database;
 use MeekroDB;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;

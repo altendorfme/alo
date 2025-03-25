@@ -1,9 +1,9 @@
 <?php
 
-namespace Pushbase\Database;
+namespace alo\Database;
 
 use MeekroDB;
-use Pushbase\Container\ContainerFactory;
+use alo\Container\ContainerFactory;
 
 class Database
 {

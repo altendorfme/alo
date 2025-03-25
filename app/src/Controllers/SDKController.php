@@ -1,11 +1,11 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
-use Pushbase\Config\Config;
-use Pushbase\Auth;
+use alo\Config\Config;
+use alo\Auth;
 
 class SDKController extends BaseController
 {
@@ -52,7 +52,7 @@ class SDKController extends BaseController
         );
     }
 
-    public function downloadPushBaseSW(): ResponseInterface
+    public function downloadaloSW(): ResponseInterface
     {
         $auth = Auth::getInstance();
         if (!$auth->isAuthenticated()) {
@@ -70,14 +70,14 @@ class SDKController extends BaseController
             );
         }
 
-        $content = file_get_contents(__DIR__ . '/../../sdk/pushBaseSW.js');
+        $content = file_get_contents(__DIR__ . '/../../sdk/aloSW.js');
         $content = $this->replaceEnvironmentVariables($content);
 
         return new Response(
             200,
             [
                 'Content-Type' => 'application/javascript',
-                'Content-Disposition' => 'attachment; filename=pushBaseSW.js'
+                'Content-Disposition' => 'attachment; filename=aloSW.js'
             ],
             $content
         );

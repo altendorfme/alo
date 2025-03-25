@@ -1,12 +1,12 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
-use Pushbase\Database\Database;
-use Pushbase\Config\Config;
+use alo\Database\Database;
+use alo\Config\Config;
 use MeekroDB;
 use Nyholm\Psr7\Response;
 

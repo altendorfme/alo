@@ -4,7 +4,7 @@
 
 <main class="container">
     <div class="text-center mb-4">
-        <i class="install-logo bi bi-bell-fill text-primary d-inline-block"></i>
+        <i class="install-logo bi bi-megaphone-fill text-primary d-inline-block"></i>
     </div>
 
     <div class="row justify-content-center">

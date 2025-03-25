@@ -1,12 +1,12 @@
 <?php
 
-namespace Pushbase\Container;
+namespace alo\Container;
 
 use DI\Container;
 use DI\ContainerBuilder;
-use Pushbase\Config\Config;
-use Pushbase\Auth;
-use Pushbase\Controllers\{
+use alo\Config\Config;
+use alo\Auth;
+use alo\Controllers\{
     AdminController,
     AuthController,
     BaseController,
@@ -19,15 +19,15 @@ use Pushbase\Controllers\{
     UserController,
     ClientConfigController
 };
-use Pushbase\Middleware\{
+use alo\Middleware\{
     CorsMiddleware
 };
-use Pushbase\Commands\Campaign\{
+use alo\Commands\Campaign\{
     SendCommand,
     QueueCommand
 };
-use Pushbase\Commands\GeoIP\UpdateCommand;
-use Pushbase\Analytics\{
+use alo\Commands\GeoIP\UpdateCommand;
+use alo\Analytics\{
     SubscribersAnalytics,
     CampaignsAnalytics
 };

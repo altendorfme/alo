@@ -1,21 +1,21 @@
 services:
-  # PushBase
-  pushbase:
-    image: ghcr.io/altendorfme/pushbase:latest
-    container_name: pushbase
+  # Alô
+  alo:
+    image: ghcr.io/altendorfme/alo:latest
+    container_name: alo
     environment:
       TZ: ${TZ:-UTC}
       WORKERS: ${WORKERS:-1}
     ports:
       - 8088:8088
     volumes:
-      - ./pushbase/config:/app/config
+      - ./alo/config:/app/config
     restart: unless-stopped
     depends_on:
       - mariadb
       - rabbitmq
     networks:
-      - pushbase
+      - alo
   # MariaDB
   mariadb:
     image: mariadb:10.11.10
@@ -32,7 +32,7 @@ services:
       - ./mariadb/data:/var/lib/mysql
     restart: unless-stopped
     networks:
-      - pushbase
+      - alo
   # RabbitMQ
   rabbitmq:
     image: rabbitmq:4-management
@@ -50,7 +50,7 @@ services:
       - 15672:15672
     restart: unless-stopped
     networks:
-      - pushbase
+      - alo
   # Nginx Proxy Manager
   # Email: admin@example.com
   # Password: changeme
@@ -68,9 +68,9 @@ services:
       - ./nginx/data:/data
       - ./letsencrypt:/etc/letsencrypt
     depends_on:
-      - pushbase
+      - alo
     networks:
-      - pushbase
+      - alo
 networks:
-  pushbase:
+  alo:
     driver: bridge

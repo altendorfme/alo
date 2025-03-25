@@ -1,9 +1,9 @@
 <?php
 
-namespace Pushbase;
+namespace alo;
 
 use MeekroDB;
-use Pushbase\Database\Database;
+use alo\Database\Database;
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 

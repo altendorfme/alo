@@ -82,7 +82,7 @@ check_supervisord() {
     log_error "Not all Supervisord processes are running after $max_attempts attempts"
 }
 
-echo -e "\n${YELLOW}PushBase: Starting${NC}\n"
+echo -e "\n${YELLOW}Alô: Starting${NC}\n"
 
 # Set timezone
 if [ -n "$TZ" ]; then
@@ -139,8 +139,8 @@ check_nginx
 log_info "Setting up cron jobs..."
 
 (
-    echo "0 0 1 * * /usr/local/bin/php /app/bin/pushbase geoip:update >> /tmp/geoip_update.log 2>&1"
-    echo "* * * * * /usr/local/bin/php /app/bin/pushbase campaign:queue >> /tmp/campaign_queue.log 2>&1"
+    echo "0 0 1 * * /usr/local/bin/php /app/bin/alo geoip:update >> /tmp/geoip_update.log 2>&1"
+    echo "* * * * * /usr/local/bin/php /app/bin/alo campaign:queue >> /tmp/campaign_queue.log 2>&1"
 ) | crontab -
 
 service cron restart
@@ -151,7 +151,7 @@ log_success "Cron jobs added"
 log_info "Checking GeoIP database..."
 if [ ! -f /app/config/GeoLite2-City.mmdb ]; then
     log_info "GeoLite2-City.mmdb not found. Updating GeoIP database..."
-    php /app/bin/pushbase geoip:update
+    php /app/bin/alo geoip:update
     if [ $? -eq 0 ]; then
         log_success "GeoIP database updated successfully"
     else
@@ -195,7 +195,7 @@ check_supervisord
 
 log_success "Supervisord started"
 
-echo -e "\n${GREEN}PushBase: Initialized ===${NC}\n"
+echo -e "\n${GREEN}Alô: Initialized ===${NC}\n"
 
 wait -n
 

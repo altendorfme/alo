@@ -110,7 +110,7 @@
 
                         <tr>
                             <td class="footer">
-                                PushBase <?= date('Y') ?>
+                                Alô <?= date('Y') ?>
                             </td>
                         </tr>
                     </table>

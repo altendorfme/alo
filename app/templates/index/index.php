@@ -3,7 +3,7 @@
 <?php $this->start('page_content') ?>
 
 <div class="text-center mb-4">
-    <a href="/login"><i class="bi bi-bell-fill text-primary d-inline-block"></i></a>
+    <a href="/login"><i class="bi bi-megaphone-fill text-primary d-inline-block"></i></a>
 </div>
 
 <?php $this->end() ?>
@@ -40,7 +40,7 @@
         }
     }
 
-    .bi.bi-bell-fill {
+    .bi.bi-megaphone-fill {
         display: inline-block;
         font-size: 4rem;
         animation: bell-shake 1s ease-in-out infinite;

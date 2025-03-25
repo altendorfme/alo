@@ -1,5 +1,5 @@
 {
-    "name": "pushbase/server",
+    "name": "alo/server",
     "description": "Web push notification system",
     "type": "project",
     "require": {
@@ -26,21 +26,21 @@
     },
     "autoload": {
         "psr-4": {
-            "Pushbase\\": "src/",
-            "Pushbase\\Analytics\\": "src/Analytics/",
-            "Pushbase\\Commands\\": "src/Commands/",
-            "Pushbase\\Config\\": "src/Config/",
-            "Pushbase\\Container\\": "src/Container/",
-            "Pushbase\\Controllers\\": "src/Controllers/",
-            "Pushbase\\Database\\": "src/Database/",
-            "Pushbase\\Http\\": "src/Http/",
-            "Pushbase\\Middleware\\": "src/Middleware/",
-            "Pushbase\\Utilities\\": "src/Utilities/"
+            "alo\\": "src/",
+            "alo\\Analytics\\": "src/Analytics/",
+            "alo\\Commands\\": "src/Commands/",
+            "alo\\Config\\": "src/Config/",
+            "alo\\Container\\": "src/Container/",
+            "alo\\Controllers\\": "src/Controllers/",
+            "alo\\Database\\": "src/Database/",
+            "alo\\Http\\": "src/Http/",
+            "alo\\Middleware\\": "src/Middleware/",
+            "alo\\Utilities\\": "src/Utilities/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Pushbase\\Tests\\": "tests/"
+            "alo\\Tests\\": "tests/"
         }
     },
     "scripts": {

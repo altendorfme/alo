@@ -1,24 +1,24 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use League\Route\Router;
 use League\Route\RouteGroup;
-use Pushbase\Analytics\CampaignsAnalytics;
-use Pushbase\Controllers\AdminController;
-use Pushbase\Controllers\CampaignController;
-use Pushbase\Controllers\CampaignAnalyticsController;
-use Pushbase\Controllers\UserController;
-use Pushbase\Controllers\SubscriberController;
-use Pushbase\Controllers\SegmentController;
-use Pushbase\Controllers\AuthController;
-use Pushbase\Controllers\InstallController;
-use Pushbase\Controllers\SDKController;
-use Pushbase\Controllers\ClientConfigController;
-use Pushbase\Analytics\SubscribersAnalytics;
-use Pushbase\Http\ContainerAwareStrategy;
-use Pushbase\Middleware\AuthMiddleware;
-use Pushbase\Middleware\ApiAuthMiddleware;
+use alo\Analytics\CampaignsAnalytics;
+use alo\Controllers\AdminController;
+use alo\Controllers\CampaignController;
+use alo\Controllers\CampaignAnalyticsController;
+use alo\Controllers\UserController;
+use alo\Controllers\SubscriberController;
+use alo\Controllers\SegmentController;
+use alo\Controllers\AuthController;
+use alo\Controllers\InstallController;
+use alo\Controllers\SDKController;
+use alo\Controllers\ClientConfigController;
+use alo\Analytics\SubscribersAnalytics;
+use alo\Http\ContainerAwareStrategy;
+use alo\Middleware\AuthMiddleware;
+use alo\Middleware\ApiAuthMiddleware;
 use DI\Container;
 
 return function (Container $container): Router {
@@ -93,8 +93,8 @@ return function (Container $container): Router {
         
         // Client Config
         $route->get('/client', [ClientConfigController::class, 'index']);
-        //-- Download pushBaseSW
-        $route->get('/download/pushBaseSW', [SDKController::class, 'downloadPushBaseSW']);
+        //-- Download aloSW
+        $route->get('/download/aloSW', [SDKController::class, 'downloadaloSW']);
 
         // API
         //-- Campaign

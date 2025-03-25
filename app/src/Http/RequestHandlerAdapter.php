@@ -1,6 +1,6 @@
 <?php
 
-namespace Pushbase\Http;
+namespace alo\Http;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

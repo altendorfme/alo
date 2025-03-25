@@ -1,6 +1,6 @@
 <?php
 
-namespace Pushbase\Config;
+namespace alo\Config;
 
 use Dotenv\Dotenv;
 use Exception;

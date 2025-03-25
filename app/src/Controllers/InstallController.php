@@ -1,6 +1,6 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Dotenv\Dotenv;
 use Nyholm\Psr7\Response;
@@ -11,8 +11,8 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
-use Pushbase\Utilities\PasswordService;
-use Pushbase\Config\Config;
+use alo\Utilities\PasswordService;
+use alo\Config\Config;
 
 class InstallController extends BaseController
 {
@@ -39,25 +39,25 @@ class InstallController extends BaseController
         $formData = [
             'app_url' => $this->getDefaultAppUrl(),
             'app_language' => 'en',
-            'client_url' => 'https://pushbase.org',
+            'client_url' => 'https://alo.org',
             'db_host' => 'mariadb',
-            'db_user' => 'pushbase',
+            'db_user' => 'alo',
             'db_pass' => '',
             'db_encoding' => 'utf8mb4',
-            'db_name' => 'pushbase',
+            'db_name' => 'alo',
             'rabbitmq_host' => 'rabbitmq',
-            'rabbitmq_user' => 'pushbase',
+            'rabbitmq_user' => 'alo',
             'rabbitmq_pass' => '',
             'rabbitmq_port' => 5672,
-            'rabbitmq_vhost' => 'pushbase',
+            'rabbitmq_vhost' => 'alo',
             'smtp_host' => 'smtp.resend.com',
             'smtp_user' => 'resend',
             'smtp_pass' => '',
             'smtp_port' => 587,
             'smtp_security' => 'tls',
             'smtp_auth' => 'true',
-            'smtp_from' => 'pushbase@' . parse_url($this->getDefaultAppUrl(), PHP_URL_HOST),
-            'smtp_from_name' => 'Pushbase',
+            'smtp_from' => 'alo@' . parse_url($this->getDefaultAppUrl(), PHP_URL_HOST),
+            'smtp_from_name' => 'alo',
             'firebase_apikey' => '',
             'firebase_authdomain' => '',
             'firebase_projectid' => '',

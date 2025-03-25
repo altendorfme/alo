@@ -149,7 +149,7 @@ $statusClass = match ($campaign['status']) {
                                                                 if (is_array($segments) && count($segments) > 0) {
                                                                     foreach ($segments as $segment) {
                                                                         if (isset($segment['type']) && isset($segment['values']) && is_array($segment['values'])) {
-                                                                            $segmentInfo = \Pushbase\Database\Database::getInstance()->queryFirstRow(
+                                                                            $segmentInfo = \alo\Database\Database::getInstance()->queryFirstRow(
                                                                                 "SELECT name, description FROM segments WHERE id = %i",
                                                                                 $segment['type']
                                                                             );

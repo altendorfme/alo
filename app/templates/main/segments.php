@@ -39,7 +39,7 @@ $this->layout('layout/default', ['title' => _e('segments')]) ?>
     <nav class="mt-4">
         <ul class="pagination justify-content-center mb-0">
             <?php
-            $paginationLinks = \Pushbase\Utilities\PaginationHelper::generatePaginationLinks(
+            $paginationLinks = \alo\Utilities\PaginationHelper::generatePaginationLinks(
                 $currentPage,
                 $totalPages,
                 '/segments',

@@ -1,7 +1,7 @@
 {
-	"name": "pushbase",
+	"name": "alo",
 	"version": "1.0.0",
-	"description": "PushBase",
+	"description": "Alô",
 	"scripts": {
 		"start": "gulp"
 	},

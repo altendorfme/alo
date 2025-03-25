@@ -1,13 +1,13 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
-use Pushbase\Database\Database;
-use Pushbase\Auth;
-use Pushbase\Config\Config;
+use alo\Database\Database;
+use alo\Auth;
+use alo\Config\Config;
 use MeekroDB;
 use Exception;
 use Nyholm\Psr7\Response;
@@ -173,7 +173,7 @@ class CampaignController extends BaseController
             return new Response(302, ['Location' => '/campaigns']);
         }
 
-        $campaignObj = new \Pushbase\Campaign();
+        $campaignObj = new \alo\Campaign();
         $campaign = $campaignObj->get($id);
 
         if (!$campaign || !in_array($campaign['status'], ['draft', 'cancelled'])) {
@@ -252,7 +252,7 @@ class CampaignController extends BaseController
                 ]);
             }
 
-            $campaignObj = new \Pushbase\Campaign();
+            $campaignObj = new \alo\Campaign();
             $result = $campaignObj->create($data, $currentUserId);
 
             if ($result) {
@@ -296,7 +296,7 @@ class CampaignController extends BaseController
             return new Response(302, ['Location' => '/campaigns']);
         }
 
-        $campaignObj = new \Pushbase\Campaign();
+        $campaignObj = new \alo\Campaign();
         $campaign = $campaignObj->get($id);
 
         if (!$campaign || !in_array($campaign['status'], ['draft', 'scheduled', 'cancelled'])) {
@@ -415,7 +415,7 @@ class CampaignController extends BaseController
         }
 
         try {
-            $campaignObj = new \Pushbase\Campaign();
+            $campaignObj = new \alo\Campaign();
             $campaign = $campaignObj->get($id);
 
             if (!$campaign || $campaign['status'] !== 'scheduled') {
@@ -667,7 +667,7 @@ class CampaignController extends BaseController
         }
 
         try {
-            $campaignObj = new \Pushbase\Campaign();
+            $campaignObj = new \alo\Campaign();
             $result = $campaignObj->delete($id);
 
             $redirectParams = $result
@@ -692,7 +692,7 @@ class CampaignController extends BaseController
         }
 
         try {
-            $campaignObj = new \Pushbase\Campaign();
+            $campaignObj = new \alo\Campaign();
             $campaign = $campaignObj->get($id);
 
             if (!$campaign) {
@@ -783,7 +783,7 @@ class CampaignController extends BaseController
                 'status' => 'draft'
             ];
 
-            $campaignObj = new \Pushbase\Campaign();
+            $campaignObj = new \alo\Campaign();
             $result = $campaignObj->create($campaignData, $user['id']);
 
             if (!$result) {

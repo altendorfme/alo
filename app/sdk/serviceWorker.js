@@ -10,7 +10,7 @@ class ServiceWorkerLogger {
         };
 
         const logMethod = logLevels[level] || console.log;
-        logMethod(`[${timestamp}] [PushBase ServiceWorker] [${level.toUpperCase()}] ${message}`);
+        logMethod(`[${timestamp}] [Alô ServiceWorker] [${level.toUpperCase()}] ${message}`);
     }
 }
 
@@ -54,7 +54,7 @@ async function handlePushEvent(event) {
             image: data.notification?.image || '',
             click_action: data.notification?.click_action || '/',
             uuid: data.notification?.uuid || Date.now().toString(),
-            tag: data.notification?.tag || `pushbase-${Date.now()}`,
+            tag: data.notification?.tag || `alo-${Date.now()}`,
             requireInteraction: !!data.notification?.requireInteraction,
             actions: Array.isArray(data.notification?.actions)
                 ? data.notification.actions.filter(action =>

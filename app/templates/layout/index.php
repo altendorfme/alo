@@ -2,7 +2,7 @@
 <html lang="<?= _e('lang') ?>" data-bs-theme="light">
 
 <head>
-    <?= $this->insert('parts/head', ['title' => 'PushBase']) ?>
+    <?= $this->insert('parts/head', ['title' => 'Alô']) ?>
 
     <?= $this->section('page_styles'); ?>
 </head>

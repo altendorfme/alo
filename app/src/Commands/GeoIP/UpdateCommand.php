@@ -1,9 +1,9 @@
 <?php
 
-namespace Pushbase\Commands\GeoIP;
+namespace alo\Commands\GeoIP;
 
 use League\CLImate\CLImate;
-use Pushbase\Config\Config;
+use alo\Config\Config;
 use GeoIp2\Database\Reader;
 use Exception;
 use GuzzleHttp\Client;

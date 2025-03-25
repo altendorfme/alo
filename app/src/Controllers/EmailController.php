@@ -1,11 +1,11 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use Psr\Container\ContainerInterface;
-use Pushbase\Config\Config;
+use alo\Config\Config;
 use League\Plates\Engine;
 use Exception;
 
@@ -37,7 +37,7 @@ class EmailController extends BaseController
         static $translations = null;
         
         if ($translations === null) {
-            $config = new \Pushbase\Config\Config();
+            $config = new \alo\Config\Config();
             $language = $config->get('app.language');
     
             $translationPath = __DIR__ . '/../../languages/' . $language . '.php';

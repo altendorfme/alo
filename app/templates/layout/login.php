@@ -2,7 +2,7 @@
 <html lang="<?= _e('lang') ?>" data-bs-theme="light">
 
 <head>
-    <?= $this->insert('parts/head', ['title' => $title ?? 'Pushbase', 'css' => $css ?? null]) ?>
+    <?= $this->insert('parts/head', ['title' => $title ?? 'Alô', 'css' => $css ?? null]) ?>
 
     <?= $this->section('page_styles'); ?>
 </head>
@@ -13,7 +13,7 @@
             <div class="row justify-content-center">
                 <div class="col-sm-6 col-lg-4 col-xl-3">
                     <div class="text-center mb-4">
-                        <i class="bi bi-bell-fill d-inline-block fs-1"></i>
+                        <i class="bi bi-megaphone-fill d-inline-block fs-1"></i>
                     </div>
 
 					<?php

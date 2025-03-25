@@ -1,14 +1,14 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Nyholm\Psr7\Response;
-use Pushbase\Database\Database;
-use Pushbase\Auth;
-use Pushbase\Config\Config;
-use Pushbase\Utilities\PaginationHelper;
+use alo\Database\Database;
+use alo\Auth;
+use alo\Config\Config;
+use alo\Utilities\PaginationHelper;
 use Psr\Container\ContainerInterface;
 use MeekroDB;
 

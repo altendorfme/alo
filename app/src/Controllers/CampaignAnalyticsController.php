@@ -1,12 +1,12 @@
 <?php
 
-namespace Pushbase\Controllers;
+namespace alo\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Container\ContainerInterface;
-use Pushbase\Database\Database;
-use Pushbase\Analytics\CampaignsAnalytics;
+use alo\Database\Database;
+use alo\Analytics\CampaignsAnalytics;
 use Nyholm\Psr7\Response;
 
 class CampaignAnalyticsController extends BaseController

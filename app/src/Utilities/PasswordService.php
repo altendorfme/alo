@@ -1,6 +1,6 @@
 <?php
 
-namespace Pushbase\Utilities;
+namespace alo\Utilities;
 
 use Hackzilla\PasswordGenerator\Generator\ComputerPasswordGenerator;
 use Exception;

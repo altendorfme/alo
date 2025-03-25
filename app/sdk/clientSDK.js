@@ -1,7 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js';
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging.js';
 
-class PushBaseLogger {
+class aloLogger {
     constructor(enableLogging = false) {
         this.enableLogging = enableLogging;
     }
@@ -17,18 +17,18 @@ class PushBaseLogger {
         };
 
         const logMethod = logLevels[level] || console.log;
-        logMethod(`[${timestamp}] [PushBase clientSDK] [${level.toUpperCase()}] ${message}`);
+        logMethod(`[${timestamp}] [alo clientSDK] [${level.toUpperCase()}] ${message}`);
     }
 }
 
-class PushBase {
+class alo {
     constructor(options = {}) {
         this.options = {
             registrationDelay: options.registrationDelay || 0,
             customSegments: options.customSegments || {},
             enableLogging: options.enableLogging || false
         };
-        this.logger = new PushBaseLogger(this.options.enableLogging);
+        this.logger = new aloLogger(this.options.enableLogging);
     }
 
     isSiteAllowed() {
@@ -296,7 +296,7 @@ class PushBase {
         return false;
     }
 
-    async registerServiceWorker(scriptPath = '/pushBaseSW.js') {
+    async registerServiceWorker(scriptPath = '/aloSW.js') {
         if (!('serviceWorker' in navigator)) {
             this.logger.log('Service Workers are not supported in this browser', 'error');
             throw new Error('Service Workers not supported');
@@ -361,7 +361,7 @@ class PushBase {
             this.logger.log('No active subscription found. Creating new subscription.', 'info');
             
             if (!registration) {
-                registration = await this.registerServiceWorker('pushBaseSW.js');
+                registration = await this.registerServiceWorker('aloSW.js');
             }
 
             await new Promise((resolve, reject) => {
@@ -444,13 +444,13 @@ class PushBase {
 
     async clearSubscriptionData() {
         try {
-            localStorage.removeItem('pushbase_subscription');
-            localStorage.removeItem('pushbase_user_token');
-            localStorage.removeItem('pushbase_recent_notifications');
+            localStorage.removeItem('alo_subscription');
+            localStorage.removeItem('alo_user_token');
+            localStorage.removeItem('alo_recent_notifications');
 
             const databases = await indexedDB.databases();
             for (let db of databases) {
-                if (db.name.startsWith('pushbase_')) {
+                if (db.name.startsWith('alo_')) {
                     indexedDB.deleteDatabase(db.name);
                 }
             }
@@ -539,7 +539,7 @@ class PushBase {
     }
 }
 
-class PushBaseClient extends PushBase {
+class aloClient extends alo {
     constructor(config = {}) {
         super({
             registrationDelay: config.registrationDelay || 0,
@@ -556,7 +556,7 @@ class PushBaseClient extends PushBase {
             measurementId: "{{FIREBASE_MEASUREMENTID}}"
         };
 
-        this.NOTIFICATION_STORAGE_KEY = 'pushbase-'+this.firebaseConfig.appId;
+        this.NOTIFICATION_STORAGE_KEY = 'alo-'+this.firebaseConfig.appId;
         this.registrationMode = config.registrationMode || 'manual';
 
         this.app = initializeApp(this.firebaseConfig);
@@ -655,7 +655,7 @@ class PushBaseClient extends PushBase {
                     await registration.unregister();
 
                     try {
-                        await this.registerServiceWorker('pushBaseSW.js');
+                        await this.registerServiceWorker('aloSW.js');
                         await this.requestNotificationPermission();
                     } catch (registrationError) {
                         this.logger.log(`Failed to re-register service worker: ${registrationError.message}`, 'error');
@@ -671,7 +671,7 @@ class PushBaseClient extends PushBase {
 
     async requestNotificationPermission() {
         try {
-            const registration = await this.registerServiceWorker('pushBaseSW.js');
+            const registration = await this.registerServiceWorker('aloSW.js');
             const permission = await Notification.requestPermission();
 
             if (permission === 'granted') {
@@ -759,4 +759,4 @@ class PushBaseClient extends PushBase {
     }
 }
 
-export default PushBaseClient;
+export default aloClient;

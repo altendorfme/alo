@@ -1,10 +1,10 @@
 <?php
 
-namespace Pushbase\Commands\Campaign;
+namespace alo\Commands\Campaign;
 
 use League\CLImate\CLImate;
-use Pushbase\Config\Config;
-use Pushbase\Database\Database;
+use alo\Config\Config;
+use alo\Database\Database;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Minishlink\WebPush\WebPush;
@@ -24,7 +24,7 @@ class SendCommand
     public function __construct(Config $config, CLImate $climate)
     {
         $this->config = $config;
-        $this->db = \Pushbase\Database\Database::getInstance();
+        $this->db = \alo\Database\Database::getInstance();
         $this->climate = $climate;
     }
 

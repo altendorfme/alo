@@ -1,12 +1,12 @@
 <?php
 
-namespace Pushbase\Http;
+namespace alo\Http;
 
 use League\Route\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Nyholm\Psr7\Response;
-use Pushbase\Middleware\CorsMiddleware;
+use alo\Middleware\CorsMiddleware;
 use DI\Container;
 
 class RequestHandler
