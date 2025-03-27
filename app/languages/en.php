@@ -281,7 +281,7 @@ return [
     'country' => 'Country',
     'confirm_campaign_publish' => 'Are you sure you want to publish this campaign?',
     'confirm_campaign_scheduled' => 'This campaign is scheduled to be published on {date} at {time}',
-    'scheduled_campaigns' => 'Scheduled:',
+    'scheduled_campaigns' => 'Scheduled',
     'scheduled_for' => 'Scheduled for',
     'redis' => 'Redis',
     'test_redis_connection' => 'Test Redis Connection',
@@ -291,5 +291,6 @@ return [
     'redis_valid' => 'Redis connection successful!',
     'redis_invalid' => 'Redis connection failed:',
     'redis_error' => 'Redis connection failed:',
-    'rabbitmq_error' => 'RabbitMQ connection failed:'
+    'rabbitmq_error' => 'RabbitMQ connection failed:',
+    'sending_campaigns' => 'Sending',
 ];

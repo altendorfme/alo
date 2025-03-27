@@ -291,5 +291,6 @@ return [
     'redis_valid' => 'Conexão Redis bem-sucedida!',
     'redis_invalid' => 'Falha na conexão Redis:',
     'redis_error' => 'Falha na conexão Redis:',
-    'rabbitmq_error' => 'Falha na conexão RabbitMQ:'
+    'rabbitmq_error' => 'Falha na conexão RabbitMQ:',
+    'sending_campaigns' => 'Enviando',
 ];
