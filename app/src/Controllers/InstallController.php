@@ -50,8 +50,6 @@ class InstallController extends BaseController
             'rabbitmq_pass' => '',
             'rabbitmq_port' => 5672,
             'rabbitmq_vhost' => 'alo',
-            'redis_host' => 'redis',
-            'redis_port' => 6379,
             'smtp_host' => 'smtp.resend.com',
             'smtp_user' => 'resend',
             'smtp_pass' => '',
@@ -125,8 +123,7 @@ class InstallController extends BaseController
             'rabbitmq_user',
             'rabbitmq_pass',
             'rabbitmq_port',
-            'redis_host',
-            'redis_port',
+            'rabbitmq_vhost',
             'smtp_host',
             'smtp_user',
             'smtp_pass',
@@ -239,8 +236,6 @@ class InstallController extends BaseController
             'RABBITMQ_USER' => $formData['rabbitmq_user'],
             'RABBITMQ_PASS' => $formData['rabbitmq_pass'],
             'RABBITMQ_VHOST' => $formData['rabbitmq_vhost'],
-            'REDIS_HOST' => $formData['redis_host'],
-            'REDIS_PORT' => $formData['redis_port'],
             'FIREBASE_VAPID_PUBLIC' => $formData['firebase_vapid_public'],
             'FIREBASE_VAPID_PRIVATE' => $formData['firebase_vapid_private'],
             'FIREBASE_APIKEY' => $formData['firebase_apikey'],
@@ -301,11 +296,7 @@ class InstallController extends BaseController
         $envContent .= "RABBITMQ_PORT={$config['RABBITMQ_PORT']}\n";
         $envContent .= "RABBITMQ_USER={$config['RABBITMQ_USER']}\n";
         $envContent .= "RABBITMQ_PASS={$config['RABBITMQ_PASS']}\n";
-        $envContent .= "RABBITMQ_VHOST={$config['RABBITMQ_VHOST']}\n\n";
-
-        $envContent .= "# Redis\n";
-        $envContent .= "REDIS_HOST={$config['REDIS_HOST']}\n";
-        $envContent .= "REDIS_PORT={$config['REDIS_PORT']}\n";
+        $envContent .= "RABBITMQ_VHOST={$config['RABBITMQ_VHOST']}\n";
 
         file_put_contents($envFilePath, $envContent);
     }
@@ -366,68 +357,6 @@ class InstallController extends BaseController
                 json_encode([
                     'success' => false,
                     'message' => $e->getMessage()
-                ])
-            );
-        } catch (Exception $e) {
-            return new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                json_encode([
-                    'success' => false,
-                    'message' => 'Unexpected error: ' . $e->getMessage()
-                ])
-            );
-        }
-    }
-
-    public function testRedisConnection()
-    {
-        $rawInput = file_get_contents('php://input');
-        $data = json_decode($rawInput, true);
-
-        if (!isset($data['host']) || !isset($data['port'])) {
-            return new Response(
-                400,
-                ['Content-Type' => 'application/json'],
-                json_encode(['success' => false, 'message' => 'Missing connection parameters'])
-            );
-        }
-
-        try {
-            $parameters = [
-                'scheme' => 'tcp',
-                'host' => $data['host'],
-                'port' => $data['port']
-            ];
-
-            $redis = new \Predis\Client($parameters);
-            
-            $response = $redis->ping();
-
-            if ($response === 'PONG' || $response === true ||
-                (is_object($response) && method_exists($response, '__toString') && (string)$response === 'PONG')) {
-                return new Response(
-                    200,
-                    ['Content-Type' => 'application/json'],
-                    json_encode(['success' => true])
-                );
-            } else {
-                return new Response(
-                    200,
-                    ['Content-Type' => 'application/json'],
-                    json_encode([
-                        'success' => false,
-                        'message' => 'Redis server did not respond correctly to PING'
-                    ])
-                );
-            }
-        } catch (\Predis\Connection\ConnectionException $e) {
-            return new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                json_encode([
-                    'success' => false,
-                    'message' => 'Redis connection error: ' . $e->getMessage()
                 ])
             );
         } catch (Exception $e) {

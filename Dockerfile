@@ -20,8 +20,7 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     libgmp-dev \
     && docker-php-ext-install pdo_mysql sockets gd zip gmp bcmath \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
+    && pecl install \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 FROM base AS builder
