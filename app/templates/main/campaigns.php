@@ -63,7 +63,7 @@ usort($scheduledCampaigns, function ($a, $b) {
 });
 
 usort($sendingCampaigns, function ($a, $b) {
-    return strtotime($a['send_at']) - strtotime($b['send_at']);
+    return strtotime($a['created_at']) - strtotime($b['created_at']);
 });
 
 usort($otherCampaigns, function ($a, $b) {
