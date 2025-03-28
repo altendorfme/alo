@@ -74,7 +74,7 @@ class SendCommand
                         ];
 
                         $webPush = new WebPush($vapidConfig);
-                        $webPush->setAutomaticPadding(true); // Recommended for security
+                        $webPush->setAutomaticPadding(true);
 
                         $campaignQueueName = $campaign['uuid'];
                         $messagesProcessed = 0;
@@ -82,16 +82,14 @@ class SendCommand
                         $batchSize = 100;
 
                         while (true) {
-                            // Reserve a batch of 100 messages from the queue
                             $messages = [];
                             $notifications = [];
                             $subscriberData = [];
 
-                            // Fetch up to 100 messages from the queue
                             for ($i = 0; $i < $batchSize; $i++) {
                                 $message = $channel->basic_get($campaignQueueName);
                                 if ($message === null) {
-                                    break; // No more messages in the queue
+                                    break;
                                 }
                                 
                                 try {
@@ -103,7 +101,6 @@ class SendCommand
                                         $payload['subscriber']['keys']['auth']
                                     );
                                     
-                                    // Store message and subscription data for batch processing
                                     $messages[] = $message;
                                     $notifications[] = [
                                         'subscription' => $subscription,
@@ -111,7 +108,6 @@ class SendCommand
                                     ];
                                     $subscriberData[] = $payload['subscriber'];
                                 } catch (Exception $e) {
-                                    // Handle malformed message
                                     $this->climate->error("Error processing message: " . $e->getMessage());
                                     $channel->basic_reject($message->getDeliveryTag(), false);
                                     $messagesFailed++;
@@ -119,7 +115,6 @@ class SendCommand
                                 }
                             }
                             
-                            // If no messages were fetched, exit the loop
                             if (empty($messages)) {
                                 $this->climate->info("No more messages in queue for campaign {$campaign['name']}");
                                 break;
@@ -127,7 +122,6 @@ class SendCommand
                             
                             $this->climate->info(sprintf("Processing batch of %d notifications for campaign %s", count($messages), $campaign['name']));
                             
-                            // Send notifications in batch
                             foreach ($notifications as $index => $notification) {
                                 $webPush->queueNotification(
                                     $notification['subscription'],
@@ -135,10 +129,8 @@ class SendCommand
                                 );
                             }
                             
-                            // Send all notifications and get results
                             $results = $webPush->flush();
                             
-                            // Process results
                             foreach ($results as $index => $result) {
                                 $message = $messages[$index];
                                 $subscriber = $subscriberData[$index];
@@ -186,12 +178,34 @@ class SendCommand
                                         
                                         $channel->basic_ack($message->getDeliveryTag());
                                     } else {
-                                        $channel->basic_reject($message->getDeliveryTag(), true);
+                                        $messageBody = json_decode($message->getBody(), true);
+                                        $isRetry = isset($messageBody['_retry']) && $messageBody['_retry'] === true;
+                                        
+                                        if ($isRetry) {
+                                            $this->climate->error("Message for {$endpoint} failed after retry. Removing from queue.");
+                                            $channel->basic_ack($message->getDeliveryTag());
+                                        } else {
+                                            $this->climate->warning("Message for {$endpoint} failed. Scheduling one retry.");
+                                            
+                                            $messageBody['_retry'] = true;
+                                            
+                                            $retryMessage = new AMQPMessage(
+                                                json_encode($messageBody),
+                                                ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]
+                                            );
+                                            
+                                            $channel->basic_publish(
+                                                $retryMessage,
+                                                '',
+                                                $campaignQueueName
+                                            );
+                                            
+                                            $channel->basic_ack($message->getDeliveryTag());
+                                        }
                                     }
                                 }
                             }
                             
-                            // Reset WebPush for the next batch
                             $webPush = new WebPush($vapidConfig);
                             $webPush->setAutomaticPadding(true);
                         }
