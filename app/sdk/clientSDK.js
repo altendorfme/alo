@@ -539,7 +539,7 @@ class alo {
     }
 }
 
-class aloClient extends alo {
+class aloSDK extends alo {
     constructor(config = {}) {
         super({
             registrationDelay: config.registrationDelay || 0,
@@ -759,4 +759,4 @@ class aloClient extends alo {
     }
 }
 
-export default aloClient;
+export default aloSDK;

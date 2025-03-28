@@ -76,7 +76,7 @@
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     <strong><?= _e('manual_mode_selected') ?></strong> <?= _e('manual_mode_instruction') ?>
                                 </div>
-                                <div class="card bg-light">
+                                <div class="card">
                                     <div class="card-body">
                                         <pre class="mb-0"><code>const aloBtn = document.getElementById('subscribeBtn');
 aloBtn.addEventListener('click', async () => {
@@ -177,7 +177,7 @@ aloBtn.addEventListener('click', async () => {
             const enableCustomSegments = enableCustomSegmentsCheckbox.checked;
 
             let code = `<script type="module">
-    import aloClient from '<?= $appUrl ?>/clientSDK';
+    import aloSDK from '<?= $appUrl ?>/clientSDK';
     const aloConfig = {
         registrationMode: '${registrationMode}'`;
 
@@ -203,7 +203,7 @@ aloBtn.addEventListener('click', async () => {
 
             code += `
     };
-    const aloClientInit = new aloClient(aloConfig);`;
+    const aloClient = new aloSDK(aloConfig);`;
 
             if (registrationMode === 'manual') {
                 code += `
