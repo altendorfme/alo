@@ -187,6 +187,15 @@ check_env_file() {
     done
 }
 
+# Run database migrations
+log_info "Running database migrations..."
+php /app/bin/alo app:migration
+if [ $? -eq 0 ]; then
+    log_success "Database migrations completed successfully"
+else
+    log_error "Failed to run database migrations"
+fi
+
 # Supervisord (campaign:send)
 log_info "Start supervisord (campaign:send)..."
 
