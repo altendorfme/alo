@@ -283,6 +283,10 @@
                 }
 
                 if (confirm(confirmMessage)) {
+                    new ldloader({
+                        root: ".ldld.full"
+                    }).on();
+                    
                     const hiddenInput = document.createElement('input');
                     hiddenInput.type = 'hidden';
                     hiddenInput.name = 'action';
@@ -336,6 +340,10 @@
                 return;
             }
 
+            new ldloader({
+                root: ".ldld.full"
+            }).on();
+            
             fetch(`/api/segments/values/${segmentId}`)
                 .then(response => {
                     if (!response.ok) {
@@ -357,11 +365,17 @@
                     });
 
                     updateUserCount();
+                    new ldloader({
+                        root: ".ldld.full"
+                    }).off();
                 })
                 .catch(error => {
                     valuesSelect.innerHTML = '';
                     valuesSelect.disabled = true;
                     updateUserCount();
+                    new ldloader({
+                        root: ".ldld.full"
+                    }).off();
                 });
         }
 
@@ -415,6 +429,10 @@
 
             updateSelectedSegmentTypes();
 
+            new ldloader({
+                root: ".ldld.full"
+            }).on();
+            
             fetch('/api/segments', {
                     method: 'POST',
                     headers: {
@@ -438,9 +456,15 @@
                     }
 
                     subscriberBySegmentCount.textContent = new Intl.NumberFormat().format(count);
+                    new ldloader({
+                        root: ".ldld.full"
+                    }).off();
                 })
                 .catch(error => {
                     subscriberBySegmentCount.textContent = 0;
+                    new ldloader({
+                        root: ".ldld.full"
+                    }).off();
                 });
         }
 
