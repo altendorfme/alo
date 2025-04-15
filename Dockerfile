@@ -19,6 +19,10 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     supervisor \
     libgmp-dev \
+    ca-certificates \
+    openssl \
+    curl \
+    && update-ca-certificates \
     && docker-php-ext-install pdo_mysql sockets gd zip gmp bcmath \
     && pecl install \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -40,6 +44,8 @@ COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
 COPY --from=builder /app /app
 
 COPY default.conf /etc/nginx/sites-available/default
+
+COPY /ssl.ini /usr/local/etc/php/conf.d/ssl.ini
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

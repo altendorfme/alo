@@ -82,6 +82,17 @@ check_supervisord() {
     log_error "Not all Supervisord processes are running after $max_attempts attempts"
 }
 
+# Update CA certificates
+update_ca_certs() {
+    log_info "Updating CA certificates..."
+    update-ca-certificates --fresh
+    if [ $? -eq 0 ]; then
+        log_success "CA certificates updated successfully"
+    else
+        log_error "Failed to update CA certificates"
+    fi
+}
+
 echo -e "\n${YELLOW}Alô: Starting${NC}\n"
 
 # Set timezone
@@ -140,7 +151,7 @@ log_info "Setting up cron jobs..."
 
 (
     echo "0 0 1 * * /usr/local/bin/php /app/bin/alo geoip:update 2>&1 | tee -a /proc/1/fd/1"
-    echo "* * * * * /usr/local/bin/php /app/bin/alo campaign:queue 2>&1 | tee -a /proc/1/fd/1"
+    echo "*/5 * * * * /usr/local/bin/php /app/bin/alo campaign:queue 2>&1 | tee -a /proc/1/fd/1"
     echo "0 4 * * 1 /usr/local/bin/php /app/bin/alo database:optimize --innodb-only 5 2>&1 | tee -a /proc/1/fd/1"
 ) | crontab -
 
@@ -161,6 +172,9 @@ if [ ! -f /app/config/GeoLite2-City.mmdb ]; then
 else
     log_success "GeoIP database exists"
 fi
+
+# Update CA certificates
+update_ca_certs
 
 # Permissions
 log_info "Adjusting directory permissions..."

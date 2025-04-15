@@ -108,7 +108,6 @@ class QueueCommand
     {
         list($query, $params) = $this->buildSegmentQuery($segments);
         
-        // Convert the SELECT query to a COUNT query
         $countQuery = preg_replace('/SELECT.*?FROM/', 'SELECT COUNT(*) FROM', $query);
         
         $fullQueryParams = array_merge([$countQuery], $params);
@@ -120,30 +119,26 @@ class QueueCommand
     private function processSubscribersInBatches($campaign, $channel, $vapidConfig, $baseNotificationPayload)
     {
         $segments = empty($campaign['segments']) ? null : $campaign['segments'];
-        $batchSize = 1000; // Process 1000 subscribers at a time
+        $batchSize = 1000;
         $offset = 0;
         $totalProcessed = 0;
         
-        // Get total count first
         $totalSubscribers = $this->countSubscribersBySegments($segments);
         $this->climate->out("Campaign has approximately {$totalSubscribers} subscribers after segment filtering");
         
         list($baseQuery, $params) = $this->buildSegmentQuery($segments);
         
-        // Add pagination to the query
         $query = $baseQuery . " LIMIT %i OFFSET %i";
         
         while (true) {
-            // Add pagination parameters
             $batchParams = array_merge($params, [$batchSize, $offset]);
             $fullQueryParams = array_merge([$query], $batchParams);
             
-            // Execute the query for this batch
             $subscribers = call_user_func_array([$this->db, 'query'], $fullQueryParams);
             
             $batchCount = count($subscribers);
             if ($batchCount == 0) {
-                break; // No more subscribers to process
+                break;
             }
             
             $this->climate->out("Processing batch of {$batchCount} subscribers (offset: {$offset})");
@@ -177,7 +172,6 @@ class QueueCommand
             $totalProcessed += $batchCount;
             $offset += $batchSize;
             
-            // Free up memory
             unset($subscribers);
             gc_collect_cycles();
             
@@ -281,7 +275,6 @@ class QueueCommand
                         $baseNotificationPayload['silent'] = true;
                     }
 
-                    // Process subscribers in batches to avoid memory issues
                     $subscriberCount = $this->processSubscribersInBatches(
                         $campaign,
                         $channel,
