@@ -59,15 +59,21 @@ foreach ($campaigns as $campaign) {
 }
 
 usort($scheduledCampaigns, function ($a, $b) {
-    return strtotime($a['send_at']) - strtotime($b['send_at']);
+    $aTime = isset($a['send_at']) && $a['send_at'] ? strtotime($a['send_at']) : 0;
+    $bTime = isset($b['send_at']) && $b['send_at'] ? strtotime($b['send_at']) : 0;
+    return $aTime - $bTime;
 });
 
 usort($sendingCampaigns, function ($a, $b) {
-    return strtotime($a['created_at']) - strtotime($b['created_at']);
+    $aTime = isset($a['created_at']) && $a['created_at'] ? strtotime($a['created_at']) : 0;
+    $bTime = isset($b['created_at']) && $b['created_at'] ? strtotime($b['created_at']) : 0;
+    return $aTime - $bTime;
 });
 
 usort($otherCampaigns, function ($a, $b) {
-    return strtotime($b['created_at']) - strtotime($a['created_at']);
+    $aTime = isset($a['created_at']) && $a['created_at'] ? strtotime($a['created_at']) : 0;
+    $bTime = isset($b['created_at']) && $b['created_at'] ? strtotime($b['created_at']) : 0;
+    return $bTime - $aTime;
 });
 ?>
 
@@ -155,6 +161,12 @@ usort($otherCampaigns, function ($a, $b) {
                         <td class="small">
                             <?php if (isset($campaign['send_at']) && !empty($campaign['send_at'])) { ?>
                                 <?= date('Y-m-d H:i', strtotime($campaign['send_at'])) ?>
+                            <?php } else { ?>
+                                <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                    <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?>
+                                <?php } else { ?>
+                                    <?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?>
+                                <?php } ?>
                             <?php } ?>
                         </td>
                         <td class="small">

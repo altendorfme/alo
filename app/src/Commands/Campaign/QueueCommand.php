@@ -22,23 +22,18 @@ class QueueCommand
         $this->climate = $climate;
     }
 
-    private function filterSubscribersBySegments($segments)
+    private function buildSegmentQuery($segments)
     {
         if (is_string($segments)) {
             $segments = json_decode($segments, true);
         }
 
-        if (empty($segments)) {
-            return $this->db->query(
-                "SELECT id, uuid, endpoint, p256dh, authKey FROM subscribers WHERE status = 'active'"
-            );
-        }
-
-        if (!is_array($segments)) {
-            $this->climate->yellow()->out("Invalid segments format. Returning all active subscribers.");
-            return $this->db->query(
-                "SELECT id, uuid, endpoint, p256dh, authKey FROM subscribers WHERE status = 'active'"
-            );
+        if (empty($segments) || !is_array($segments)) {
+            $this->climate->yellow()->out(empty($segments) ? "No segments specified." : "Invalid segments format.");
+            return [
+                "SELECT id, uuid, endpoint, p256dh, authKey FROM subscribers WHERE status = 'active'",
+                []
+            ];
         }
 
         $segmentConditions = [];
@@ -92,9 +87,10 @@ class QueueCommand
         }
 
         if (empty($segmentConditions)) {
-            return $this->db->query(
-                "SELECT id, uuid, endpoint, p256dh, authKey FROM subscribers WHERE status = 'active'"
-            );
+            return [
+                "SELECT id, uuid, endpoint, p256dh, authKey FROM subscribers WHERE status = 'active'",
+                []
+            ];
         }
 
         $whereClause = implode(' OR ', $segmentConditions);
@@ -105,9 +101,90 @@ class QueueCommand
             WHERE s.status = 'active' AND ({$whereClause})
         ";
 
-        $fullQueryParams = array_merge([$query], $params);
+        return [$query, $params];
+    }
 
-        return call_user_func_array([$this->db, 'query'], $fullQueryParams);
+    private function countSubscribersBySegments($segments)
+    {
+        list($query, $params) = $this->buildSegmentQuery($segments);
+        
+        // Convert the SELECT query to a COUNT query
+        $countQuery = preg_replace('/SELECT.*?FROM/', 'SELECT COUNT(*) FROM', $query);
+        
+        $fullQueryParams = array_merge([$countQuery], $params);
+        $count = call_user_func_array([$this->db, 'queryFirstField'], $fullQueryParams);
+        
+        return $count;
+    }
+
+    private function processSubscribersInBatches($campaign, $channel, $vapidConfig, $baseNotificationPayload)
+    {
+        $segments = empty($campaign['segments']) ? null : $campaign['segments'];
+        $batchSize = 1000; // Process 1000 subscribers at a time
+        $offset = 0;
+        $totalProcessed = 0;
+        
+        // Get total count first
+        $totalSubscribers = $this->countSubscribersBySegments($segments);
+        $this->climate->out("Campaign has approximately {$totalSubscribers} subscribers after segment filtering");
+        
+        list($baseQuery, $params) = $this->buildSegmentQuery($segments);
+        
+        // Add pagination to the query
+        $query = $baseQuery . " LIMIT %i OFFSET %i";
+        
+        while (true) {
+            // Add pagination parameters
+            $batchParams = array_merge($params, [$batchSize, $offset]);
+            $fullQueryParams = array_merge([$query], $batchParams);
+            
+            // Execute the query for this batch
+            $subscribers = call_user_func_array([$this->db, 'query'], $fullQueryParams);
+            
+            $batchCount = count($subscribers);
+            if ($batchCount == 0) {
+                break; // No more subscribers to process
+            }
+            
+            $this->climate->out("Processing batch of {$batchCount} subscribers (offset: {$offset})");
+            
+            foreach ($subscribers as $subscriber) {
+                $subscriberPayload = [
+                    'campaign' => [
+                        'id' => $campaign['id'],
+                        'uuid' => $campaign['uuid']
+                    ],
+                    'notification' => $baseNotificationPayload,
+                    'vapid' => $vapidConfig,
+                    'subscriber' => [
+                        'id' => $subscriber['id'],
+                        'uuid' => $subscriber['uuid'],
+                        'endpoint' => $subscriber['endpoint'],
+                        'keys' => [
+                            'p256dh' => $subscriber['p256dh'],
+                            'auth' => $subscriber['authKey']
+                        ]
+                    ]
+                ];
+                
+                $msg = new AMQPMessage(json_encode($subscriberPayload), [
+                    'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT
+                ]);
+                
+                $channel->basic_publish($msg, '', $campaign['uuid']);
+            }
+            
+            $totalProcessed += $batchCount;
+            $offset += $batchSize;
+            
+            // Free up memory
+            unset($subscribers);
+            gc_collect_cycles();
+            
+            $this->climate->out("Processed {$totalProcessed} of {$totalSubscribers} subscribers");
+        }
+        
+        return $totalProcessed;
     }
 
     public function execute(): int
@@ -157,7 +234,7 @@ class QueueCommand
                         false,   // passive
                         true,    // durable
                         false,   // exclusive
-                        false,   // auto_delete
+                        true,    // auto_delete
                         false,   // nowait
                         [
                             'x-message-ttl' => ['I', 604800000] // 7 days in milliseconds
@@ -169,13 +246,6 @@ class QueueCommand
                         SET status = 'queuing' 
                         WHERE id = %s
                     ", $campaign['id']);
-
-                    $segments = empty($campaign['segments']) ? null : $campaign['segments'];
-
-                    $subscriptions = $this->filterSubscribersBySegments($segments);
-
-                    $subscriberCount = count($subscriptions);
-                    $this->climate->out("Campaign has {$subscriberCount} subscribers after segment filtering");
 
                     $vapidConfig = [
                         'subject' => $this->config->get('app.url'),
@@ -211,31 +281,13 @@ class QueueCommand
                         $baseNotificationPayload['silent'] = true;
                     }
 
-                    foreach ($subscriptions as $subscriber) {
-                        $subscriberPayload = [
-                            'campaign' => [
-                                'id' => $campaign['id'],
-                                'uuid' => $campaign['uuid']
-                            ],
-                            'notification' => $baseNotificationPayload,
-                            'vapid' => $vapidConfig,
-                            'subscriber' => [
-                                'id' => $subscriber['id'],
-                                'uuid' => $subscriber['uuid'],
-                                'endpoint' => $subscriber['endpoint'],
-                                'keys' => [
-                                    'p256dh' => $subscriber['p256dh'],
-                                    'auth' => $subscriber['authKey']
-                                ]
-                            ]
-                        ];
-
-                        $msg = new AMQPMessage(json_encode($subscriberPayload), [
-                            'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT
-                        ]);
-
-                        $channel->basic_publish($msg, '', $campaign['uuid']);
-                    }
+                    // Process subscribers in batches to avoid memory issues
+                    $subscriberCount = $this->processSubscribersInBatches(
+                        $campaign,
+                        $channel,
+                        $vapidConfig,
+                        $baseNotificationPayload
+                    );
 
                     $this->db->query("
                         UPDATE campaigns 
