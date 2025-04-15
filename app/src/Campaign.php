@@ -11,8 +11,6 @@ class Campaign
     {
         $db = Database::getInstance();
 
-        $status = $data['status'] ?? 'draft';
-
         $db->insert('campaigns', [
             'uuid' => Uuid::uuid4()->toString(),
             'name' => $data['name'],
@@ -25,7 +23,7 @@ class Campaign
             'push_url' => $data['push_url'] ?? null,
             'push_renotify' => $data['push_renotify'] ?? false,
             'push_silent' => $data['push_silent'] ?? false,
-            'status' => $status,
+            'status' => $data['status'] ?? 'draft',
             'send_at' => $data['send_at'] ?? null,
             'segments' => isset($data['segments']) ? json_encode($data['segments']) : null,
             'created_by' => $userId,
