@@ -13,6 +13,7 @@ use alo\Container\ContainerFactory;
 use alo\Commands\Campaign\QueueCommand;
 use alo\Commands\Campaign\SendCommand;
 use alo\Commands\GeoIP\UpdateCommand as GeoIPUpdateCommand;
+use alo\Commands\Database\OptimizeCommand;
 
 // Create dependency injection container
 $container = ContainerFactory::create();
@@ -32,6 +33,10 @@ $commands = [
     },
     'geoip:update' => function() use ($container, $climate) {
         $command = $container->get(GeoIPUpdateCommand::class);
+        return $command->execute();
+    },
+    'database:optimize' => function() use ($container, $climate) {
+        $command = $container->get(OptimizeCommand::class);
         return $command->execute();
     }
 ];
