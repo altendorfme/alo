@@ -139,9 +139,9 @@ check_nginx
 log_info "Setting up cron jobs..."
 
 (
-    echo "0 0 1 * * /usr/local/bin/php /app/bin/alo geoip:update >> /tmp/geoip_update.log 2>&1"
-    echo "* * * * * /usr/local/bin/php /app/bin/alo campaign:queue >> /tmp/campaign_queue.log 2>&1"
-    echo "0 4 * * 1 /usr/local/bin/php /app/bin/alo database:optimize --innodb-only 5 >> /tmp/database_optimize.log 2>&1"
+    echo "0 0 1 * * /usr/local/bin/php /app/bin/alo geoip:update 2>&1 | tee -a /proc/1/fd/1"
+    echo "* * * * * /usr/local/bin/php /app/bin/alo campaign:queue 2>&1 | tee -a /proc/1/fd/1"
+    echo "0 4 * * 1 /usr/local/bin/php /app/bin/alo database:optimize --innodb-only 5 2>&1 | tee -a /proc/1/fd/1"
 ) | crontab -
 
 service cron restart
