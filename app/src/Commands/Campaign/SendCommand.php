@@ -79,7 +79,7 @@ class SendCommand
                         $campaignQueueName = $campaign['uuid'];
                         $messagesProcessed = 0;
                         $messagesFailed = 0;
-                        $batchSize = 100;
+                        $batchSize = 200;
 
                         while (true) {
                             $messages = [];
