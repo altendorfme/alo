@@ -74,7 +74,14 @@ class SendCommand
                             ]
                         ];
 
-                        $webPush = new WebPush($vapidConfig);
+                        $timeout = 300;
+                        $clientOptions = [
+                            \GuzzleHttp\RequestOptions::ALLOW_REDIRECTS => false,
+                            \GuzzleHttp\RequestOptions::VERIFY => false,
+                            \GuzzleHttp\RequestOptions::CONNECT_TIMEOUT => 300,
+                            \GuzzleHttp\RequestOptions::TIMEOUT => 300,
+                        ];
+                        $webPush = new WebPush($vapidConfig, [], $timeout, $clientOptions);
                         $webPush->setAutomaticPadding(true);
 
                         $campaignQueueName = $campaign['uuid'];
