@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     supervisor \
     libgmp-dev \
+    libcurl4-openssl-dev \
     && docker-php-ext-install pdo_mysql sockets gd zip gmp bcmath curl \
     && pecl install \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
