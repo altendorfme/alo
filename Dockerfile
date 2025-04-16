@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     supervisor \
     libgmp-dev \
-    && docker-php-ext-install pdo_mysql sockets gd zip gmp bcmath \
+    && docker-php-ext-install pdo_mysql sockets gd zip gmp bcmath curl \
     && pecl install \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -38,6 +38,9 @@ FROM base
 
 COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
 COPY --from=builder /app /app
+
+COPY cacert.pem /app/cacert.pem
+COPY curl.ini /usr/local/etc/php/conf.d/curl.ini
 
 COPY default.conf /etc/nginx/sites-available/default
 
