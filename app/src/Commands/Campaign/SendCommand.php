@@ -70,13 +70,6 @@ class SendCommand
                                 'subject' => $this->config->get('client.url'),
                                 'publicKey' => $this->config->get('firebase.vapid.public'),
                                 'privateKey' => $this->config->get('firebase.vapid.private')
-                            ],
-                            'curl' => [
-                                CURLOPT_SSL_VERIFYPEER => true,
-                                CURLOPT_SSL_VERIFYHOST => 2,
-                                CURLOPT_TIMEOUT => 30,
-                                CURLOPT_CONNECTTIMEOUT => 10,
-                                CURLOPT_CAINFO => '/etc/ssl/certs/ca-certificates.crt'
                             ]
                         ];
 
@@ -86,7 +79,7 @@ class SendCommand
                         $campaignQueueName = $campaign['uuid'];
                         $messagesProcessed = 0;
                         $messagesFailed = 0;
-                        $batchSize = 200;
+                        $batchSize = 100;
 
                         while (true) {
                             $messages = [];
@@ -213,7 +206,6 @@ class SendCommand
                                 }
                             }
                             
-                            // Recreate WebPush with the same SSL configuration
                             $webPush = new WebPush($vapidConfig);
                             $webPush->setAutomaticPadding(true);
                         }
@@ -274,23 +266,6 @@ class SendCommand
                 $errorCount++;
                 $this->climate->error("Critical Error: " . $e->getMessage());
                 
-                // Log more detailed information for SSL errors
-                if (strpos($e->getMessage(), 'SSL') !== false || strpos($e->getMessage(), 'curl error') !== false) {
-                    $this->climate->error("SSL/TLS Connection Error Details:");
-                    $this->climate->error("- Check network connectivity to fcm.googleapis.com");
-                    $this->climate->error("- Verify firewall/proxy settings");
-                    $this->climate->error("- Ensure CA certificates are up to date");
-                    
-                    // Try to update CA certificates
-                    $this->climate->info("Attempting to update CA certificates...");
-                    exec('update-ca-certificates 2>&1', $output, $returnCode);
-                    if ($returnCode === 0) {
-                        $this->climate->success("CA certificates updated successfully");
-                    } else {
-                        $this->climate->error("Failed to update CA certificates: " . implode("\n", $output));
-                    }
-                }
-
                 if ($errorCount >= $this->maxRetries) {
                     $this->climate->error("Maximum error retries reached. Exiting.");
                     return 1;

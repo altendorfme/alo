@@ -82,17 +82,6 @@ check_supervisord() {
     log_error "Not all Supervisord processes are running after $max_attempts attempts"
 }
 
-# Update CA certificates
-update_ca_certs() {
-    log_info "Updating CA certificates..."
-    update-ca-certificates --fresh
-    if [ $? -eq 0 ]; then
-        log_success "CA certificates updated successfully"
-    else
-        log_error "Failed to update CA certificates"
-    fi
-}
-
 echo -e "\n${YELLOW}Alô: Starting${NC}\n"
 
 # Set timezone
@@ -172,9 +161,6 @@ if [ ! -f /app/config/GeoLite2-City.mmdb ]; then
 else
     log_success "GeoIP database exists"
 fi
-
-# Update CA certificates
-update_ca_certs
 
 # Permissions
 log_info "Adjusting directory permissions..."
