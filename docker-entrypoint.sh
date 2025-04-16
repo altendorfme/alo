@@ -90,7 +90,7 @@ if [ -n "$TZ" ]; then
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
     echo $TZ > /etc/timezone
     
-    echo "date.timezone = $TZ" > /usr/local/etc/php/conf.d/timezone.ini
+    echo "date.timezone = $TZ" > /usr/local/etc/php/conf.d/99-timezone.ini
     log_success "Timezone set to $TZ for both system and PHP"
 else
     log_info "No TZ environment variable set, using UTC as default timezone"
@@ -98,7 +98,7 @@ else
     ln -snf /usr/share/zoneinfo/UTC /etc/localtime
     echo "UTC" > /etc/timezone
     
-    echo "date.timezone = UTC" > /usr/local/etc/php/conf.d/timezone.ini
+    echo "date.timezone = UTC" > /usr/local/etc/php/conf.d/99-timezone.ini
     log_success "Timezone set to UTC for both system and PHP"
 fi
 
