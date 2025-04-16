@@ -79,7 +79,7 @@ class SendCommand
                         $campaignQueueName = $campaign['uuid'];
                         $messagesProcessed = 0;
                         $messagesFailed = 0;
-                        $batchSize = 500;
+                        $batchSize = 1000;
 
                         while (true) {
                             $messages = [];
@@ -206,7 +206,8 @@ class SendCommand
                                 }
                             }
                             
-                            $webPush = new WebPush($vapidConfig);
+                            $timeout = 300;
+                            $webPush = new WebPush($vapidConfig, [], $timeout);
                             $webPush->setAutomaticPadding(true);
                         }
 
