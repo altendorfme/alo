@@ -207,7 +207,13 @@ class SendCommand
                             }
                             
                             $timeout = 300;
-                            $webPush = new WebPush($vapidConfig, [], $timeout);
+                            $clientOptions = [
+                                \GuzzleHttp\RequestOptions::ALLOW_REDIRECTS => false,
+                                \GuzzleHttp\RequestOptions::VERIFY => false,
+                                \GuzzleHttp\RequestOptions::CONNECT_TIMEOUT => 120,
+                                \GuzzleHttp\RequestOptions::TIMEOUT => 300,
+                            ];
+                            $webPush = new WebPush($vapidConfig, [], $timeout, $clientOptions);
                             $webPush->setAutomaticPadding(true);
                         }
 
