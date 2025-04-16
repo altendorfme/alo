@@ -53,4 +53,4 @@ ENV TZ=UTC
 
 EXPOSE 8088
 
-CMD ["docker-entrypoint"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
