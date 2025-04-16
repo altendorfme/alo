@@ -231,7 +231,7 @@ class QueueCommand
                         true,    // auto_delete
                         false,   // nowait
                         [
-                            'x-message-ttl' => ['I', 604800000] // 7 days in milliseconds
+                            'x-message-ttl' => ['I', 86400000] // 1 day
                         ]
                     );
 
