@@ -33,7 +33,8 @@ services:
     restart: unless-stopped
     networks:
       - alo
-  # RabbitMQ
+  # AMQP
+  ## RabbitMQ
   rabbitmq:
     image: rabbitmq:4-management
     container_name: rabbitmq
@@ -51,9 +52,24 @@ services:
     restart: unless-stopped
     networks:
       - alo
+  ## LavinMQ
+  ### guest:guest
+  lavinmq:
+    image: cloudamqp/lavinmq:2
+    container_name: lavinmq
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ./lavinmq/data:/var/lib/lavinmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    restart: unless-stopped
+    networks:
+      - alo
   # Nginx Proxy Manager
-  # Email: admin@example.com
-  # Password: changeme
+  ## Email: admin@example.com
+  ## Password: changeme
   nginx:
     image: jc21/nginx-proxy-manager:2.12.3
     container_name: nginx

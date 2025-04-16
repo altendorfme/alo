@@ -186,14 +186,14 @@ class QueueCommand
         try {
             $this->climate->bold()->blue()->out('Campaign Queue Processing');
 
-            $rabbitmqConfig = $this->config->get('rabbitmq');
+            $amqpConfig = $this->config->get('amqp');
 
             $connection = new AMQPStreamConnection(
-                $rabbitmqConfig['host'],
-                $rabbitmqConfig['port'],
-                $rabbitmqConfig['user'],
-                $rabbitmqConfig['password'],
-                $rabbitmqConfig['vhost']
+                $amqpConfig['host'],
+                $amqpConfig['port'],
+                $amqpConfig['user'],
+                $amqpConfig['password'],
+                $amqpConfig['vhost']
             );
 
             $channel = $connection->channel();

@@ -33,7 +33,7 @@ Edit environment:
 | MYSQL_USER | alo | Username for MySQL database authentication |
 | MYSQL_PASSWORD | Empty | Password for MySQL database authentication |
 
-**AMQP**: RabbitMQ is used by default, but LavinMQ has also been tested and works correctly.
+**AMQP**: RabbitMQ, LavinMQ or any AMQP supported in the lib https://github.com/php-amqplib/php-amqplib
 
 Now just run `docker compose up -d`
 

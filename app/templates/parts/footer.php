@@ -18,26 +18,26 @@
 
             <div class="nerd-metrics text-end">
                 <?php if (isset($user) && $user['role'] != 'editor') { ?>
-                    <div class="d-inline-block me-3 text-nowrap" title="<?= _e('rabbitmq_status') ?>">
+                    <div class="d-inline-block me-3 text-nowrap" title="<?= _e('amqp_status') ?>">
                         <i class="bi bi-chat-right-dots"></i>
                         <?php
-                        function checkRabbitMQConnection()
+                        function checkAMQPConnection()
                         {
                             try {
                                 global $container;
                                 $config = $container->get('config');
-                                $rabbitmqConfig = $config->get('rabbitmq');
+                                $amqpConfig = $config->get('amqp');
 
                                 if (!class_exists('PhpAmqpLib\Connection\AMQPStreamConnection')) {
                                     return false;
                                 }
 
                                 $connection = new PhpAmqpLib\Connection\AMQPStreamConnection(
-                                    $rabbitmqConfig['host'],
-                                    $rabbitmqConfig['port'],
-                                    $rabbitmqConfig['user'],
-                                    $rabbitmqConfig['password'],
-                                    $rabbitmqConfig['vhost']
+                                    $amqpConfig['host'],
+                                    $amqpConfig['port'],
+                                    $amqpConfig['user'],
+                                    $amqpConfig['password'],
+                                    $amqpConfig['vhost']
                                 );
 
                                 $isConnected = $connection->isConnected();
@@ -49,9 +49,9 @@
                                 return false;
                             }
                         }
-                        $rabbitmqConnected = checkRabbitMQConnection();
+                        $amqpConnected = checkAMQPConnection();
 
-                        if ($rabbitmqConnected) { ?>
+                        if ($amqpConnected) { ?>
                             <span><?= _e('connected') ?></span>
                         <?php } else { ?>
                             <span class="text-danger"><?= _e('disconnected') ?></span>

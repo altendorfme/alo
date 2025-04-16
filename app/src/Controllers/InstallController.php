@@ -45,11 +45,11 @@ class InstallController extends BaseController
             'db_pass' => '',
             'db_encoding' => 'utf8mb4',
             'db_name' => 'alo',
-            'rabbitmq_host' => 'rabbitmq',
-            'rabbitmq_user' => 'alo',
-            'rabbitmq_pass' => '',
-            'rabbitmq_port' => 5672,
-            'rabbitmq_vhost' => 'alo',
+            'amqp_host' => 'amqp',
+            'amqp_user' => 'alo',
+            'amqp_pass' => '',
+            'amqp_port' => 5672,
+            'amqp_vhost' => 'alo',
             'smtp_host' => 'smtp.resend.com',
             'smtp_user' => 'resend',
             'smtp_pass' => '',
@@ -119,11 +119,11 @@ class InstallController extends BaseController
             'db_user',
             'db_encoding',
             'db_name',
-            'rabbitmq_host',
-            'rabbitmq_user',
-            'rabbitmq_pass',
-            'rabbitmq_port',
-            'rabbitmq_vhost',
+            'amqp_host',
+            'amqp_user',
+            'amqp_pass',
+            'amqp_port',
+            'amqp_vhost',
             'smtp_host',
             'smtp_user',
             'smtp_pass',
@@ -231,11 +231,11 @@ class InstallController extends BaseController
             'SMTP_FROM_NAME' => $formData['smtp_from_name'],
             'SMTP_SECURITY' => $formData['smtp_security'],
             'SMTP_AUTH' => $formData['smtp_auth'],
-            'RABBITMQ_HOST' => $formData['rabbitmq_host'],
-            'RABBITMQ_PORT' => $formData['rabbitmq_port'],
-            'RABBITMQ_USER' => $formData['rabbitmq_user'],
-            'RABBITMQ_PASS' => $formData['rabbitmq_pass'],
-            'RABBITMQ_VHOST' => $formData['rabbitmq_vhost'],
+            'AMQP_HOST' => $formData['amqp_host'],
+            'AMQP_PORT' => $formData['amqp_port'],
+            'AMQP_USER' => $formData['amqp_user'],
+            'AMQP_PASS' => $formData['amqp_pass'],
+            'AMQP_VHOST' => $formData['amqp_vhost'],
             'FIREBASE_VAPID_PUBLIC' => $formData['firebase_vapid_public'],
             'FIREBASE_VAPID_PRIVATE' => $formData['firebase_vapid_private'],
             'FIREBASE_APIKEY' => $formData['firebase_apikey'],
@@ -291,12 +291,12 @@ class InstallController extends BaseController
         $envContent .= "SMTP_SECURITY={$config['SMTP_SECURITY']}\n";
         $envContent .= "SMTP_AUTH={$config['SMTP_AUTH']}\n\n";
 
-        $envContent .= "# RabbitMQ\n";
-        $envContent .= "RABBITMQ_HOST={$config['RABBITMQ_HOST']}\n";
-        $envContent .= "RABBITMQ_PORT={$config['RABBITMQ_PORT']}\n";
-        $envContent .= "RABBITMQ_USER={$config['RABBITMQ_USER']}\n";
-        $envContent .= "RABBITMQ_PASS={$config['RABBITMQ_PASS']}\n";
-        $envContent .= "RABBITMQ_VHOST={$config['RABBITMQ_VHOST']}\n";
+        $envContent .= "# AMQP\n";
+        $envContent .= "AMQP_HOST={$config['AMQP_HOST']}\n";
+        $envContent .= "AMQP_PORT={$config['AMQP_PORT']}\n";
+        $envContent .= "AMQP_USER={$config['AMQP_USER']}\n";
+        $envContent .= "AMQP_PASS={$config['AMQP_PASS']}\n";
+        $envContent .= "AMQP_VHOST={$config['AMQP_VHOST']}\n";
 
         file_put_contents($envFilePath, $envContent);
     }
@@ -314,7 +314,7 @@ class InstallController extends BaseController
         }
     }
 
-    public function testRabbitMQConnection()
+    public function testAMQPConnection()
     {
         $rawInput = file_get_contents('php://input');
         $data = json_decode($rawInput, true);

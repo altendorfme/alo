@@ -155,63 +155,63 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header fw-bold"><?= _e('rabbitmq') ?></div>
+                    <div class="card-header fw-bold"><?= _e('amqp') ?></div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-8">
                                 <div class="mb-3">
-                                    <label for="rabbitmq_host" class="form-label"><?= _e('host') ?></label>
+                                    <label for="amqp_host" class="form-label"><?= _e('host') ?></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-hdd-network"></i></span>
-                                        <input type="text" class="form-control" id="rabbitmq_host" required name="rabbitmq_host"
-                                            value="<?= htmlspecialchars($formData['rabbitmq_host'] ?? '') ?>">
+                                        <input type="text" class="form-control" id="amqp_host" required name="amqp_host"
+                                            value="<?= htmlspecialchars($formData['amqp_host'] ?? '') ?>">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="mb-3">
-                                    <label for="rabbitmq_port" class="form-label"><?= _e('port') ?></label>
+                                    <label for="amqp_port" class="form-label"><?= _e('port') ?></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-door-open"></i></span>
-                                        <input type="number" class="form-control" id="rabbitmq_port" name="rabbitmq_port"
-                                            value="<?= htmlspecialchars($formData['rabbitmq_port'] ?? '') ?>" required>
+                                        <input type="number" class="form-control" id="amqp_port" name="amqp_port"
+                                            value="<?= htmlspecialchars($formData['amqp_port'] ?? '') ?>" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label for="rabbitmq_user" class="form-label"><?= _e('user') ?></label>
+                                    <label for="amqp_user" class="form-label"><?= _e('user') ?></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-person-lines-fill"></i></span>
-                                        <input type="text" class="form-control" id="rabbitmq_user" required name="rabbitmq_user"
-                                            value="<?= htmlspecialchars($formData['rabbitmq_user'] ?? '') ?>">
+                                        <input type="text" class="form-control" id="amqp_user" required name="amqp_user"
+                                            value="<?= htmlspecialchars($formData['amqp_user'] ?? '') ?>">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label for="rabbitmq_pass" class="form-label"><?= _e('password') ?></label>
+                                    <label for="amqp_pass" class="form-label"><?= _e('password') ?></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                                        <input type="password" class="form-control" id="rabbitmq_pass" required name="rabbitmq_pass"
-                                            value="<?= htmlspecialchars($formData['rabbitmq_pass'] ?? '') ?>">
+                                        <input type="password" class="form-control" id="amqp_pass" required name="amqp_pass"
+                                            value="<?= htmlspecialchars($formData['amqp_pass'] ?? '') ?>">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label for="rabbitmq_vhost" class="form-label"><?= _e('virtual_host') ?></label>
+                                    <label for="amqp_vhost" class="form-label"><?= _e('virtual_host') ?></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-diagram-3"></i></span>
-                                        <input type="text" class="form-control" id="rabbitmq_vhost" name="rabbitmq_vhost"
-                                            value="<?= htmlspecialchars($formData['rabbitmq_vhost'] ?? '') ?>" required>
+                                        <input type="text" class="form-control" id="amqp_vhost" name="amqp_vhost"
+                                            value="<?= htmlspecialchars($formData['amqp_vhost'] ?? '') ?>" required>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <div id="rabbitmqConnectionResult"></div>
-                                <button type="button" id="testRabbitMQConnection" class="btn btn-secondary">
-                                    <i class="bi bi-plug"></i> <?= _e('test_rabbitmq_connection') ?>
+                                <div id="amqpConnectionResult"></div>
+                                <button type="button" id="testAMQPConnection" class="btn btn-secondary">
+                                    <i class="bi bi-plug"></i> <?= _e('test_amqp_connection') ?>
                                 </button>
                             </div>
                         </div>
@@ -467,19 +467,19 @@
         });
 
         const testMySQLBtn = document.getElementById('testMySQLConnection');
-        const testRabbitMQBtn = document.getElementById('testRabbitMQConnection');
+        const testAMQPBtn = document.getElementById('testAMQPConnection');
         const testSMTPBtn = document.getElementById('testSMTPConnection');
         const mysqlConnectionResult = document.getElementById('mysqlConnectionResult');
-        const rabbitmqConnectionResult = document.getElementById('rabbitmqConnectionResult');
+        const amqpConnectionResult = document.getElementById('amqpConnectionResult');
         const smtpConnectionResult = document.getElementById('smtpConnectionResult');
         const installButton = document.getElementById('installButton');
 
         let mysqlTestPassed = false;
-        let rabbitmqTestPassed = false;
+        let amqpTestPassed = false;
         let smtpTestPassed = false;
 
         function updateInstallButton() {
-            installButton.disabled = !(mysqlTestPassed && rabbitmqTestPassed && smtpTestPassed);
+            installButton.disabled = !(mysqlTestPassed && amqpTestPassed && smtpTestPassed);
         }
 
         function updateImagePreview(preview, url) {
@@ -565,23 +565,23 @@
                 });
         });
 
-        testRabbitMQBtn.addEventListener('click', function() {
-            const host = document.getElementById('rabbitmq_host').value;
-            const port = document.getElementById('rabbitmq_port').value;
-            const user = document.getElementById('rabbitmq_user').value;
-            const pass = document.getElementById('rabbitmq_pass').value;
-            const vhost = document.getElementById('rabbitmq_vhost').value;
+        testAMQPBtn.addEventListener('click', function() {
+            const host = document.getElementById('amqp_host').value;
+            const port = document.getElementById('amqp_port').value;
+            const user = document.getElementById('amqp_user').value;
+            const pass = document.getElementById('amqp_pass').value;
+            const vhost = document.getElementById('amqp_vhost').value;
 
             if (!host || !port || !user || !pass) {
-                rabbitmqConnectionResult.innerHTML = '<div class="alert alert-warning"><?= _e('rabbitmq_fill_all') ?></div>';
+                amqpConnectionResult.innerHTML = '<div class="alert alert-warning"><?= _e('amqp_fill_all') ?></div>';
                 return;
             }
 
             // Disable button during test
-            testRabbitMQBtn.disabled = true;
-            rabbitmqConnectionResult.innerHTML = '<div class="alert alert-info"><?= _e('rabbitmq_testing') ?></div>';
+            testAMQPBtn.disabled = true;
+            amqpConnectionResult.innerHTML = '<div class="alert alert-info"><?= _e('amqp_testing') ?></div>';
 
-            fetch('/install/rabbitmq', {
+            fetch('/install/amqp', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -597,21 +597,21 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        rabbitmqConnectionResult.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> <?= _e('rabbitmq_valid') ?></div>';
-                        rabbitmqTestPassed = true;
+                        amqpConnectionResult.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> <?= _e('amqp_valid') ?></div>';
+                        amqpTestPassed = true;
                     } else {
-                        rabbitmqConnectionResult.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle"></i> <?= _e('rabbitmq_invalid') ?>: ${data.message}</div>`;
-                        rabbitmqTestPassed = false;
+                        amqpConnectionResult.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle"></i> <?= _e('amqp_invalid') ?>: ${data.message}</div>`;
+                        amqpTestPassed = false;
                     }
                     updateInstallButton();
                 })
                 .catch(error => {
-                    rabbitmqConnectionResult.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle"></i> <?= _e('rabbitmq_error') ?>: ${error.message}</div>`;
-                    rabbitmqTestPassed = false;
+                    amqpConnectionResult.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle"></i> <?= _e('amqp_error') ?>: ${error.message}</div>`;
+                    amqpTestPassed = false;
                     updateInstallButton();
                 })
                 .finally(() => {
-                    testRabbitMQBtn.disabled = false;
+                    testAMQPBtn.disabled = false;
                 });
         });
 

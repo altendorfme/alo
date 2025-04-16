@@ -39,7 +39,7 @@ return function (Container $container): Router {
     // Install
     $router->get('/install', [InstallController::class, 'index']);
     $router->post('/install', [InstallController::class, 'install']);
-    $router->post('/install/rabbitmq', [InstallController::class, 'testRabbitMQConnection']);
+    $router->post('/install/amqp', [InstallController::class, 'testAMQPConnection']);
     $router->post('/install/mysql', [InstallController::class, 'testMySQLConnection']);
     $router->post('/install/smtp', [InstallController::class, 'testSMTPConnection']);
     

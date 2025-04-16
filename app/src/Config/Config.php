@@ -44,7 +44,7 @@ class Config
                     'private' => '',
                 ]
             ],
-            'rabbitmq' => [
+            'amqp' => [
                 'host' => '',
                 'port' => '',
                 'user' => '',
@@ -96,12 +96,12 @@ class Config
                         'private' => $_ENV['FIREBASE_VAPID_PRIVATE'],
                     ]
                 ],
-                'rabbitmq' => [
-                    'host' => $_ENV['RABBITMQ_HOST'],
-                    'port' => $_ENV['RABBITMQ_PORT'],
-                    'user' => $_ENV['RABBITMQ_USER'],
-                    'password' => $_ENV['RABBITMQ_PASS'],
-                    'vhost' => $_ENV['RABBITMQ_VHOST']
+                'amqp' => [
+                    'host' => $_ENV['AMQP_HOST'],
+                    'port' => $_ENV['AMQP_PORT'],
+                    'user' => $_ENV['AMQP_USER'],
+                    'password' => $_ENV['AMQP_PASS'],
+                    'vhost' => $_ENV['AMQP_VHOST']
                 ]
             ];
         } catch (\Exception $e) {
