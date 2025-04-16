@@ -30,6 +30,7 @@ class SendCommand
 
     public function execute(): int
     {
+        set_time_limit(0);
         $errorCount = 0;
         
         while (true) {
