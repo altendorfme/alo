@@ -25,7 +25,7 @@ Edit environment:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | TZ | UTC | Timezone for the application |
-| WORKERS | 1 | Each worker is a push service, each worker sends 5-6 pushes per second. Increasing the number of workers will directly impact database usage. |
+| WORKERS | 1 | Each worker is a push service, each worker sends 500 batch pushes every routine. Increasing the number of workers will directly impact database usage. |
 | AMQP_USER | Empty | Username for AMQP message broker authentication |
 | AMQP_PASS | Empty | Password for AMQP message broker authentication |
 | AMQP_VHOST | alo | Virtual host for AMQP to isolate applications |

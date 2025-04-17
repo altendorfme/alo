@@ -177,8 +177,8 @@ class CampaignController extends BaseController
         $campaign = $campaignObj->get($id);
 
         if (!$campaign || !in_array($campaign['status'], ['draft', 'cancelled'])) {
-            return $this->render('main/campaigns', [
-                'error' => _e('error_not_allowed_edit_campaign')
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode('error_not_allowed_edit_campaign')
             ]);
         }
 
@@ -300,8 +300,8 @@ class CampaignController extends BaseController
         $campaign = $campaignObj->get($id);
 
         if (!$campaign || !in_array($campaign['status'], ['draft', 'scheduled', 'cancelled'])) {
-            return $this->render('main/campaigns', [
-                'error' => _e('error_not_allowed_edit_campaign')
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode('error_not_allowed_edit_campaign')
             ]);
         }
 

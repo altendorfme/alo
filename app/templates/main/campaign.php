@@ -8,11 +8,13 @@
         <h1 class="h4"><?= $isEdit ? _e('campaign_edit') : _e('campaign_publish'); ?></h1>
     </div>
     <div class="btn-toolbar">
-        <button type="submit" form="campaignForm" name="action" value="save" class="btn btn-primary me-2">
-            <?= _e('campaign_publish'); ?>
-        </button>
-        <button type="submit" form="campaignForm" name="action" value="draft" class="btn btn-secondary">
-            <?= _e('save_as_draft') ?>
+        <?php if (!$isEdit || (isset($campaign['status']) && in_array($campaign['status'], ['draft', 'cancelled']))): ?>
+            <button type="submit" form="campaignForm" name="action" value="save" class="btn btn-primary me-2">
+                <?= _e('campaign_publish'); ?>
+            </button>
+            <button type="submit" form="campaignForm" name="action" value="draft" class="btn btn-secondary">
+                <?= _e('save_as_draft') ?>
+            </button>
         </button>
     </div>
 </div>
