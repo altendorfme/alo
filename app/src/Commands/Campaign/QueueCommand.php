@@ -216,27 +216,14 @@ class QueueCommand
                 $this->climate->out("Processing campaign: {$campaign['name']} (ID: {$campaign['id']}) (UUID: {$campaign['uuid']})");
 
                 try {
-                    try {
-                        $channel->queue_declare(
-                            'campaigns',
-                            true,    // passive
-                            true,    // durable
-                            false,   // exclusive
-                            false,   // auto_delete
-                            false    // nowait
-                        );
-                        $this->climate->out("Usando fila 'campaigns' existente");
-                    } catch (Exception $queueCheckError) {
-                        $channel->queue_declare(
-                            'campaigns',
-                            false,   // passive
-                            true,    // durable
-                            false,   // exclusive
-                            false,   // auto_delete
-                            false    // nowait
-                        );
-                        $this->climate->out("Fila 'campaigns' criada com sucesso");
-                    }
+                    $channel->queue_declare(
+                        'campaigns',
+                        false,   // passive
+                        true,    // durable
+                        false,   // exclusive
+                        false,   // auto_delete
+                        false    // nowait
+                    );
 
                     $this->db->query("
                         UPDATE campaigns 
