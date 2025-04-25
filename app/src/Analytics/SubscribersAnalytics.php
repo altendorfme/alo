@@ -4,22 +4,23 @@ namespace alo\Analytics;
 
 use alo\Database\Database;
 use alo\Config\Config;
+use alo\Analytics\AnalyticsQueueService;
 use MeekroDB;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Nyholm\Psr7\Response;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Message\AMQPMessage;
 
 class SubscribersAnalytics
 {
     private $db;
     private $config;
+    private $analyticsQueueService;
 
     public function __construct(Config $config = null)
     {
         $this->db = Database::getInstance();
         $this->config = $config ?? new Config();
+        $this->analyticsQueueService = new AnalyticsQueueService($this->config);
     }
     public function recordSubscriberActivity(int $subscriberId, string $status, ?string $timestamp = null): bool
     {
@@ -92,12 +93,8 @@ class SubscribersAnalytics
                 return false;
             }
 
-            try {
-                $this->sendToAMQP($campaignId, $subscriberId, $interactionType);
-                return true;
-            } catch (\Exception $e) {
-                return false;
-            }
+            $result = $this->analyticsQueueService->sendToAnalyticsQueue($campaignId, $subscriberId, $interactionType);
+            return $result;
         } catch (\Exception $e) {
             return false;
         }
@@ -178,43 +175,4 @@ class SubscribersAnalytics
         );
     }
 
-    private function sendToAMQP(int $campaignId, int $subscriberId, string $interactionType): void
-    {
-        $amqpConfig = $this->config->get('amqp');
-        
-        $connection = new AMQPStreamConnection(
-            $amqpConfig['host'],
-            $amqpConfig['port'],
-            $amqpConfig['user'],
-            $amqpConfig['password'],
-            $amqpConfig['vhost']
-        );
-        
-        $channel = $connection->channel();
-        
-        $channel->queue_declare(
-            'analytics:campaign',
-            false,   // passive
-            true,    // durable
-            false,   // exclusive
-            false    // auto_delete
-        );
-        
-        $data = [
-            'campaignId' => $campaignId,
-            'subscriberId' => $subscriberId,
-            'action' => $interactionType,
-            'timestamp' => date('Y-m-d\TH:i:s.v\Z', time())
-        ];
-        
-        $msg = new AMQPMessage(
-            json_encode($data),
-            ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]
-        );
-        
-        $channel->basic_publish($msg, '', 'analytics:campaign');
-        
-        $channel->close();
-        $connection->close();
-    }
 }

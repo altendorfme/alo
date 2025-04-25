@@ -5,6 +5,7 @@ namespace alo\Commands\Campaign;
 use League\CLImate\CLImate;
 use alo\Config\Config;
 use alo\Database\Database;
+use alo\Analytics\AnalyticsQueueService;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Minishlink\WebPush\WebPush;
@@ -17,6 +18,7 @@ class SendCommand
     private $config;
     private $db;
     private $climate;
+    private $analyticsQueueService;
     private $sleepInterval = 5;
     private $maxRetries = 3;
     private $errorSleepInterval = 30;
@@ -26,6 +28,7 @@ class SendCommand
         $this->config = $config;
         $this->db = \alo\Database\Database::getInstance();
         $this->climate = $climate;
+        $this->analyticsQueueService = new AnalyticsQueueService($this->config, $this->climate);
     }
 
     public function execute(): int
@@ -150,11 +153,11 @@ class SendCommand
                                     $messagesProcessed++;
                                     $totalNotificationsSent++;
                                     
-                                    $this->db->query("
-                                        INSERT INTO analytics_campaign
-                                        (campaign_id, subscriber_id, interaction_type)
-                                        VALUES (%s, %s, 'sent')
-                                    ", $campaign['id'], $subscriber['id']);
+                                    $this->analyticsQueueService->sendToAnalyticsQueue(
+                                        $campaign['id'],
+                                        $subscriber['id'],
+                                        'sent'
+                                    );
                                     
                                     $channel->basic_ack($message->getDeliveryTag());
                                 } else {
@@ -163,11 +166,11 @@ class SendCommand
                                     $messagesFailed++;
                                     $totalNotificationsFailed++;
                                     
-                                    $this->db->query("
-                                        INSERT INTO analytics_campaign
-                                        (campaign_id, subscriber_id, interaction_type)
-                                        VALUES (%s, %s, 'failed')
-                                    ", $campaign['id'], $subscriber['id']);
+                                    $this->analyticsQueueService->sendToAnalyticsQueue(
+                                        $campaign['id'],
+                                        $subscriber['id'],
+                                        'failed'
+                                    );
                                     
                                     if ($result->isSubscriptionExpired()) {
                                         $this->db->query("
@@ -294,4 +297,5 @@ class SendCommand
 
         return 0;
     }
+
 }
