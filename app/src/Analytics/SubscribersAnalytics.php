@@ -3,18 +3,23 @@
 namespace alo\Analytics;
 
 use alo\Database\Database;
+use alo\Config\Config;
 use MeekroDB;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Nyholm\Psr7\Response;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 
 class SubscribersAnalytics
 {
     private $db;
+    private $config;
 
-    public function __construct()
+    public function __construct(Config $config = null)
     {
         $this->db = Database::getInstance();
+        $this->config = $config ?? new Config();
     }
     public function recordSubscriberActivity(int $subscriberId, string $status, ?string $timestamp = null): bool
     {
@@ -39,7 +44,6 @@ class SubscribersAnalytics
                 return false;
             }
 
-            // Prepare and execute the insert query
             $query = "INSERT INTO analytics_subscribers (subscriber_id, status, created_at) 
                        VALUES (%s, %s, %s)";
 
@@ -60,19 +64,16 @@ class SubscribersAnalytics
         int $campaignId,
         string $interactionType
     ): bool {
-        // Validate input parameters
         if (!$subscriberId || !$campaignId) {
             return false;
         }
 
-        // Validate interaction type
         $validInteractionTypes = ['clicked', 'delivered'];
         if (!in_array($interactionType, $validInteractionTypes)) {
             return false;
         }
 
         try {
-            // Verify subscriber exists
             $subscriberExists = $this->db->queryFirstField(
                 "SELECT COUNT(*) FROM subscribers WHERE id = %i",
                 $subscriberId
@@ -82,7 +83,6 @@ class SubscribersAnalytics
                 return false;
             }
 
-            // Verify campaign exists
             $campaignExists = $this->db->queryFirstField(
                 "SELECT COUNT(*) FROM campaigns WHERE id = %i",
                 $campaignId
@@ -92,23 +92,12 @@ class SubscribersAnalytics
                 return false;
             }
 
-            // Prepare and execute the insert query for analytics_campaign
-            $query = "INSERT INTO analytics_campaign 
-                      (campaign_id, subscriber_id, interaction_type, created_at) 
-                      VALUES (%i, %i, %s, NOW())";
-
-            $result = $this->db->query(
-                $query,
-                $campaignId,
-                $subscriberId,
-                $interactionType
-            );
-
-            if ($result === false) {
+            try {
+                $this->sendToAMQP($campaignId, $subscriberId, $interactionType);
+                return true;
+            } catch (\Exception $e) {
                 return false;
             }
-
-            return true;
         } catch (\Exception $e) {
             return false;
         }
@@ -187,5 +176,45 @@ class SubscribersAnalytics
                 'data' => $data
             ])
         );
+    }
+
+    private function sendToAMQP(int $campaignId, int $subscriberId, string $interactionType): void
+    {
+        $amqpConfig = $this->config->get('amqp');
+        
+        $connection = new AMQPStreamConnection(
+            $amqpConfig['host'],
+            $amqpConfig['port'],
+            $amqpConfig['user'],
+            $amqpConfig['password'],
+            $amqpConfig['vhost']
+        );
+        
+        $channel = $connection->channel();
+        
+        $channel->queue_declare(
+            'analytics:campaign',
+            false,   // passive
+            true,    // durable
+            false,   // exclusive
+            false    // auto_delete
+        );
+        
+        $data = [
+            'campaignId' => $campaignId,
+            'subscriberId' => $subscriberId,
+            'action' => $interactionType,
+            'timestamp' => date('Y-m-d\TH:i:s.v\Z', time())
+        ];
+        
+        $msg = new AMQPMessage(
+            json_encode($data),
+            ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]
+        );
+        
+        $channel->basic_publish($msg, '', 'analytics:campaign');
+        
+        $channel->close();
+        $connection->close();
     }
 }

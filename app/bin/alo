@@ -12,6 +12,7 @@ use League\CLImate\CLImate;
 use alo\Container\ContainerFactory;
 use alo\Commands\Campaign\QueueCommand;
 use alo\Commands\Campaign\SendCommand;
+use alo\Commands\Campaign\AnalyticsCommand;
 use alo\Commands\GeoIP\UpdateCommand as GeoIPUpdateCommand;
 use alo\Commands\App\MigrationCommand;
 use alo\Commands\Optimize\Database\OptimizeDatabase;
@@ -47,6 +48,10 @@ $commands = [
     },
     'optimize:database' => function() use ($container, $climate) {
         $command = $container->get(OptimizeDatabase::class);
+        return $command->execute();
+    },
+    'campaign:analytics' => function() use ($container, $climate) {
+        $command = $container->get(AnalyticsCommand::class);
         return $command->execute();
     },
 ];

@@ -56,19 +56,16 @@ class CampaignAnalyticsController extends BaseController
 
         try {
             $interactionTimeline = $this->db->query(
-                "SELECT 
-                    DATE_FORMAT(created_at, '%Y-%m-%d %H:00') AS datetime,
+                "SELECT
+                    DATE_FORMAT(hour, '%Y-%m-%d %H:00') AS datetime,
                     interaction_type,
-                    COUNT(*) AS count 
-                FROM 
-                    analytics_campaign 
-                WHERE 
-                    campaign_id = " . $campaignId . " 
-                GROUP BY 
-                    datetime, 
-                    interaction_type 
-                ORDER BY 
-                    datetime"
+                    count
+                FROM
+                    analytics_campaign
+                WHERE
+                    campaign_id = " . $campaignId . "
+                ORDER BY
+                    hour"
             );
         } catch (\Exception $e) {
             $interactionTimeline = [];
@@ -106,9 +103,9 @@ class CampaignAnalyticsController extends BaseController
             $results = $this->db->query(
                 "SELECT
                     c.total_recipients,
-                    COALESCE(SUM(CASE WHEN ac.interaction_type = 'failed' THEN 1 ELSE 0 END), 0) AS error_count,
-                    COALESCE(SUM(CASE WHEN ac.interaction_type = 'delivered' THEN 1 ELSE 0 END), 0) AS successfully_count,
-                    COALESCE(SUM(CASE WHEN ac.interaction_type = 'clicked' THEN 1 ELSE 0 END), 0) AS clicked_count
+                    COALESCE(SUM(CASE WHEN ac.interaction_type = 'failed' THEN ac.count ELSE 0 END), 0) AS error_count,
+                    COALESCE(SUM(CASE WHEN ac.interaction_type = 'delivered' THEN ac.count ELSE 0 END), 0) AS successfully_count,
+                    COALESCE(SUM(CASE WHEN ac.interaction_type = 'clicked' THEN ac.count ELSE 0 END), 0) AS clicked_count
                 FROM
                     campaigns c
                 LEFT JOIN
