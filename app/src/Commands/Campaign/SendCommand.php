@@ -84,7 +84,7 @@ class SendCommand
                         $webPush = new WebPush($vapidConfig, [], $timeout, $clientOptions);
                         $webPush->setAutomaticPadding(true);
 
-                        $campaignQueueName = $campaign['uuid'];
+                        $campaignQueueName = 'campaigns';
                         $messagesProcessed = 0;
                         $messagesFailed = 0;
                         $batchSize = 500;
@@ -124,7 +124,7 @@ class SendCommand
                             }
                             
                             if (empty($messages)) {
-                                $this->climate->info("No more messages in queue for campaign {$campaign['name']}");
+                                $this->climate->info("No more messages in queue 'campaigns' for campaign {$campaign['name']}");
                                 break;
                             }
                             
@@ -205,7 +205,7 @@ class SendCommand
                                             $channel->basic_publish(
                                                 $retryMessage,
                                                 '',
-                                                $campaignQueueName
+                                                'campaigns'
                                             );
                                             
                                             $channel->basic_ack($message->getDeliveryTag());

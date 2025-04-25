@@ -166,7 +166,7 @@ class QueueCommand
                     'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT
                 ]);
                 
-                $channel->basic_publish($msg, '', $campaign['uuid']);
+                $channel->basic_publish($msg, '', 'campaigns');
             }
             
             $totalProcessed += $batchCount;
@@ -217,23 +217,26 @@ class QueueCommand
 
                 try {
                     try {
-                        $channel->queue_delete($campaign['uuid']);
-                        $this->climate->out("Existing queue {$campaign['uuid']} deleted successfully");
-                    } catch (Exception $queueDeleteError) {
-                        $this->climate->out("No existing queue found for {$campaign['uuid']}");
+                        $channel->queue_declare(
+                            'campaigns',
+                            true,    // passive
+                            true,    // durable
+                            false,   // exclusive
+                            false,   // auto_delete
+                            false    // nowait
+                        );
+                        $this->climate->out("Usando fila 'campaigns' existente");
+                    } catch (Exception $queueCheckError) {
+                        $channel->queue_declare(
+                            'campaigns',
+                            false,   // passive
+                            true,    // durable
+                            false,   // exclusive
+                            false,   // auto_delete
+                            false    // nowait
+                        );
+                        $this->climate->out("Fila 'campaigns' criada com sucesso");
                     }
-
-                    $channel->queue_declare(
-                        $campaign['uuid'],
-                        false,   // passive
-                        true,    // durable
-                        false,   // exclusive
-                        true,    // auto_delete
-                        false,   // nowait
-                        [
-                            'x-message-ttl' => ['I', 86400000] // 1 day
-                        ]
-                    );
 
                     $this->db->query("
                         UPDATE campaigns 
