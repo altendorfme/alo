@@ -15,6 +15,7 @@ use alo\Commands\Campaign\SendCommand;
 use alo\Commands\GeoIP\UpdateCommand as GeoIPUpdateCommand;
 use alo\Commands\Database\OptimizeCommand;
 use alo\Commands\App\MigrationCommand;
+use alo\Commands\Analytics\OptimizeSubscribersCommand;
 
 // Create dependency injection container
 $container = ContainerFactory::create();
@@ -36,14 +37,18 @@ $commands = [
         $command = $container->get(GeoIPUpdateCommand::class);
         return $command->execute();
     },
-    'database:optimize' => function() use ($container, $climate) {
-        $command = $container->get(OptimizeCommand::class);
-        return $command->execute();
-    },
     'app:migration' => function() use ($container, $climate) {
         $command = $container->get(MigrationCommand::class);
         return $command->execute();
-    }
+    },
+    'optimize:analytics:subscribers' => function() use ($container, $climate) {
+        $command = $container->get(OptimizeSubscribersCommand::class);
+        return $command->execute();
+    },
+    'optimize:database' => function() use ($container, $climate) {
+        $command = $container->get(OptimizeCommand::class);
+        return $command->execute();
+    },
 ];
 
 // Check if a command was provided

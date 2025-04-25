@@ -272,7 +272,7 @@ return [
     'success_user_created' => 'User created successfully!',
     'error_saving_user' => 'Error while saving the user!',
     'error_user_not_found' => 'User not found!',
-    'subscribers_status_trend' => 'Subscribers Trend',
+    'subscribers_status_trend' => 'Subscribers Trend (30 days)',
     'subscribers_count' => 'Subscribers Count',
     'date' => 'Date',
     'amqp_status' => 'AMQP Status',
