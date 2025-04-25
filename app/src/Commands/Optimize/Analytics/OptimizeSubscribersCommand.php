@@ -1,6 +1,6 @@
 <?php
 
-namespace alo\Commands\Analytics;
+namespace alo\Commands\Optimize\Analytics;
 
 use League\CLImate\CLImate;
 use alo\Config\Config;

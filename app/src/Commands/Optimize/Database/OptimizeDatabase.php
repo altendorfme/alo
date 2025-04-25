@@ -1,13 +1,13 @@
 <?php
 
-namespace alo\Commands\Database;
+namespace alo\Commands\Optimize\Database;
 
 use League\CLImate\CLImate;
 use alo\Config\Config;
 use alo\Database\Database;
 use Exception;
 
-class OptimizeCommand
+class OptimizeDatabase
 {
     private $config;
     private $db;
