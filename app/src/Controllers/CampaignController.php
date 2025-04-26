@@ -71,9 +71,9 @@ class CampaignController extends BaseController
         $campaigns = $this->db->query(
             "SELECT
                 c.*,
-                (SELECT COUNT(*) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'delivered') AS successfully_count,
-                (SELECT COUNT(*) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'failed') AS error_count,
-                (SELECT COUNT(*) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'clicked') AS clicked_count,
+                (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'delivered') AS successfully_count,
+                (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'failed') AS error_count,
+                (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'clicked') AS clicked_count,
                 c.total_recipients
             FROM campaigns c " .
                 $whereClause .
