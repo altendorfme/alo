@@ -63,9 +63,10 @@ class CampaignAnalyticsController extends BaseController
                 FROM
                     analytics_campaign
                 WHERE
-                    campaign_id = " . $campaignId . "
+                    campaign_id = %i
                 ORDER BY
-                    hour"
+                    hour",
+                $campaignId
             );
         } catch (\Exception $e) {
             $interactionTimeline = [];
