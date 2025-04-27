@@ -16,6 +16,11 @@ services:
       - rabbitmq
     networks:
       - alo
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "1"
   # MariaDB
   mariadb:
     image: mariadb:10.11.10
@@ -33,6 +38,11 @@ services:
     restart: unless-stopped
     networks:
       - alo
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "1"
   # AMQP
   ## RabbitMQ
   rabbitmq:
@@ -52,10 +62,15 @@ services:
     restart: unless-stopped
     networks:
       - alo
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "1"
   ## LavinMQ
   ### guest:guest
   lavinmq:
-    image: cloudamqp/lavinmq:2
+    image: cloudamqp/lavinmq:2.3
     container_name: lavinmq
     environment:
       TZ: ${TZ}
@@ -67,6 +82,11 @@ services:
     restart: unless-stopped
     networks:
       - alo
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "1"
   # Nginx Proxy Manager
   ## Email: admin@example.com
   ## Password: changeme
@@ -87,6 +107,11 @@ services:
       - alo
     networks:
       - alo
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "1"
 networks:
   alo:
     driver: bridge
