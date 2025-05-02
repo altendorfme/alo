@@ -10,6 +10,7 @@
         "league/climate": "^3.10",
         "league/plates": "^3.6",
         "league/route": "^6.2",
+        "matthiasmullie/minify": "^1.3",
         "minishlink/web-push": "^9.0",
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1.1",
