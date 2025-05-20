@@ -78,8 +78,13 @@
 
                     <div class="mb-3">
                         <label for="push_url" class="form-label fw-bold"><i class="bi bi-link-45deg me-2"></i><?= _e('push_url') ?></label>
-                        <input type="url" class="form-control" id="push_url" name="push_url"
-                            value="<?= htmlspecialchars($campaign['push_url'] ?? ''); ?>">
+                        <div class="d-flex">
+                            <input type="url" class="form-control" id="push_url" name="push_url"
+                                value="<?= htmlspecialchars($campaign['push_url'] ?? ''); ?>">
+                            <button type="button" class="btn btn-primary ms-2" id="refreshUrlButton">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
                         <small class="form-text text-muted"><?= _e('push_url_description') ?></small>
                     </div>
 
@@ -643,6 +648,62 @@
                     document.getElementById('push_icon').value = data.icon;
                 }
                 document.getElementById('push_url').value = url;
+
+            } catch (error) {
+                alert('<?= _e('error_network_response') ?>');
+            } finally {
+                new ldloader({
+                    root: ".ldld.full"
+                }).off();
+                updateCharCounter('push_title', 65);
+                updateCharCounter('push_body', 180);
+                imagePreview('push_image');
+                imagePreview('push_icon');
+                imagePreview('push_badge');
+            }
+        });
+
+        // Refresh URL Button
+        document.getElementById('refreshUrlButton').addEventListener('click', async function(e) {
+            const urlInput = document.getElementById('push_url');
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                alert('<?= _e('validate_url') ?>');
+                return;
+            }
+
+            try {
+                new ldloader({
+                    root: ".ldld.full"
+                }).on();
+                const response = await fetch('/api/campaign/import/metadata', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('<?= _e('error_network_response') ?>');
+                }
+
+                const data = await response.json();
+                if (data.title) {
+                    document.getElementById('push_title').value = data.title;
+                }
+                if (data.description) {
+                    document.getElementById('push_body').value = data.description;
+                }
+                if (data.image) {
+                    document.getElementById('push_image').value = data.image;
+                }
+                if (data.icon) {
+                    document.getElementById('push_icon').value = data.icon;
+                }
 
             } catch (error) {
                 alert('<?= _e('error_network_response') ?>');
