@@ -105,7 +105,7 @@ class CampaignController extends BaseController
                     $baseAnalyticsSelect
                 FROM campaigns c
                 WHERE c.status = 'scheduled'
-                ORDER BY c.created_at ASC"
+                ORDER BY c.send_at ASC"
             );
 
             $sendingCampaigns = $this->db->query(
@@ -114,7 +114,7 @@ class CampaignController extends BaseController
                     $baseAnalyticsSelect
                 FROM campaigns c
                 WHERE c.status = 'sending'
-                ORDER BY c.created_at ASC"
+                ORDER BY c.send_at ASC"
             );
 
             $queuingCampaigns = $this->db->query(
@@ -123,7 +123,7 @@ class CampaignController extends BaseController
                     $baseAnalyticsSelect
                 FROM campaigns c
                 WHERE c.status = 'queuing'
-                ORDER BY c.created_at ASC"
+                ORDER BY c.send_at ASC"
             );
 
             $otherCampaigns = $this->db->query(
@@ -874,5 +874,91 @@ class CampaignController extends BaseController
             ['Content-Type' => 'application/json'],
             json_encode(['error' => $message])
         );
+    }
+
+    public function batchScheduleCampaigns(ServerRequestInterface $request): ResponseInterface
+    {
+        $params = (array)$request->getParsedBody();
+        $campaignIds = $params['campaign_ids'] ?? [];
+        $campaignOrders = $params['campaign_order'] ?? [];
+        $startDateTime = $params['start_datetime'] ?? null;
+        $timeInterval = (int)($params['time_interval'] ?? 15);
+        
+        if (empty($campaignIds)) {
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode(_e('error_no_campaigns_selected'))
+            ]);
+        }
+        
+        if (empty($startDateTime)) {
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode(_e('error_start_datetime_required'))
+            ]);
+        }
+        
+        try {
+            $currentUserId = $this->getCurrentUserId();
+            if ($currentUserId === null) {
+                return new Response(302, [
+                    'Location' => '/campaigns?error=' . urlencode('error_authentication_required')
+                ]);
+            }
+            
+            $startTimestamp = strtotime($startDateTime);
+            if ($startTimestamp === false) {
+                return new Response(302, [
+                    'Location' => '/campaigns?error=' . urlencode(_e('error_invalid_date_format'))
+                ]);
+            }
+            
+            $campaignObj = new \alo\Campaign();
+            
+            $orderedCampaigns = [];
+            foreach ($campaignIds as $campaignId) {
+                $order = isset($campaignOrders[$campaignId]) && !empty($campaignOrders[$campaignId])
+                    ? (int)$campaignOrders[$campaignId]
+                    : 999;
+                $orderedCampaigns[] = [
+                    'id' => $campaignId,
+                    'order' => $order
+                ];
+            }
+            
+            usort($orderedCampaigns, function($a, $b) {
+                return $a['order'] - $b['order'];
+            });
+            
+            $successCount = 0;
+            foreach ($orderedCampaigns as $index => $campaign) {
+                $campaignId = $campaign['id'];
+                
+                $scheduledTimestamp = $startTimestamp + ($index * $timeInterval * 60);
+                $scheduledDateTime = date('Y-m-d H:i:s', $scheduledTimestamp);
+
+                $updateData = [
+                    'status' => 'scheduled',
+                    'send_at' => $scheduledDateTime
+                ];
+                
+                $result = $campaignObj->update($campaignId, $updateData, $currentUserId);
+                if ($result) {
+                    $successCount++;
+                }
+            }
+            
+            if ($successCount > 0) {
+                return new Response(302, [
+                    'Location' => '/campaigns?success=' . urlencode(_e('success_scheduled_campaigns'))
+                ]);
+            } else {
+                return new Response(302, [
+                    'Location' => '/campaigns?error=' . urlencode(_e('error_failed_to_schedule'))
+                ]);
+            }
+        } catch (Exception $e) {
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode($e->getMessage())
+            ]);
+        }
     }
 }

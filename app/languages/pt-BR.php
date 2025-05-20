@@ -287,5 +287,19 @@ return [
     'sending_campaigns' => 'Enviando',
     'draft_campaigns' => 'Rascunho',
     'other_campaigns' => 'Arquivo',
-    'queued_campaigns' => 'Em fila'
+    'queued_campaigns' => 'Em fila',
+    'batch_schedule_campaigns' => 'Agendar campanhas',
+    'start_datetime' => 'Data e hora de Início',
+    'start_datetime_description' => 'A data e hora em que a primeira campanha deve ser enviada',
+    'time_interval' => 'Intervalo de tempo',
+    'time_interval_description' => 'O intervalo de tempo entre cada campanha',
+    '15_minutes' => '15 Minutos',
+    '30_minutes' => '30 Minutos',
+    '60_minutes' => '1 Hora',
+    'schedule_selected_campaigns' => 'Agendar campanhas',
+    'error_no_campaigns_selected' => 'Nenhuma campanha selecionada',
+    'error_start_datetime_required' => 'Data e hora de início são obrigatórias',
+    'error_invalid_date_format' => 'Formato de data inválido',
+    'error_failed_to_schedule' => 'Falha ao agendar campanhas',
+    'success_scheduled_campaigns' => 'Campanhas agendadas com sucesso'
 ];

@@ -287,5 +287,19 @@ return [
     'sending_campaigns' => 'Sending',
     'draft_campaigns' => 'Draft',
     'other_campaigns' => 'Archive',
-    'queued_campaigns' => 'Queued'
+    'queued_campaigns' => 'Queued',
+    'batch_schedule_campaigns' => 'Schedule Campaigns',
+    'start_datetime' => 'Start Date & Time',
+    'start_datetime_description' => 'The date and time when the first campaign should be sent',
+    'time_interval' => 'Time Interval',
+    'time_interval_description' => 'The time interval between each campaign',
+    '15_minutes' => '15 Minutes',
+    '30_minutes' => '30 Minutes',
+    '60_minutes' => '1 Hour',
+    'schedule_selected_campaigns' => 'Schedule campaigns',
+    'error_no_campaigns_selected' => 'No campaigns selected',
+    'error_start_datetime_required' => 'Start date and time is required',
+    'error_invalid_date_format' => 'Invalid date format',
+    'error_failed_to_schedule' => 'Failed to schedule campaigns',
+    'success_scheduled_campaigns' => 'Successfully scheduled campaigns'
 ];

@@ -239,22 +239,35 @@ if ($statusFilter) {
 
         <div class="tab-pane fade" id="draft" role="tabpanel" aria-labelledby="draft-tab">
             <?php if (isset($draftCampaigns) && !empty($draftCampaigns)) { ?>
-                <div class="table-responsive bg-white rounded border border-bottom-0">
-                    <table class="table table-striped table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th style="min-width: 220px;"><?= _e('campaign') ?></th>
-                                <th style="min-width: 320px;"><?= _e('details') ?></th>
-                                <th style="min-width: 90px;"><?= _e('status') ?></th>
-                                <th style="min-width: 180px;"><?= _e('rate') ?></th>
-                                <th style="min-width: 190px;"><?= _e('history') ?></th>
-                                <th style="min-width: 124px; width: 124px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($draftCampaigns as $campaign) { ?>
+                <form id="batchScheduleForm" action="/campaigns/batch-schedule" method="post">
+                    <div class="table-responsive bg-white rounded border border-bottom-0">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead>
                                 <tr>
-                                    <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                                    <th style="width: 40px;">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="selectAllDraft">
+                                        </div>
+                                    </th>
+                                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                                    <th style="min-width: 320px;"><?= _e('details') ?></th>
+                                    <th style="min-width: 90px;"><?= _e('status') ?></th>
+                                    <th style="min-width: 180px;"><?= _e('rate') ?></th>
+                                    <th style="min-width: 190px;"><?= _e('history') ?></th>
+                                    <th style="min-width: 124px; width: 124px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($draftCampaigns as $campaign) { ?>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check position-relative ps-0">
+                                                <input class="form-check-input campaign-checkbox float-none ms-0" type="checkbox" name="campaign_ids[]" value="<?= $campaign['id'] ?>" data-campaign-id="<?= $campaign['id'] ?>">
+                                                <small class="d-block text-muted selection-order"></small>
+                                                <input type="hidden" name="campaign_order[<?= $campaign['id'] ?>]" class="campaign-order-input" value="">
+                                            </div>
+                                        </td>
+                                        <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
                                     <td class="small">
                                         <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
                                         <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
@@ -324,6 +337,121 @@ if ($statusFilter) {
                         </tbody>
                     </table>
                 </div>
+                
+                <div class="mt-3 batch-schedule-options" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <?= _e('batch_schedule_campaigns') ?>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-md-5">
+                                    <label for="startDateTime" class="form-label"><?= _e('start_datetime') ?></label>
+                                    <input type="datetime-local" class="form-control" id="startDateTime" name="start_datetime" required>
+                                    <div class="form-text"><?= _e('start_datetime_description') ?></div>
+                                </div>
+                                <div class="col-12 col-md-5 mb-3 mb-md-0">
+                                    <label for="timeInterval" class="form-label"><?= _e('time_interval') ?></label>
+                                    <select class="form-select" id="timeInterval" name="time_interval" required>
+                                        <option value="15"><?= _e('15_minutes') ?></option>
+                                        <option value="30"><?= _e('30_minutes') ?></option>
+                                        <option value="60"><?= _e('60_minutes') ?></option>
+                                    </select>
+                                    <div class="form-text"><?= _e('time_interval_description') ?></div>
+                                </div>
+                                <div class="col-12 col-md-2 mb-0 mb-md-0 mt-md-2 pt-md-4">
+                                    <button type="submit" class="btn btn-primary w-100"><?= _e('schedule_selected_campaigns') ?></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const selectAllCheckbox = document.getElementById('selectAllDraft');
+                        const campaignCheckboxes = document.querySelectorAll('.campaign-checkbox');
+                        const batchScheduleOptions = document.querySelector('.batch-schedule-options');
+                        let selectionOrder = [];
+                        
+                        function toggleBatchScheduleOptions() {
+                            const anyChecked = Array.from(campaignCheckboxes).some(checkbox => checkbox.checked);
+                            batchScheduleOptions.style.display = anyChecked ? 'block' : 'none';
+                        }
+                        
+                        function updateSelectionOrderDisplay() {
+                            document.querySelectorAll('.selection-order').forEach(el => {
+                                el.style.display = 'none';
+                                el.textContent = '';
+                            });
+                            
+                            document.querySelectorAll('.campaign-order-input').forEach(input => {
+                                input.value = '';
+                            });
+                            
+                            selectionOrder.forEach((id, index) => {
+                                const checkbox = document.querySelector(`.campaign-checkbox[data-campaign-id="${id}"]`);
+                                if (checkbox && checkbox.checked) {
+                                    const orderDisplay = checkbox.closest('.form-check').querySelector('.selection-order');
+                                    orderDisplay.textContent = '#' + (index + 1);
+                                    orderDisplay.style.display = 'block';
+                                    
+                                    const orderInput = checkbox.closest('.form-check').querySelector('.campaign-order-input');
+                                    orderInput.value = index + 1;
+                                }
+                            });
+                        }
+                        
+                        selectAllCheckbox.addEventListener('change', function() {
+                            if (selectAllCheckbox.checked) {
+                                campaignCheckboxes.forEach(checkbox => {
+                                    const campaignId = checkbox.getAttribute('data-campaign-id');
+                                    if (!checkbox.checked && !selectionOrder.includes(campaignId)) {
+                                        selectionOrder.push(campaignId);
+                                    }
+                                    checkbox.checked = true;
+                                });
+                            } else {
+                                selectionOrder = [];
+                                campaignCheckboxes.forEach(checkbox => {
+                                    checkbox.checked = false;
+                                });
+                            }
+                            updateSelectionOrderDisplay();
+                            toggleBatchScheduleOptions();
+                        });
+                        
+                        campaignCheckboxes.forEach(checkbox => {
+                            checkbox.addEventListener('change', function() {
+                                const campaignId = this.getAttribute('data-campaign-id');
+                                
+                                if (this.checked && !selectionOrder.includes(campaignId)) {
+                                    selectionOrder.push(campaignId);
+                                } else if (!this.checked) {
+                                    selectionOrder = selectionOrder.filter(id => id !== campaignId);
+                                }
+                                
+                                updateSelectionOrderDisplay();
+                                toggleBatchScheduleOptions();
+                            });
+                        });
+                        
+                        const startDateTimeInput = document.getElementById('startDateTime');
+                        if (startDateTimeInput) {
+                            const now = new Date();
+                            const year = now.getFullYear();
+                            const month = String(now.getMonth() + 1).padStart(2, '0');
+                            const day = String(now.getDate()).padStart(2, '0');
+                            const hours = String(now.getHours()).padStart(2, '0');
+                            const minutes = String(now.getMinutes()).padStart(2, '0');
+                            
+                            const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                            startDateTimeInput.min = currentDateTime;
+                            startDateTimeInput.value = currentDateTime;
+                        }
+                    });
+                </script>
             <?php } ?>
         </div>
 

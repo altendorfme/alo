@@ -76,6 +76,7 @@ return function (Container $container): Router {
         $route->get('/campaign/analytics/{id:\d+}', [CampaignAnalyticsController::class, 'campaignAnalytics']);
         $route->get('/campaigns[/page/{page:\d+}]', [CampaignController::class, 'viewCampaigns']);
         $route->post('/campaigns', [CampaignController::class, 'processCampaigns']);
+        $route->post('/campaigns/batch-schedule', [CampaignController::class, 'batchScheduleCampaigns']);
         $route->get('/campaigns/export/{format:csv|xlsx}', [CampaignController::class, 'exportCampaigns']);
         
         // User Management
