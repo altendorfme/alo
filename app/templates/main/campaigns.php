@@ -252,7 +252,6 @@ if ($statusFilter) {
                                     <th style="min-width: 220px;"><?= _e('campaign') ?></th>
                                     <th style="min-width: 320px;"><?= _e('details') ?></th>
                                     <th style="min-width: 90px;"><?= _e('status') ?></th>
-                                    <th style="min-width: 180px;"><?= _e('rate') ?></th>
                                     <th style="min-width: 190px;"><?= _e('history') ?></th>
                                     <th style="min-width: 124px; width: 124px;"></th>
                                 </tr>
@@ -287,24 +286,6 @@ if ($statusFilter) {
                                         <span class="badge <?= $statusClass ?>">
                                             <?= _e('status_' . $campaign['status']) ?>
                                         </span>
-                                    </td>
-                                    <td class="small">
-                                        <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
-                                            $totalRecipients = $campaign['total_recipients'] ?? 1;
-
-                                            $successCount = $campaign['successfully_count'] ?? 0;
-                                            $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
-
-                                            $failedCount = $campaign['error_count'] ?? 0;
-                                            $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
-
-                                            $clickCount = $campaign['clicked_count'] ?? 0;
-                                            $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
-                                        ?>
-                                            <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
-                                            <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
-                                            <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
-                                        <?php } ?>
                                     </td>
                                     <td class="small">
                                         <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>

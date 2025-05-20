@@ -948,11 +948,11 @@ class CampaignController extends BaseController
             
             if ($successCount > 0) {
                 return new Response(302, [
-                    'Location' => '/campaigns?success=' . urlencode(_e('success_scheduled_campaigns'))
+                    'Location' => '/campaigns?success=success_scheduled_campaigns'
                 ]);
             } else {
                 return new Response(302, [
-                    'Location' => '/campaigns?error=' . urlencode(_e('error_failed_to_schedule'))
+                    'Location' => '/campaigns?error=error_failed_to_schedule'
                 ]);
             }
         } catch (Exception $e) {
