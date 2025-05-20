@@ -43,376 +43,551 @@ if ($statusFilter) {
     </div>
 </div>
 
-<?php if (isset($sendingCampaigns) && !empty($sendingCampaigns)) { ?>
-    <h5 class="mt-4 mb-3"><?= _e('sending_campaigns') ?></h5>
-    <div class="table-responsive bg-white rounded border border-bottom-0">
-        <table class="table table-striped table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
-                    <th style="min-width: 320px;"><?= _e('details') ?></th>
-                    <th style="min-width: 180px;"><?= _e('rate') ?></th>
-                    <th style="min-width: 190px;"><?= _e('history') ?></th>
-                    <th style="min-width: 124px; width: 124px;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($sendingCampaigns as $campaign) { ?>
-                    <tr>
-                        <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
-                        <td class="small">
-                            <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
-                            <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
-                        </td>
-                        <td class="small">
-                            <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
-                                $totalRecipients = $campaign['total_recipients'] ?? 1;
+<?php if ($currentPage <= 1) { ?>
+    <ul class="nav nav-tabs mb-3" id="campaignTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="sending-queuing-tab" data-bs-toggle="tab" data-bs-target="#sending-queuing" type="button" role="tab" aria-controls="sending-queuing" aria-selected="true">
+                <?= _e('sending_campaigns') ?> / <?= _e('queued_campaigns') ?>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="scheduled-tab" data-bs-toggle="tab" data-bs-target="#scheduled" type="button" role="tab" aria-controls="scheduled" aria-selected="false">
+                <?= _e('scheduled_campaigns') ?>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="draft-tab" data-bs-toggle="tab" data-bs-target="#draft" type="button" role="tab" aria-controls="draft" aria-selected="false">
+                <?= _e('draft_campaigns') ?>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other" type="button" role="tab" aria-controls="other" aria-selected="false">
+                <?= _e('other_campaigns') ?>
+            </button>
+        </li>
+    </ul>
 
-                                $successCount = $campaign['successfully_count'] ?? 0;
-                                $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
+    <div class="tab-content" id="campaignTabsContent">
+        <div class="tab-pane fade show active" id="sending-queuing" role="tabpanel" aria-labelledby="sending-queuing-tab">
+            <?php if (isset($sendingCampaigns) && !empty($sendingCampaigns)) { ?>
+                <h5 class="mb-3"><?= _e('sending_campaigns') ?></h5>
+                <div class="table-responsive bg-white rounded border border-bottom-0">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                                <th style="min-width: 320px;"><?= _e('details') ?></th>
+                                <th style="min-width: 180px;"><?= _e('rate') ?></th>
+                                <th style="min-width: 190px;"><?= _e('history') ?></th>
+                                <th style="min-width: 124px; width: 124px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($sendingCampaigns as $campaign) { ?>
+                                <tr>
+                                    <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                                    <td class="small">
+                                        <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                                        <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                                    </td>
+                                    <td class="small">
+                                        <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
+                                            $totalRecipients = $campaign['total_recipients'] ?? 1;
 
-                                $failedCount = $campaign['error_count'] ?? 0;
-                                $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
+                                            $successCount = $campaign['successfully_count'] ?? 0;
+                                            $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
 
-                                $clickCount = $campaign['clicked_count'] ?? 0;
-                                $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
-                            ?>
-                                <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
-                                <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
-                                <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
-                            <?php } ?>
-                        </td>
-                        <td class="small">
-                            <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
-                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
-                                <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
-                            <?php } ?>
-                        </td>
-                        <td>
-                            <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
-                                <i class="bi bi-graph-up"></i>
-                            </a>
-                            <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
-                                <i class="bi bi-files"></i>
-                            </a>
-                        </td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </div>
-<?php } ?>
+                                            $failedCount = $campaign['error_count'] ?? 0;
+                                            $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
 
-<?php if (isset($queuingCampaigns) && !empty($queuingCampaigns)) { ?>
-    <h5 class="mt-4 mb-3"><?= _e('queued_campaigns') ?></h5>
-    <div class="table-responsive bg-white rounded border border-bottom-0">
-        <table class="table table-striped table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
-                    <th style="min-width: 320px;"><?= _e('details') ?></th>
-                    <th style="min-width: 180px;"><?= _e('scheduled_for') ?></th>
-                    <th style="min-width: 190px;"><?= _e('history') ?></th>
-                    <th style="min-width: 124px; width: 124px;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($queuingCampaigns as $campaign) { ?>
-                    <tr>
-                        <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
-                        <td class="small">
-                            <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
-                            <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
-                        </td>
-                        <td class="small">
-                            <?php if (isset($campaign['send_at']) && !empty($campaign['send_at'])) { ?>
-                                <?= date('Y-m-d H:i', strtotime($campaign['send_at'])) ?>
-                            <?php } else { ?>
-                                <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
-                                    <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?>
-                                <?php } else { ?>
-                                    <?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?>
-                                <?php } ?>
+                                            $clickCount = $campaign['clicked_count'] ?? 0;
+                                            $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
+                                        ?>
+                                            <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
+                                            <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
+                                            <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
+                                        <?php } ?>
+                                    </td>
+                                    <td class="small">
+                                        <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                                        <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                            <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                                        <?php } ?>
+                                    </td>
+                                    <td>
+                                        <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
+                                            <i class="bi bi-graph-up"></i>
+                                        </a>
+                                        <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                            <i class="bi bi-files"></i>
+                                        </a>
+                                    </td>
+                                </tr>
                             <?php } ?>
-                        </td>
-                        <td class="small">
-                            <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
-                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
-                                <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
-                            <?php } ?>
-                        </td>
-                        <td>
-                            <a href="/campaign/cancel/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-warning" onclick="return confirm('<?= _e('confirm_cancel_campaign') ?>')" title="Cancel">
-                                <i class="bi bi-x-circle"></i>
-                            </a>
-                            <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
-                                <i class="bi bi-files"></i>
-                            </a>
-                        </td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </div>
-<?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php } ?>
 
-<?php if (isset($scheduledCampaigns) && !empty($scheduledCampaigns)) { ?>
-    <h5 class="mt-4 mb-3"><?= _e('scheduled_campaigns') ?></h5>
-    <div class="table-responsive bg-white rounded border border-bottom-0">
-        <table class="table table-striped table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
-                    <th style="min-width: 320px;"><?= _e('details') ?></th>
-                    <th style="min-width: 180px;"><?= _e('scheduled_for') ?></th>
-                    <th style="min-width: 190px;"><?= _e('history') ?></th>
-                    <th style="min-width: 124px; width: 124px;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ((isset($statusFilter) ? $scheduledCampaigns : $scheduledCampaigns) as $campaign) { ?>
-                    <tr>
-                        <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
-                        <td class="small">
-                            <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
-                            <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
-                        </td>
-                        <td class="small">
-                            <?php if (isset($campaign['send_at']) && !empty($campaign['send_at'])) { ?>
-                                <?= date('Y-m-d H:i', strtotime($campaign['send_at'])) ?>
-                            <?php } else { ?>
-                                <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
-                                    <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?>
-                                <?php } else { ?>
-                                    <?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?>
-                                <?php } ?>
+            <?php if (isset($queuingCampaigns) && !empty($queuingCampaigns)) { ?>
+                <h5 class="mt-4 mb-3"><?= _e('queued_campaigns') ?></h5>
+                <div class="table-responsive bg-white rounded border border-bottom-0">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                                <th style="min-width: 320px;"><?= _e('details') ?></th>
+                                <th style="min-width: 180px;"><?= _e('scheduled_for') ?></th>
+                                <th style="min-width: 190px;"><?= _e('history') ?></th>
+                                <th style="min-width: 124px; width: 124px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($queuingCampaigns as $campaign) { ?>
+                                <tr>
+                                    <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                                    <td class="small">
+                                        <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                                        <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                                    </td>
+                                    <td class="small">
+                                        <?php if (isset($campaign['send_at']) && !empty($campaign['send_at'])) { ?>
+                                            <?= date('Y-m-d H:i', strtotime($campaign['send_at'])) ?>
+                                        <?php } else { ?>
+                                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                                <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?>
+                                            <?php } else { ?>
+                                                <?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?>
+                                            <?php } ?>
+                                        <?php } ?>
+                                    </td>
+                                    <td class="small">
+                                        <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                                        <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                            <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                                        <?php } ?>
+                                    </td>
+                                    <td>
+                                        <a href="/campaign/cancel/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-warning" onclick="return confirm('<?= _e('confirm_cancel_campaign') ?>')" title="Cancel">
+                                            <i class="bi bi-x-circle"></i>
+                                        </a>
+                                        <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                            <i class="bi bi-files"></i>
+                                        </a>
+                                    </td>
+                                </tr>
                             <?php } ?>
-                        </td>
-                        <td class="small">
-                            <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
-                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
-                                <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
-                            <?php } ?>
-                        </td>
-                        <td>
-                            <a href="/campaign/cancel/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-warning" onclick="return confirm('<?= _e('confirm_cancel_campaign') ?>')" title="Cancel">
-                                <i class="bi bi-x-circle"></i>
-                            </a>
-                            <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
-                                <i class="bi bi-files"></i>
-                            </a>
-                        </td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </div>
-<?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php } ?>
+        </div>
 
-<?php if (isset($draftCampaigns) && !empty($draftCampaigns)) { ?>
-    <h5 class="mt-4 mb-3"><?= _e('draft_campaigns') ?></h5>
-    <div class="table-responsive bg-white rounded border border-bottom-0">
-        <table class="table table-striped table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
-                    <th style="min-width: 320px;"><?= _e('details') ?></th>
-                    <th style="min-width: 90px;"><?= _e('status') ?></th>
-                    <th style="min-width: 180px;"><?= _e('rate') ?></th>
-                    <th style="min-width: 190px;"><?= _e('history') ?></th>
-                    <th style="min-width: 124px; width: 124px;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($draftCampaigns as $campaign) { ?>
-                    <tr>
-                        <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
-                        <td class="small">
-                            <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
-                            <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
-                        </td>
-                        <td>
+        <div class="tab-pane fade" id="scheduled" role="tabpanel" aria-labelledby="scheduled-tab">
+            <?php if (isset($scheduledCampaigns) && !empty($scheduledCampaigns)) { ?>
+                <div class="table-responsive bg-white rounded border border-bottom-0">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                                <th style="min-width: 320px;"><?= _e('details') ?></th>
+                                <th style="min-width: 180px;"><?= _e('scheduled_for') ?></th>
+                                <th style="min-width: 190px;"><?= _e('history') ?></th>
+                                <th style="min-width: 124px; width: 124px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ((isset($statusFilter) ? $scheduledCampaigns : $scheduledCampaigns) as $campaign) { ?>
+                                <tr>
+                                    <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                                    <td class="small">
+                                        <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                                        <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                                    </td>
+                                    <td class="small">
+                                        <?php if (isset($campaign['send_at']) && !empty($campaign['send_at'])) { ?>
+                                            <?= date('Y-m-d H:i', strtotime($campaign['send_at'])) ?>
+                                        <?php } else { ?>
+                                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                                <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?>
+                                            <?php } else { ?>
+                                                <?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?>
+                                            <?php } ?>
+                                        <?php } ?>
+                                    </td>
+                                    <td class="small">
+                                        <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                                        <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                            <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                                        <?php } ?>
+                                    </td>
+                                    <td>
+                                        <a href="/campaign/cancel/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-warning" onclick="return confirm('<?= _e('confirm_cancel_campaign') ?>')" title="Cancel">
+                                            <i class="bi bi-x-circle"></i>
+                                        </a>
+                                        <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                            <i class="bi bi-files"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php } ?>
+        </div>
+
+        <div class="tab-pane fade" id="draft" role="tabpanel" aria-labelledby="draft-tab">
+            <?php if (isset($draftCampaigns) && !empty($draftCampaigns)) { ?>
+                <div class="table-responsive bg-white rounded border border-bottom-0">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                                <th style="min-width: 320px;"><?= _e('details') ?></th>
+                                <th style="min-width: 90px;"><?= _e('status') ?></th>
+                                <th style="min-width: 180px;"><?= _e('rate') ?></th>
+                                <th style="min-width: 190px;"><?= _e('history') ?></th>
+                                <th style="min-width: 124px; width: 124px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($draftCampaigns as $campaign) { ?>
+                                <tr>
+                                    <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                                    <td class="small">
+                                        <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                                        <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $statusClass = match ($campaign['status']) {
+                                            'draft' => 'bg-secondary',
+                                            'scheduled' => 'bg-primary',
+                                            'sent' => 'bg-success',
+                                            'sending' => 'bg-info',
+                                            'cancelled' => 'bg-danger',
+                                            'queuing' => 'bg-warning',
+                                            default => 'bg-secondary'
+                                        };
+                                        ?>
+                                        <span class="badge <?= $statusClass ?>">
+                                            <?= _e('status_' . $campaign['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td class="small">
+                                        <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
+                                            $totalRecipients = $campaign['total_recipients'] ?? 1;
+
+                                            $successCount = $campaign['successfully_count'] ?? 0;
+                                            $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
+
+                                            $failedCount = $campaign['error_count'] ?? 0;
+                                            $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
+
+                                            $clickCount = $campaign['clicked_count'] ?? 0;
+                                            $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
+                                        ?>
+                                            <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
+                                            <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
+                                            <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
+                                        <?php } ?>
+                                    </td>
+                                    <td class="small">
+                                        <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                                        <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                            <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                                        <?php } ?>
+                                    </td>
+                                    <td>
+                                        <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
+                                            <a href="/campaign/edit/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                        <?php } ?>
+                                        <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
+                                            <a href="/campaign/delete/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= _e('confirm_delete_campaign') ?>')" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        <?php } ?>
+                                        <?php if (in_array($campaign['status'], ['sent'])) { ?>
+                                            <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
+                                                <i class="bi bi-graph-up"></i>
+                                            </a>
+                                        <?php } ?>
+                                        <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                            <i class="bi bi-files"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php } ?>
+        </div>
+
+        <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="other-tab">
+            <?php if (isset($otherCampaigns) && !empty($otherCampaigns)) { ?>
+                <div class="table-responsive bg-white rounded border border-bottom-0">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                                <th style="min-width: 320px;"><?= _e('details') ?></th>
+                                <th style="min-width: 90px;"><?= _e('status') ?></th>
+                                <th style="min-width: 180px;"><?= _e('rate') ?></th>
+                                <th style="min-width: 190px;"><?= _e('history') ?></th>
+                                <th style="min-width: 124px; width: 124px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($otherCampaigns as $campaign) { ?>
+                                <tr>
+                                    <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                                    <td class="small">
+                                        <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                                        <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $statusClass = match ($campaign['status']) {
+                                            'draft' => 'bg-secondary',
+                                            'scheduled' => 'bg-primary',
+                                            'sent' => 'bg-success',
+                                            'sending' => 'bg-info',
+                                            'cancelled' => 'bg-danger',
+                                            'queuing' => 'bg-warning',
+                                            default => 'bg-secondary'
+                                        };
+                                        ?>
+                                        <span class="badge <?= $statusClass ?>">
+                                            <?= _e('status_' . $campaign['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td class="small">
+                                        <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
+                                            $totalRecipients = $campaign['total_recipients'] ?? 1;
+
+                                            $successCount = $campaign['successfully_count'] ?? 0;
+                                            $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
+
+                                            $failedCount = $campaign['error_count'] ?? 0;
+                                            $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
+
+                                            $clickCount = $campaign['clicked_count'] ?? 0;
+                                            $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
+                                        ?>
+                                            <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
+                                            <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
+                                            <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
+                                        <?php } ?>
+                                    </td>
+                                    <td class="small">
+                                        <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                                        <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                            <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                                        <?php } ?>
+                                    </td>
+                                    <td>
+                                        <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
+                                            <a href="/campaign/edit/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                        <?php } ?>
+                                        <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
+                                            <a href="/campaign/delete/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= _e('confirm_delete_campaign') ?>')" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        <?php } ?>
+                                        <?php if (in_array($campaign['status'], ['sent'])) { ?>
+                                            <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
+                                                <i class="bi bi-graph-up"></i>
+                                            </a>
+                                        <?php } ?>
+                                        <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                            <i class="bi bi-files"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <?php if ($totalPages > 1) { ?>
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center mb-0">
                             <?php
-                            $statusClass = match ($campaign['status']) {
-                                'draft' => 'bg-secondary',
-                                'scheduled' => 'bg-primary',
-                                'sent' => 'bg-success',
-                                'sending' => 'bg-info',
-                                'cancelled' => 'bg-danger',
-                                'queuing' => 'bg-warning',
-                                default => 'bg-secondary'
-                            };
+                            $paginationLinks = PaginationHelper::generatePaginationLinks(
+                                $currentPage,
+                                $totalPages,
+                                '/campaigns',
+                                $queryParams
+                            );
+
+                            foreach ($paginationLinks as $link) {
                             ?>
-                            <span class="badge <?= $statusClass ?>">
-                                <?= _e('status_' . $campaign['status']) ?>
-                            </span>
-                        </td>
-                        <td class="small">
-                            <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
-                                $totalRecipients = $campaign['total_recipients'] ?? 1;
-
-                                $successCount = $campaign['successfully_count'] ?? 0;
-                                $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
-
-                                $failedCount = $campaign['error_count'] ?? 0;
-                                $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
-
-                                $clickCount = $campaign['clicked_count'] ?? 0;
-                                $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
-                            ?>
-                                <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
-                                <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
-                                <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
+                                <li class="page-item 
+                        <?= isset($link['disabled']) && $link['disabled'] ? 'disabled' : '' ?> 
+                        <?= isset($link['active']) && $link['active'] ? 'active' : '' ?>
+                    ">
+                                    <a class="page-link"
+                                        href="<?= $link['url'] ?>"
+                                        <?= isset($link['disabled']) && $link['disabled'] ? 'tabindex="-1"' : '' ?>>
+                                        <?= htmlspecialchars($link['label']) ?>
+                                    </a>
+                                </li>
                             <?php } ?>
-                        </td>
-                        <td class="small">
-                            <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
-                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
-                                <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
-                            <?php } ?>
-                        </td>
-                        <td>
-                            <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
-                                <a href="/campaign/edit/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                            <?php } ?>
-                            <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
-                                <a href="/campaign/delete/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= _e('confirm_delete_campaign') ?>')" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            <?php } ?>
-                            <?php if (in_array($campaign['status'], ['sent'])) { ?>
-                                <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
-                                    <i class="bi bi-graph-up"></i>
-                                </a>
-                            <?php } ?>
-                            <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
-                                <i class="bi bi-files"></i>
-                            </a>
-                        </td>
-                    </tr>
+                        </ul>
+                    </nav>
                 <?php } ?>
-            </tbody>
-        </table>
+
+            <?php } ?>
+        </div>
     </div>
-<?php } ?>
+<?php } else { ?>
+    <?php if (isset($otherCampaigns) && !empty($otherCampaigns)) { ?>
 
-<?php if (isset($otherCampaigns) && !empty($otherCampaigns)) { ?>
-    <h5 class="mt-4 mb-3"><?= _e('other_campaigns') ?></h5>
-    <div class="table-responsive bg-white rounded border border-bottom-0">
-        <table class="table table-striped table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
-                    <th style="min-width: 320px;"><?= _e('details') ?></th>
-                    <th style="min-width: 90px;"><?= _e('status') ?></th>
-                    <th style="min-width: 180px;"><?= _e('rate') ?></th>
-                    <th style="min-width: 190px;"><?= _e('history') ?></th>
-                    <th style="min-width: 124px; width: 124px;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($otherCampaigns as $campaign) { ?>
-                <tr>
-                    <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
-                    <td class="small">
-                        <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
-                        <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
-                    </td>
-                    <td>
-                        <?php
-                        $statusClass = match ($campaign['status']) {
-                            'draft' => 'bg-secondary',
-                            'scheduled' => 'bg-primary',
-                            'sent' => 'bg-success',
-                            'sending' => 'bg-info',
-                            'cancelled' => 'bg-danger',
-                            'queuing' => 'bg-warning',
-                            default => 'bg-secondary'
-                        };
-                        ?>
-                        <span class="badge <?= $statusClass ?>">
-                            <?= _e('status_' . $campaign['status']) ?>
-                        </span>
-                    </td>
-                    <td class="small">
-                        <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
-                            $totalRecipients = $campaign['total_recipients'] ?? 1;
+        <nav class="mt-4 mb-4">
+            <ul class="pagination justify-content-center mb-0">
+                <?php
+                $paginationLinks = PaginationHelper::generatePaginationLinks(
+                    $currentPage,
+                    $totalPages,
+                    '/campaigns',
+                    $queryParams
+                );
 
-                            $successCount = $campaign['successfully_count'] ?? 0;
-                            $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
-
-                            $failedCount = $campaign['error_count'] ?? 0;
-                            $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
-
-                            $clickCount = $campaign['clicked_count'] ?? 0;
-                            $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
-                        ?>
-                            <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
-                            <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
-                            <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
-                        <?php } ?>
-                    </td>
-                    <td class="small">
-                        <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
-                        <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
-                            <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
-                        <?php } ?>
-                    </td>
-                    <td>
-                        <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
-                            <a href="/campaign/edit/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                        <?php } ?>
-                        <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
-                            <a href="/campaign/delete/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= _e('confirm_delete_campaign') ?>')" title="Delete">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        <?php } ?>
-                        <?php if (in_array($campaign['status'], ['sent'])) { ?>
-                            <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
-                                <i class="bi bi-graph-up"></i>
-                            </a>
-                        <?php } ?>
-                        <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
-                            <i class="bi bi-files"></i>
+                foreach ($paginationLinks as $link) {
+                ?>
+                    <li class="page-item 
+        <?= isset($link['disabled']) && $link['disabled'] ? 'disabled' : '' ?> 
+        <?= isset($link['active']) && $link['active'] ? 'active' : '' ?>
+    ">
+                        <a class="page-link"
+                            href="<?= $link['url'] ?>"
+                            <?= isset($link['disabled']) && $link['disabled'] ? 'tabindex="-1"' : '' ?>>
+                            <?= htmlspecialchars($link['label']) ?>
                         </a>
-                    </td>
-                </tr>
-            <?php } ?>
-        </tbody>
-    </table>
-    </div>
-<?php } ?>
+                    </li>
+                <?php } ?>
+            </ul>
+        </nav>
 
-<?php if ($totalPages > 1) { ?>
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center mb-0">
-            <?php
-            $paginationLinks = PaginationHelper::generatePaginationLinks(
-                $currentPage,
-                $totalPages,
-                '/campaigns',
-                $queryParams
-            );
+        <div class="table-responsive bg-white rounded border border-bottom-0">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                        <th style="min-width: 320px;"><?= _e('details') ?></th>
+                        <th style="min-width: 90px;"><?= _e('status') ?></th>
+                        <th style="min-width: 180px;"><?= _e('rate') ?></th>
+                        <th style="min-width: 190px;"><?= _e('history') ?></th>
+                        <th style="min-width: 124px; width: 124px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($otherCampaigns as $campaign) { ?>
+                        <tr>
+                            <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                            <td class="small">
+                                <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                                <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                            </td>
+                            <td>
+                                <?php
+                                $statusClass = match ($campaign['status']) {
+                                    'draft' => 'bg-secondary',
+                                    'scheduled' => 'bg-primary',
+                                    'sent' => 'bg-success',
+                                    'sending' => 'bg-info',
+                                    'cancelled' => 'bg-danger',
+                                    'queuing' => 'bg-warning',
+                                    default => 'bg-secondary'
+                                };
+                                ?>
+                                <span class="badge <?= $statusClass ?>">
+                                    <?= _e('status_' . $campaign['status']) ?>
+                                </span>
+                            </td>
+                            <td class="small">
+                                <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
+                                    $totalRecipients = $campaign['total_recipients'] ?? 1;
 
-            foreach ($paginationLinks as $link) {
-            ?>
-                <li class="page-item 
-                    <?= isset($link['disabled']) && $link['disabled'] ? 'disabled' : '' ?> 
-                    <?= isset($link['active']) && $link['active'] ? 'active' : '' ?>
-                ">
-                    <a class="page-link"
-                        href="<?= $link['url'] ?>"
-                        <?= isset($link['disabled']) && $link['disabled'] ? 'tabindex="-1"' : '' ?>>
-                        <?= htmlspecialchars($link['label']) ?>
-                    </a>
-                </li>
-            <?php } ?>
-        </ul>
-    </nav>
+                                    $successCount = $campaign['successfully_count'] ?? 0;
+                                    $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
+
+                                    $failedCount = $campaign['error_count'] ?? 0;
+                                    $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
+
+                                    $clickCount = $campaign['clicked_count'] ?? 0;
+                                    $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
+                                ?>
+                                    <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
+                                    <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
+                                    <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
+                                <?php } ?>
+                            </td>
+                            <td class="small">
+                                <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                                <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                    <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                                <?php } ?>
+                            </td>
+                            <td>
+                                <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
+                                    <a href="/campaign/edit/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                <?php } ?>
+                                <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
+                                    <a href="/campaign/delete/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= _e('confirm_delete_campaign') ?>')" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                <?php } ?>
+                                <?php if (in_array($campaign['status'], ['sent'])) { ?>
+                                    <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
+                                        <i class="bi bi-graph-up"></i>
+                                    </a>
+                                <?php } ?>
+                                <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                    <i class="bi bi-files"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center mb-0">
+                <?php
+                $paginationLinks = PaginationHelper::generatePaginationLinks(
+                    $currentPage,
+                    $totalPages,
+                    '/campaigns',
+                    $queryParams
+                );
+
+                foreach ($paginationLinks as $link) {
+                ?>
+                    <li class="page-item 
+        <?= isset($link['disabled']) && $link['disabled'] ? 'disabled' : '' ?> 
+        <?= isset($link['active']) && $link['active'] ? 'active' : '' ?>
+    ">
+                        <a class="page-link"
+                            href="<?= $link['url'] ?>"
+                            <?= isset($link['disabled']) && $link['disabled'] ? 'tabindex="-1"' : '' ?>>
+                            <?= htmlspecialchars($link['label']) ?>
+                        </a>
+                    </li>
+                <?php } ?>
+            </ul>
+        </nav>
+
+    <?php } ?>
 <?php } ?>
 
 <?php $this->end() ?>
