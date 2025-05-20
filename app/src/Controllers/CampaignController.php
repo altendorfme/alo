@@ -90,24 +90,6 @@ class CampaignController extends BaseController
                 'statuses' => $this->db->queryFirstColumn("SELECT DISTINCT status FROM campaigns ORDER BY status")
             ];
         } else {
-            $sendingCampaigns = $this->db->query(
-                "SELECT
-                    c.*,
-                    $baseAnalyticsSelect
-                FROM campaigns c
-                WHERE c.status = 'sending'
-                ORDER BY c.created_at ASC"
-            );
-
-            $queuedCampaigns = $this->db->query(
-                "SELECT
-                    c.*,
-                    $baseAnalyticsSelect
-                FROM campaigns c
-                WHERE c.status = 'queued'
-                ORDER BY c.created_at ASC"
-            );
-
             $draftCampaigns = $this->db->query(
                 "SELECT
                     c.*,
@@ -117,12 +99,30 @@ class CampaignController extends BaseController
                 ORDER BY c.created_at ASC"
             );
 
-            $queueCampaigns = $this->db->query(
+            $scheduledCampaigns = $this->db->query(
                 "SELECT
                     c.*,
                     $baseAnalyticsSelect
                 FROM campaigns c
-                WHERE c.status = 'queue'
+                WHERE c.status = 'scheduled'
+                ORDER BY c.created_at ASC"
+            );
+
+            $sendingCampaigns = $this->db->query(
+                "SELECT
+                    c.*,
+                    $baseAnalyticsSelect
+                FROM campaigns c
+                WHERE c.status = 'sending'
+                ORDER BY c.created_at ASC"
+            );
+
+            $queuingCampaigns = $this->db->query(
+                "SELECT
+                    c.*,
+                    $baseAnalyticsSelect
+                FROM campaigns c
+                WHERE c.status = 'queuing'
                 ORDER BY c.created_at ASC"
             );
 
@@ -131,22 +131,22 @@ class CampaignController extends BaseController
                     c.*,
                     $baseAnalyticsSelect
                 FROM campaigns c
-                WHERE c.status NOT IN ('sending', 'queued', 'draft', 'queue')
+                WHERE c.status IN ('sent', 'cancelled')
                 ORDER BY c.created_at DESC
                 LIMIT 20"
             );
 
             $totalCount = $this->db->queryFirstField(
-                "SELECT COUNT(*) FROM campaigns WHERE status NOT IN ('sending', 'queued', 'draft', 'queue')"
+                "SELECT COUNT(*) FROM campaigns WHERE status IN ('sent', 'cancelled')"
             );
 
             $totalPages = ceil($totalCount / $perPage);
 
             $data = [
                 'sendingCampaigns' => $sendingCampaigns,
-                'queuedCampaigns' => $queuedCampaigns,
+                'scheduledCampaigns' => $scheduledCampaigns,
+                'queuingCampaigns' => $queuingCampaigns,
                 'draftCampaigns' => $draftCampaigns,
-                'queueCampaigns' => $queueCampaigns,
                 'otherCampaigns' => $otherCampaigns,
                 'currentPage' => $currentPage,
                 'totalPages' => $totalPages,

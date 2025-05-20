@@ -287,5 +287,5 @@ return [
     'sending_campaigns' => 'Enviando',
     'draft_campaigns' => 'Rascunho',
     'other_campaigns' => 'Arquivo',
-    'queue_campaigns' => 'Em fila'
+    'queued_campaigns' => 'Em fila'
 ];

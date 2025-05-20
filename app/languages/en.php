@@ -287,5 +287,5 @@ return [
     'sending_campaigns' => 'Sending',
     'draft_campaigns' => 'Draft',
     'other_campaigns' => 'Archive',
-    'queue_campaigns' => 'Queued'
+    'queued_campaigns' => 'Queued'
 ];
