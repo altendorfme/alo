@@ -43,41 +43,7 @@ if ($statusFilter) {
     </div>
 </div>
 
-<?php
-$scheduledCampaigns = [];
-$sendingCampaigns = [];
-$otherCampaigns = [];
-
-foreach ($campaigns as $campaign) {
-    if ($campaign['status'] === 'scheduled') {
-        $scheduledCampaigns[] = $campaign;
-    } else if ($campaign['status'] === 'sending') {
-        $sendingCampaigns[] = $campaign;
-     } else {
-        $otherCampaigns[] = $campaign;
-    }
-}
-
-usort($scheduledCampaigns, function ($a, $b) {
-    $aTime = isset($a['send_at']) && $a['send_at'] ? strtotime($a['send_at']) : 0;
-    $bTime = isset($b['send_at']) && $b['send_at'] ? strtotime($b['send_at']) : 0;
-    return $aTime - $bTime;
-});
-
-usort($sendingCampaigns, function ($a, $b) {
-    $aTime = isset($a['created_at']) && $a['created_at'] ? strtotime($a['created_at']) : 0;
-    $bTime = isset($b['created_at']) && $b['created_at'] ? strtotime($b['created_at']) : 0;
-    return $aTime - $bTime;
-});
-
-usort($otherCampaigns, function ($a, $b) {
-    $aTime = isset($a['created_at']) && $a['created_at'] ? strtotime($a['created_at']) : 0;
-    $bTime = isset($b['created_at']) && $b['created_at'] ? strtotime($b['created_at']) : 0;
-    return $bTime - $aTime;
-});
-?>
-
-<?php if (!empty($sendingCampaigns)) { ?>
+<?php if (isset($sendingCampaigns) && !empty($sendingCampaigns)) { ?>
     <h5 class="mt-4 mb-3"><?= _e('sending_campaigns') ?></h5>
     <div class="table-responsive bg-white rounded border border-bottom-0">
         <table class="table table-striped table-hover align-middle mb-0">
@@ -137,8 +103,8 @@ usort($otherCampaigns, function ($a, $b) {
     </div>
 <?php } ?>
 
-<?php if (!empty($scheduledCampaigns)) { ?>
-    <h5 class="mt-4 mb-3"><?= _e('scheduled_campaigns') ?></h5>
+<?php if (isset($queuedCampaigns) && !empty($queuedCampaigns)) { ?>
+    <h5 class="mt-4 mb-3"><?= _e('queued_campaigns') ?></h5>
     <div class="table-responsive bg-white rounded border border-bottom-0">
         <table class="table table-striped table-hover align-middle mb-0">
             <thead>
@@ -151,7 +117,7 @@ usort($otherCampaigns, function ($a, $b) {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($scheduledCampaigns as $campaign) { ?>
+                <?php foreach ($queuedCampaigns as $campaign) { ?>
                     <tr>
                         <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
                         <td class="small">
@@ -190,21 +156,217 @@ usort($otherCampaigns, function ($a, $b) {
     </div>
 <?php } ?>
 
-<h5 class="mt-4 mb-3"><?= _e('campaigns') ?></h5>
-<div class="table-responsive bg-white rounded border border-bottom-0">
-    <table class="table table-striped table-hover align-middle mb-0">
-        <thead>
-            <tr>
-                <th style="min-width: 220px;"><?= _e('campaign') ?></th>
-                <th style="min-width: 320px;"><?= _e('details') ?></th>
-                <th style="min-width: 90px;"><?= _e('status') ?></th>
-                <th style="min-width: 180px;"><?= _e('rate') ?></th>
-                <th style="min-width: 190px;"><?= _e('history') ?></th>
-                <th style="min-width: 124px; width: 124px;"></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($otherCampaigns as $campaign) { ?>
+<?php if (isset($queueCampaigns) && !empty($queueCampaigns)) { ?>
+    <h5 class="mt-4 mb-3"><?= _e('queue_campaigns') ?></h5>
+    <div class="table-responsive bg-white rounded border border-bottom-0">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                    <th style="min-width: 320px;"><?= _e('details') ?></th>
+                    <th style="min-width: 180px;"><?= _e('scheduled_for') ?></th>
+                    <th style="min-width: 190px;"><?= _e('history') ?></th>
+                    <th style="min-width: 124px; width: 124px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($queueCampaigns as $campaign) { ?>
+                    <tr>
+                        <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                        <td class="small">
+                            <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                            <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                        </td>
+                        <td class="small">
+                            <?php if (isset($campaign['send_at']) && !empty($campaign['send_at'])) { ?>
+                                <?= date('Y-m-d H:i', strtotime($campaign['send_at'])) ?>
+                            <?php } else { ?>
+                                <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                    <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?>
+                                <?php } else { ?>
+                                    <?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?>
+                                <?php } ?>
+                            <?php } ?>
+                        </td>
+                        <td class="small">
+                            <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                            <?php } ?>
+                        </td>
+                        <td>
+                            <a href="/campaign/cancel/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-warning" onclick="return confirm('<?= _e('confirm_cancel_campaign') ?>')" title="Cancel">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                            <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                <i class="bi bi-files"></i>
+                            </a>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+<?php } ?>
+
+<?php if ((isset($statusFilter) && $statusFilter === 'scheduled') || (!isset($statusFilter) && isset($scheduledCampaigns) && !empty($scheduledCampaigns))) { ?>
+    <h5 class="mt-4 mb-3"><?= _e('scheduled_campaigns') ?></h5>
+    <div class="table-responsive bg-white rounded border border-bottom-0">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                    <th style="min-width: 320px;"><?= _e('details') ?></th>
+                    <th style="min-width: 180px;"><?= _e('scheduled_for') ?></th>
+                    <th style="min-width: 190px;"><?= _e('history') ?></th>
+                    <th style="min-width: 124px; width: 124px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ((isset($statusFilter) ? $scheduledCampaigns : $scheduledCampaigns) as $campaign) { ?>
+                    <tr>
+                        <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                        <td class="small">
+                            <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                            <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                        </td>
+                        <td class="small">
+                            <?php if (isset($campaign['send_at']) && !empty($campaign['send_at'])) { ?>
+                                <?= date('Y-m-d H:i', strtotime($campaign['send_at'])) ?>
+                            <?php } else { ?>
+                                <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                    <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?>
+                                <?php } else { ?>
+                                    <?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?>
+                                <?php } ?>
+                            <?php } ?>
+                        </td>
+                        <td class="small">
+                            <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                            <?php } ?>
+                        </td>
+                        <td>
+                            <a href="/campaign/cancel/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-warning" onclick="return confirm('<?= _e('confirm_cancel_campaign') ?>')" title="Cancel">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                            <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                <i class="bi bi-files"></i>
+                            </a>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+<?php } ?>
+
+<?php if (isset($draftCampaigns) && !empty($draftCampaigns)) { ?>
+    <h5 class="mt-4 mb-3"><?= _e('draft_campaigns') ?></h5>
+    <div class="table-responsive bg-white rounded border border-bottom-0">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                    <th style="min-width: 320px;"><?= _e('details') ?></th>
+                    <th style="min-width: 90px;"><?= _e('status') ?></th>
+                    <th style="min-width: 180px;"><?= _e('rate') ?></th>
+                    <th style="min-width: 190px;"><?= _e('history') ?></th>
+                    <th style="min-width: 124px; width: 124px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($draftCampaigns as $campaign) { ?>
+                    <tr>
+                        <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
+                        <td class="small">
+                            <div><a href="<?= htmlspecialchars($campaign['push_url'] ?? '#') ?>" class="link-secondary" target="_blank"><?= htmlspecialchars($campaign['push_title']) ?></a></div>
+                            <div title="<?= htmlspecialchars($campaign['push_body']) ?>"><?= strlen($campaign['push_body']) > 60 ? substr(htmlspecialchars($campaign['push_body']), 0, 60) . '...' : htmlspecialchars($campaign['push_body']) ?></div>
+                        </td>
+                        <td>
+                            <?php
+                            $statusClass = match ($campaign['status']) {
+                                'draft' => 'bg-secondary',
+                                'scheduled' => 'bg-primary',
+                                'sent' => 'bg-success',
+                                'sending' => 'bg-info',
+                                'cancelled' => 'bg-danger',
+                                'queuing' => 'bg-warning',
+                                default => 'bg-secondary'
+                            };
+                            ?>
+                            <span class="badge <?= $statusClass ?>">
+                                <?= _e('status_' . $campaign['status']) ?>
+                            </span>
+                        </td>
+                        <td class="small">
+                            <?php if (in_array($campaign['status'], ['sent', 'sending'])) {
+                                $totalRecipients = $campaign['total_recipients'] ?? 1;
+
+                                $successCount = $campaign['successfully_count'] ?? 0;
+                                $successPercentage = $totalRecipients > 0 ? round(($successCount / $totalRecipients) * 100, 2) : 0;
+
+                                $failedCount = $campaign['error_count'] ?? 0;
+                                $failedPercentage = $successCount > 0 ? round(($failedCount / $totalRecipients) * 100, 2) : 0;
+
+                                $clickCount = $campaign['clicked_count'] ?? 0;
+                                $clickPercentage = $successCount > 0 ? round(($clickCount / $totalRecipients) * 100, 2) : 0;
+                            ?>
+                                <div><?= _e('success') ?>: <?= $successCount ?> (<?= $successPercentage ?>%)</div>
+                                <div><?= _e('failed') ?>: <?= $failedCount ?> (<?= $failedPercentage ?>%)</div>
+                                <div><?= _e('clicks') ?>: <?= $clickCount ?> (<?= $clickPercentage ?>%)</div>
+                            <?php } ?>
+                        </td>
+                        <td class="small">
+                            <div><?= date('Y-m-d H:i', strtotime($campaign['created_at'])) ?></div>
+                            <?php if ($campaign['created_at'] !== $campaign['updated_at']) { ?>
+                                <div><?= _e('updated_at') ?>: <?= date('Y-m-d H:i', strtotime($campaign['updated_at'])) ?></div>
+                            <?php } ?>
+                        </td>
+                        <td>
+                            <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
+                                <a href="/campaign/edit/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            <?php } ?>
+                            <?php if (in_array($campaign['status'], ['draft', 'cancelled'])) { ?>
+                                <a href="/campaign/delete/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= _e('confirm_delete_campaign') ?>')" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            <?php } ?>
+                            <?php if (in_array($campaign['status'], ['sent'])) { ?>
+                                <a href="/campaign/analytics/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('analytics') ?>">
+                                    <i class="bi bi-graph-up"></i>
+                                </a>
+                            <?php } ?>
+                            <a href="/campaign/duplicate/<?= $campaign['id'] ?>" class="btn btn-sm btn-outline-info" title="<?= _e('duplicate') ?>">
+                                <i class="bi bi-files"></i>
+                            </a>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+<?php } ?>
+
+<?php if (isset($otherCampaigns) && !empty($otherCampaigns)) { ?>
+    <h5 class="mt-4 mb-3"><?= _e('other_campaigns') ?></h5>
+    <div class="table-responsive bg-white rounded border border-bottom-0">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="min-width: 220px;"><?= _e('campaign') ?></th>
+                    <th style="min-width: 320px;"><?= _e('details') ?></th>
+                    <th style="min-width: 90px;"><?= _e('status') ?></th>
+                    <th style="min-width: 180px;"><?= _e('rate') ?></th>
+                    <th style="min-width: 190px;"><?= _e('history') ?></th>
+                    <th style="min-width: 124px; width: 124px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($otherCampaigns as $campaign) { ?>
                 <tr>
                     <td class="small"><?= htmlspecialchars($campaign['name']) ?></td>
                     <td class="small">
@@ -275,7 +437,8 @@ usort($otherCampaigns, function ($a, $b) {
             <?php } ?>
         </tbody>
     </table>
-</div>
+    </div>
+<?php } ?>
 
 <?php if ($totalPages > 1) { ?>
     <nav class="mt-4">

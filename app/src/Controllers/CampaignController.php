@@ -51,45 +51,109 @@ class CampaignController extends BaseController
         $perPage = 20;
         $offset = ($currentPage - 1) * $perPage;
 
-        $whereClause = "";
-        $queryParams = [];
+        $baseAnalyticsSelect = "
+            (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'delivered') AS successfully_count,
+            (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'failed') AS error_count,
+            (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'clicked') AS clicked_count,
+            c.total_recipients
+        ";
+
         if ($statusFilter) {
             $whereClause = "WHERE status = %s";
-            $queryParams[] = $statusFilter;
+            $queryParams = [$statusFilter];
+
+            $totalCount = $this->db->queryFirstField(
+                "SELECT COUNT(*) FROM campaigns " . $whereClause,
+                ...array_values($queryParams)
+            );
+
+            $totalPages = ceil($totalCount / $perPage);
+            if ($currentPage > $totalPages && $totalPages > 0) {
+                return new Response(302, ['Location' => '/campaigns/page/' . $totalPages]);
+            }
+
+            $campaigns = $this->db->query(
+                "SELECT
+                    c.*,
+                    $baseAnalyticsSelect
+                FROM campaigns c " .
+                    $whereClause .
+                    " ORDER BY c.created_at DESC LIMIT %i, %i",
+                ...array_merge(array_values($queryParams), [$offset, $perPage])
+            );
+
+            $data = [
+                'campaigns' => $campaigns,
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
+                'statusFilter' => $statusFilter,
+                'statuses' => $this->db->queryFirstColumn("SELECT DISTINCT status FROM campaigns ORDER BY status")
+            ];
+        } else {
+            $sendingCampaigns = $this->db->query(
+                "SELECT
+                    c.*,
+                    $baseAnalyticsSelect
+                FROM campaigns c
+                WHERE c.status = 'sending'
+                ORDER BY c.created_at ASC"
+            );
+
+            $queuedCampaigns = $this->db->query(
+                "SELECT
+                    c.*,
+                    $baseAnalyticsSelect
+                FROM campaigns c
+                WHERE c.status = 'queued'
+                ORDER BY c.created_at ASC"
+            );
+
+            $draftCampaigns = $this->db->query(
+                "SELECT
+                    c.*,
+                    $baseAnalyticsSelect
+                FROM campaigns c
+                WHERE c.status = 'draft'
+                ORDER BY c.created_at ASC"
+            );
+
+            $queueCampaigns = $this->db->query(
+                "SELECT
+                    c.*,
+                    $baseAnalyticsSelect
+                FROM campaigns c
+                WHERE c.status = 'queue'
+                ORDER BY c.created_at ASC"
+            );
+
+            $otherCampaigns = $this->db->query(
+                "SELECT
+                    c.*,
+                    $baseAnalyticsSelect
+                FROM campaigns c
+                WHERE c.status NOT IN ('sending', 'queued', 'draft', 'queue')
+                ORDER BY c.created_at DESC
+                LIMIT 20"
+            );
+
+            $totalCount = $this->db->queryFirstField(
+                "SELECT COUNT(*) FROM campaigns WHERE status NOT IN ('sending', 'queued', 'draft', 'queue')"
+            );
+
+            $totalPages = ceil($totalCount / $perPage);
+
+            $data = [
+                'sendingCampaigns' => $sendingCampaigns,
+                'queuedCampaigns' => $queuedCampaigns,
+                'draftCampaigns' => $draftCampaigns,
+                'queueCampaigns' => $queueCampaigns,
+                'otherCampaigns' => $otherCampaigns,
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
+                'statusFilter' => null,
+                'statuses' => $this->db->queryFirstColumn("SELECT DISTINCT status FROM campaigns ORDER BY status")
+            ];
         }
-
-        $totalCount = $this->db->queryFirstField(
-            "SELECT COUNT(*) FROM campaigns " . $whereClause,
-            ...array_values($queryParams)
-        );
-
-        $totalPages = ceil($totalCount / $perPage);
-        if ($currentPage > $totalPages && $totalPages > 0) {
-            return new Response(302, ['Location' => '/campaigns/page/' . $totalPages]);
-        }
-
-        $campaigns = $this->db->query(
-            "SELECT
-                c.*,
-                (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'delivered') AS successfully_count,
-                (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'failed') AS error_count,
-                (SELECT IFNULL(SUM(count), 0) FROM analytics_campaign ac WHERE ac.campaign_id = c.id AND ac.interaction_type = 'clicked') AS clicked_count,
-                c.total_recipients
-            FROM campaigns c " .
-                $whereClause .
-                " ORDER BY c.created_at DESC LIMIT %i, %i",
-            ...array_merge(array_values($queryParams), [$offset, $perPage])
-        );
-
-        $statuses = $this->db->queryFirstColumn("SELECT DISTINCT status FROM campaigns ORDER BY status");
-
-        $data = [
-            'campaigns' => $campaigns,
-            'currentPage' => $currentPage,
-            'totalPages' => $totalPages,
-            'statusFilter' => $statusFilter,
-            'statuses' => $statuses
-        ];
 
         if (isset($queryParams['error'])) {
             $data['error'] = $queryParams['error'];
@@ -708,7 +772,6 @@ class CampaignController extends BaseController
                 ]);
             }
 
-            // Create a new campaign with the same data but as draft
             $newCampaignData = [
                 'name' => $campaign['name'],
                 'push_title' => $campaign['push_title'],

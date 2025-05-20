@@ -285,4 +285,7 @@ return [
     'scheduled_for' => 'Agendado para',
     'amqp_error' => 'Falha na conexão AMQP:',
     'sending_campaigns' => 'Enviando',
+    'draft_campaigns' => 'Rascunho',
+    'other_campaigns' => 'Arquivo',
+    'queue_campaigns' => 'Em fila'
 ];
