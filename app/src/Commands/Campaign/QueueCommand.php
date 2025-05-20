@@ -163,10 +163,11 @@ class QueueCommand
                 ];
                 
                 $msg = new AMQPMessage(json_encode($subscriberPayload), [
-                    'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT
+                    'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
+                    'priority' => 0
                 ]);
                 
-                $channel->basic_publish($msg, '', 'campaigns');
+                $channel->basic_publish($msg, '', 'campaigns', false, false);
             }
             
             $totalProcessed += $batchCount;
