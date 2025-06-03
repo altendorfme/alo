@@ -301,5 +301,13 @@ return [
     'error_start_datetime_required' => 'Data e hora de início são obrigatórias',
     'error_invalid_date_format' => 'Formato de data inválido',
     'error_failed_to_schedule' => 'Falha ao agendar campanhas',
-    'success_scheduled_campaigns' => 'Campanhas agendadas com sucesso'
+    'success_scheduled_campaigns' => 'Campanhas agendadas com sucesso',
+    'batch_delete_campaigns' => 'Remover campanhas',
+    'batch_delete_warning' => 'Esta ação irá remover permanentemente as campanhas selecionadas.',
+    'delete_selected_campaigns' => 'Remover campanhas selecionadas',
+    'confirm_delete_campaigns' => 'Tem certeza de que deseja excluir as seguintes campanhas?',
+    'error_invalid_campaign_selection' => 'Seleção de campanhas inválida',
+    'success_campaigns_deleted' => 'Campanhas removidas com sucesso',
+    'warning_some_campaigns_deleted' => 'Algumas campanhas foram removidas, outras não puderam ser removidas',
+    'error_failed_to_delete_campaigns' => 'Falha ao remover campanhas'
 ];

@@ -301,5 +301,13 @@ return [
     'error_start_datetime_required' => 'Start date and time is required',
     'error_invalid_date_format' => 'Invalid date format',
     'error_failed_to_schedule' => 'Failed to schedule campaigns',
-    'success_scheduled_campaigns' => 'Successfully scheduled campaigns'
+    'success_scheduled_campaigns' => 'Successfully scheduled campaigns',
+    'batch_delete_campaigns' => 'Delete Campaigns',
+    'batch_delete_warning' => 'This action will permanently delete the selected campaigns.',
+    'delete_selected_campaigns' => 'Delete Selected Campaigns',
+    'confirm_delete_campaigns' => 'Are you sure you want to delete the following campaigns?',
+    'error_invalid_campaign_selection' => 'Invalid campaign selection',
+    'success_campaigns_deleted' => 'Campaigns deleted successfully',
+    'warning_some_campaigns_deleted' => 'Some campaigns were deleted, others could not be deleted',
+    'error_failed_to_delete_campaigns' => 'Failed to delete campaigns'
 ];

@@ -319,29 +319,46 @@ if ($statusFilter) {
                     </table>
                 </div>
                 
-                <div class="mt-3 batch-schedule-options" style="display: none;">
-                    <div class="card">
-                        <div class="card-header">
-                            <?= _e('batch_schedule_campaigns') ?>
+                <div class="mt-3 batch-actions-options" style="display: none;">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <?= _e('batch_schedule_campaigns') ?>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="startDateTime" class="form-label"><?= _e('start_datetime') ?></label>
+                                            <input type="datetime-local" class="form-control" id="startDateTime" name="start_datetime">
+                                            <div class="form-text"><?= _e('start_datetime_description') ?></div>
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label for="timeInterval" class="form-label"><?= _e('time_interval') ?></label>
+                                            <select class="form-select" id="timeInterval" name="time_interval">
+                                                <option value="15"><?= _e('15_minutes') ?></option>
+                                                <option value="30"><?= _e('30_minutes') ?></option>
+                                                <option value="60"><?= _e('60_minutes') ?></option>
+                                            </select>
+                                            <div class="form-text"><?= _e('time_interval_description') ?></div>
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary w-100"><?= _e('schedule_selected_campaigns') ?></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-12 col-md-5">
-                                    <label for="startDateTime" class="form-label"><?= _e('start_datetime') ?></label>
-                                    <input type="datetime-local" class="form-control" id="startDateTime" name="start_datetime" required>
-                                    <div class="form-text"><?= _e('start_datetime_description') ?></div>
+                        <div class="col-12 col-md-6">
+                            <div class="card">
+                                <div class="card-header text-danger">
+                                    <?= _e('batch_delete_campaigns') ?>
                                 </div>
-                                <div class="col-12 col-md-5 mb-3 mb-md-0">
-                                    <label for="timeInterval" class="form-label"><?= _e('time_interval') ?></label>
-                                    <select class="form-select" id="timeInterval" name="time_interval" required>
-                                        <option value="15"><?= _e('15_minutes') ?></option>
-                                        <option value="30"><?= _e('30_minutes') ?></option>
-                                        <option value="60"><?= _e('60_minutes') ?></option>
-                                    </select>
-                                    <div class="form-text"><?= _e('time_interval_description') ?></div>
-                                </div>
-                                <div class="col-12 col-md-2 mb-0 mb-md-0 mt-md-2 pt-md-4">
-                                    <button type="submit" class="btn btn-primary w-100"><?= _e('schedule_selected_campaigns') ?></button>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3"><?= _e('batch_delete_warning') ?></p>
+                                    <button type="button" class="btn btn-danger w-100" id="batchDeleteBtn" onclick="confirmBatchDelete()">
+                                        <i class="bi bi-trash me-2"></i><?= _e('delete_selected_campaigns') ?>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -349,16 +366,21 @@ if ($statusFilter) {
                 </div>
                 </form>
                 
+                <!-- Form separado para remoção em lote -->
+                <form id="batchDeleteForm" action="/campaigns/batch-delete" method="post" style="display: none;">
+                    <input type="hidden" name="campaign_ids" id="deleteSelectedIds" value="">
+                </form>
+                
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         const selectAllCheckbox = document.getElementById('selectAllDraft');
                         const campaignCheckboxes = document.querySelectorAll('.campaign-checkbox');
-                        const batchScheduleOptions = document.querySelector('.batch-schedule-options');
+                        const batchActionsOptions = document.querySelector('.batch-actions-options');
                         let selectionOrder = [];
                         
-                        function toggleBatchScheduleOptions() {
+                        function toggleBatchActionsOptions() {
                             const anyChecked = Array.from(campaignCheckboxes).some(checkbox => checkbox.checked);
-                            batchScheduleOptions.style.display = anyChecked ? 'block' : 'none';
+                            batchActionsOptions.style.display = anyChecked ? 'block' : 'none';
                         }
                         
                         function updateSelectionOrderDisplay() {
@@ -400,7 +422,7 @@ if ($statusFilter) {
                                 });
                             }
                             updateSelectionOrderDisplay();
-                            toggleBatchScheduleOptions();
+                            toggleBatchActionsOptions();
                         });
                         
                         campaignCheckboxes.forEach(checkbox => {
@@ -414,7 +436,7 @@ if ($statusFilter) {
                                 }
                                 
                                 updateSelectionOrderDisplay();
-                                toggleBatchScheduleOptions();
+                                toggleBatchActionsOptions();
                             });
                         });
                         
@@ -432,6 +454,28 @@ if ($statusFilter) {
                             startDateTimeInput.value = currentDateTime;
                         }
                     });
+                    
+                    function confirmBatchDelete() {
+                        const checkedBoxes = document.querySelectorAll('.campaign-checkbox:checked');
+                        if (checkedBoxes.length === 0) {
+                            alert('<?= _e('error_no_campaigns_selected') ?>');
+                            return;
+                        }
+                        
+                        const campaignNames = Array.from(checkedBoxes).map(checkbox => {
+                            const row = checkbox.closest('tr');
+                            return row.querySelector('td:nth-child(2)').textContent.trim();
+                        });
+                        
+                        const confirmMessage = '<?= _e('confirm_delete_campaigns') ?>\n\n' +
+                            campaignNames.map((name, index) => `${index + 1}. ${name}`).join('\n');
+                        
+                        if (confirm(confirmMessage)) {
+                            const selectedIds = Array.from(checkedBoxes).map(checkbox => checkbox.value);
+                            document.getElementById('deleteSelectedIds').value = JSON.stringify(selectedIds);
+                            document.getElementById('batchDeleteForm').submit();
+                        }
+                    }
                 </script>
             <?php } ?>
         </div>

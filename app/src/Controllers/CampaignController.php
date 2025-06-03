@@ -962,4 +962,69 @@ class CampaignController extends BaseController
             ]);
         }
     }
+
+    public function batchDeleteCampaigns(ServerRequestInterface $request): ResponseInterface
+    {
+        $params = (array)$request->getParsedBody();
+        $campaignIdsJson = $params['campaign_ids'] ?? '';
+        
+        if (empty($campaignIdsJson)) {
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode('error_no_campaigns_selected')
+            ]);
+        }
+        
+        $campaignIds = json_decode($campaignIdsJson, true);
+        if (!is_array($campaignIds) || empty($campaignIds)) {
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode('error_invalid_campaign_selection')
+            ]);
+        }
+        
+        try {
+            $currentUserId = $this->getCurrentUserId();
+            if ($currentUserId === null) {
+                return new Response(302, [
+                    'Location' => '/campaigns?error=' . urlencode('error_authentication_required')
+                ]);
+            }
+            
+            $campaignObj = new \alo\Campaign();
+            $successCount = 0;
+            $errorCount = 0;
+            
+            foreach ($campaignIds as $campaignId) {
+                // Verificar se a campanha existe e pode ser deletada
+                $campaign = $campaignObj->get($campaignId);
+                if ($campaign && in_array($campaign['status'], ['draft', 'cancelled'])) {
+                    $result = $campaignObj->delete($campaignId);
+                    if ($result) {
+                        $successCount++;
+                    } else {
+                        $errorCount++;
+                    }
+                } else {
+                    $errorCount++;
+                }
+            }
+            
+            if ($successCount > 0 && $errorCount === 0) {
+                return new Response(302, [
+                    'Location' => '/campaigns?success=' . urlencode('success_campaigns_deleted')
+                ]);
+            } elseif ($successCount > 0 && $errorCount > 0) {
+                return new Response(302, [
+                    'Location' => '/campaigns?warning=' . urlencode('warning_some_campaigns_deleted')
+                ]);
+            } else {
+                return new Response(302, [
+                    'Location' => '/campaigns?error=' . urlencode('error_failed_to_delete_campaigns')
+                ]);
+            }
+        } catch (Exception $e) {
+            return new Response(302, [
+                'Location' => '/campaigns?error=' . urlencode($e->getMessage())
+            ]);
+        }
+    }
 }
