@@ -133,7 +133,8 @@ class CampaignController extends BaseController
                 FROM campaigns c
                 WHERE c.status IN ('sent', 'cancelled')
                 ORDER BY c.created_at DESC
-                LIMIT 20"
+                LIMIT %i, %i",
+                $offset, $perPage
             );
 
             $totalCount = $this->db->queryFirstField(
