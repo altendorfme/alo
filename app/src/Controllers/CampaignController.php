@@ -96,7 +96,7 @@ class CampaignController extends BaseController
                     $baseAnalyticsSelect
                 FROM campaigns c
                 WHERE c.status = 'draft'
-                ORDER BY c.created_at ASC"
+                ORDER BY c.created_at DESC"
             );
 
             $scheduledCampaigns = $this->db->query(
