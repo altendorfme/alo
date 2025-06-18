@@ -223,13 +223,10 @@ class CampaignController extends BaseController
 
     public function viewCampaign(ServerRequestInterface $request): ResponseInterface
     {
-        $listSegments = $this->getListSegments();
-
         return $this->render('main/campaign', [
             'title' => _e('campaign_create'),
             'campaign' => null,
             'isEdit' => false,
-            'listSegments' => $listSegments,
             'client' => [
                 'icon' => $this->config->get('client.icon') ?? null,
                 'badge' => $this->config->get('client.badge') ?? null,
@@ -253,13 +250,10 @@ class CampaignController extends BaseController
             ]);
         }
 
-        $listSegments = $this->getListSegments();
-
         return $this->render('main/campaign', [
             'title' => _e('campaign_edit'),
             'campaign' => $campaign,
             'isEdit' => true,
-            'listSegments' => $listSegments,
             'client' => [
                 'icon' => $this->config->get('client.icon') ?? null,
                 'badge' => $this->config->get('client.badge') ?? null,
@@ -269,7 +263,7 @@ class CampaignController extends BaseController
 
     public function processCampaign(ServerRequestInterface $request): ResponseInterface
     {
-        $listSegments = $this->getListSegments();
+        $listSegments = $this->getListSegmentsData();
         $params = (array)$request->getParsedBody();
         $data = [
             'name' => $params['name'] ?? '',
@@ -376,7 +370,7 @@ class CampaignController extends BaseController
             ]);
         }
 
-        $listSegments = $this->getListSegments();
+        $listSegments = $this->getListSegmentsData();
         $params = (array)$request->getParsedBody();
         $data = [
             'name' => $params['name'] ?? '',
@@ -1031,5 +1025,33 @@ class CampaignController extends BaseController
                 'Location' => '/campaigns?error=' . urlencode($e->getMessage())
             ]);
         }
+    }
+
+    public function getListSegmentsAjax(ServerRequestInterface $request): ResponseInterface
+    {
+        $listSegments = $this->getListSegmentsData();
+
+        return new Response(
+            200,
+            ['Content-Type' => 'application/json'],
+            json_encode($listSegments)
+        );
+    }
+
+    private function getListSegmentsData(): array
+    {
+        $listSegments = $this->db->query(
+            "SELECT
+                s.id,
+                s.name,
+                s.description,
+                GROUP_CONCAT(DISTINCT sg.value SEPARATOR '|') AS segment_values
+            FROM segments s
+            LEFT JOIN segment_goals sg ON sg.segment_id = s.id
+            GROUP BY s.id, s.name, s.description
+            ORDER BY s.name"
+        );
+
+        return array_filter($listSegments);
     }
 }

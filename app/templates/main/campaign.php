@@ -118,6 +118,9 @@
                     <h5 class="card-title mb-0"><?= _e('segments') ?> (<?= _e('optional') ?>)</h5>
                 </div>
                 <div class="card-body">
+                    <div id="segmentsLoadingContainer" class="position-relative py-3">
+                        <div id="segmentsLoading" class="ldld default"></div>
+                    </div>
                     <div id="segmentsContainer">
 
                         <?php
@@ -262,10 +265,77 @@
 
 <?php $this->start('page_scripts') ?>
 <script id="listSegments" type="application/json">
-    <?= json_encode($listSegments); ?>
+    []
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Segments
+        loadSegments();
+        
+        function loadSegments() {
+            var ldld = new ldloader({ root: "#segmentsLoading" }); 
+            ldld.on();
+
+            document.getElementById('segmentsLoadingContainer').style.display = 'block';
+            document.getElementById('segmentsContainer').style.display = 'none';
+            document.getElementById('addSegmentBtn').style.display = 'none';
+            
+            fetch('/api/campaign/segments')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('<?= _e('error_network_response') ?>');
+                    }
+                    return response.json();
+                })
+                .then(segments => {
+                    document.getElementById('listSegments').textContent = JSON.stringify(segments);
+                    
+                    listSegments = segments;
+                    segmentsArray = Object.values(segments);
+                    
+                    updateExistingSegmentSelects();
+                    
+                    ldld.off();
+                    document.getElementById('segmentsLoadingContainer').style.display = 'none';
+                    document.getElementById('segmentsContainer').style.display = 'block';
+                    document.getElementById('addSegmentBtn').style.display = 'inline-block';
+                    
+                    updateUserCount();
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar segmentos:', error);
+                    ldld.off();
+                    document.getElementById('segmentsLoadingContainer').style.display = 'none';
+                    document.getElementById('segmentsContainer').style.display = 'block';
+                    document.getElementById('addSegmentBtn').style.display = 'inline-block';
+                });
+        }
+        
+        function updateExistingSegmentSelects() {
+            const existingSelects = document.querySelectorAll('.segment-select');
+            existingSelects.forEach(select => {
+                const currentValue = select.value;
+                
+                while (select.children.length > 1) {
+                    select.removeChild(select.lastChild);
+                }
+                
+                segmentsArray.forEach(segment => {
+                    const option = document.createElement('option');
+                    option.value = segment.id;
+                    option.textContent = segment.description || segment.name;
+                    if (currentValue == segment.id) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+                
+                if (currentValue) {
+                    fetchSegmentValues(select);
+                }
+            });
+        }
+        
         // Publish confirmation
         const campaignForm = document.getElementById('campaignForm');
         const publishButton = document.querySelector('button[name="action"][value="save"]');
@@ -311,8 +381,8 @@
         const existingSegments = document.querySelectorAll('.segment-row');
         let segmentIndex = existingSegments.length > 0 ? existingSegments.length : 0;
 
-        const listSegments = JSON.parse(document.getElementById('listSegments').textContent);
-        const segmentsArray = Object.values(listSegments);
+        let listSegments = JSON.parse(document.getElementById('listSegments').textContent);
+        let segmentsArray = Object.values(listSegments);
 
         function reindexSegments() {
             const segmentRows = document.querySelectorAll('.segment-row');
@@ -541,7 +611,6 @@
                 updateUserCount();
             });
         });
-        updateUserCount();
 
         // Image Preview
         function updateImagePreview(preview, url) {

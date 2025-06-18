@@ -102,6 +102,7 @@ return function (Container $container): Router {
         // API
         //-- Campaign
         $route->post('/api/campaign/import/metadata', [CampaignController::class, 'importMetadata']);
+        $route->get('/api/campaign/segments', [CampaignController::class, 'getListSegmentsAjax']);
         //-- Segments
         $route->post('/api/segments', [SegmentController::class, 'subscribersBySegments']);
         $route->get('/api/segments/values/{id:\d+}', [SegmentController::class, 'getSegments']);
