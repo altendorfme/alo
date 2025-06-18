@@ -24,7 +24,8 @@ use alo\Middleware\{
 };
 use alo\Commands\Campaign\{
     SendCommand,
-    QueueCommand
+    QueueCommand,
+    DraftCleanupCommand
 };
 use alo\Commands\GeoIP\UpdateCommand;
 use alo\Analytics\{
@@ -77,6 +78,7 @@ class ContainerFactory
             UpdateCommand::class => \DI\autowire(UpdateCommand::class),
             SendCommand::class => \DI\autowire(SendCommand::class),
             QueueCommand::class => \DI\autowire(QueueCommand::class),
+            DraftCleanupCommand::class => \DI\autowire(DraftCleanupCommand::class),
         ]);
 
         return $builder->build();

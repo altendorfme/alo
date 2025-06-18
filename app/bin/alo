@@ -17,6 +17,7 @@ use alo\Commands\GeoIP\UpdateCommand as GeoIPUpdateCommand;
 use alo\Commands\App\MigrationCommand;
 use alo\Commands\Optimize\Database\OptimizeDatabase;
 use alo\Commands\Optimize\Analytics\OptimizeSubscribersCommand;
+use alo\Commands\Campaign\DraftCleanupCommand;
 
 // Create dependency injection container
 $container = ContainerFactory::create();
@@ -52,6 +53,10 @@ $commands = [
     },
     'campaign:analytics' => function() use ($container, $climate) {
         $command = $container->get(AnalyticsCommand::class);
+        return $command->execute();
+    },
+    'campaign:draft:cleanup' => function() use ($container, $climate) {
+        $command = $container->get(DraftCleanupCommand::class);
         return $command->execute();
     },
 ];

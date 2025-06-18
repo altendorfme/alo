@@ -143,6 +143,7 @@ log_info "Setting up cron jobs..."
     echo "*/5 * * * * /usr/local/bin/php /app/bin/alo campaign:queue 2>&1 | tee -a /proc/1/fd/1"
     echo "0 4 * * 1 /usr/local/bin/php /app/bin/alo optimize:database --innodb-only 5 2>&1 | tee -a /proc/1/fd/1"
     echo "0 3 * * * /usr/local/bin/php /app/bin/alo optimize:analytics:subscribers 31 2>&1 | tee -a /proc/1/fd/1"
+    echo "0 2 * * * /usr/local/bin/php /app/bin/alo campaign:draft:cleanup 31 2>&1 | tee -a /proc/1/fd/1"
 ) | crontab -
 
 service cron restart
