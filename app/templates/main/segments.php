@@ -23,11 +23,20 @@ $this->layout('layout/default', ['title' => _e('segments')]) ?>
             <?php foreach ($segments as $segment) { ?>
                 <tr>
                     <td>
-                        <a href="/segment/edit/<?= $segment['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
-                            <i class="bi bi-pencil-square"></i>
+                        <div class="btn-group" role="group">
+                            <a href="/segment/data/<?= $segment['id'] ?>" class="btn btn-sm btn-outline-primary" title="<?= _e('view_data') ?>">
+                                <i class="bi bi-bar-chart"></i>
+                            </a>
+                            <a href="/segment/edit/<?= $segment['id'] ?>" class="btn btn-sm btn-outline-secondary" title="<?= _e('edit') ?>">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        </div>
+                    </td>
+                    <td class="small">
+                        <a href="/segment/data/<?= $segment['id'] ?>" class="text-decoration-none">
+                            <?= htmlspecialchars($segment['name']) ?>
                         </a>
                     </td>
-                    <td class="small"><?= htmlspecialchars($segment['name']) ?></td>
                     <td class="small"><?= !empty($segment['description']) ? htmlspecialchars($segment['description']) : _e('no_description') ?></td>
                 </tr>
             <?php } ?>

@@ -23,32 +23,6 @@ class AdminController extends BaseController
 
     public function dashboard(ServerRequestInterface $request): ResponseInterface
     {
-        $getSegmentData = function ($segmentType) {
-            $query = "
-                SELECT
-                    a.segment_value as name,
-                    a.count
-                FROM
-                    segments s
-                JOIN
-                    analytics_segments a ON s.id = a.segment_id
-                WHERE
-                    s.name = %s
-                ORDER BY
-                    a.count DESC
-            ";
-
-            $results = $this->db->query($query, $segmentType);
-
-            $labels = array_column($results, 'name');
-            $data = array_column($results, 'count');
-
-            return [
-                'labels' => $labels ?: [],
-                'data' => $data ?: []
-            ];
-        };
-
         $subscribers_trend = [];
         try {
             $earliestDataQuery = "
@@ -151,13 +125,6 @@ class AdminController extends BaseController
                     'cancelled' => $this->db->queryFirstRow("SELECT COUNT(*) as count FROM campaigns WHERE status = 'cancelled'")['count']
                 ],
                 'recent' => $this->db->query("SELECT * FROM campaigns WHERE `status` = 'sent' ORDER BY `ended_at` DESC LIMIT 10;")
-            ],
-            'segments' => [
-                'browser_name' => $getSegmentData('browser_name'),
-                'os_name' => $getSegmentData('os_name'),
-                'device_type' => $getSegmentData('device_type'),
-                'category' => $getSegmentData('category'),
-                'country' => $getSegmentData('country')
             ],
             'subscribers_trend' => $subscribers_trend
         ];

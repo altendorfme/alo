@@ -69,6 +69,73 @@ class SegmentController extends BaseController
         ]);
     }
 
+    /**
+     * View segment data/analytics (GET method)
+     */
+    public function viewSegmentData(ServerRequestInterface $request, array $args): ResponseInterface
+    {
+        $id = $args['id'] ?? null;
+        $queryParams = $request->getQueryParams();
+        $page = isset($queryParams['page']) ? (int)$queryParams['page'] : 1;
+        $page = max(1, $page);
+        $itemsPerPage = 20;
+        $offset = ($page - 1) * $itemsPerPage;
+
+        $segment = $this->db->queryFirstRow("SELECT * FROM segments WHERE id = %i", $id);
+        if (!$segment) {
+            return new Response(404, [], 'Segment not found');
+        }
+
+        $totalQuery = "SELECT COUNT(*) FROM segment_goals WHERE segment_id = %i";
+        $totalRecords = $this->db->queryFirstField($totalQuery, $id);
+        $totalPages = ceil($totalRecords / $itemsPerPage);
+
+        $dataQuery = "SELECT
+                        sg.id,
+                        sg.value,
+                        sg.created_at,
+                        s.uuid as subscriber_uuid,
+                        s.status as subscriber_status,
+                        s.subscribed_at,
+                        s.last_active
+                      FROM segment_goals sg
+                      INNER JOIN subscribers s ON sg.subscriber_id = s.id
+                      WHERE sg.segment_id = %i
+                      ORDER BY sg.created_at DESC
+                      LIMIT %i OFFSET %i";
+
+        $segmentData = $this->db->query($dataQuery, $id, $itemsPerPage, $offset);
+
+        $statsQuery = "SELECT
+                        COUNT(*) as total_records,
+                        COUNT(DISTINCT sg.value) as unique_values
+                       FROM segment_goals sg
+                       WHERE sg.segment_id = %i";
+        
+        $stats = $this->db->queryFirstRow($statsQuery, $id);
+
+        $topValuesQuery = "SELECT
+                            value,
+                            COUNT(*) as count
+                           FROM segment_goals
+                           WHERE segment_id = %i
+                           GROUP BY value
+                           ORDER BY count DESC
+                           LIMIT 10";
+        
+        $topValues = $this->db->query($topValuesQuery, $id);
+
+        return $this->render('main/segment_data', [
+            'segment' => $segment,
+            'segmentData' => $segmentData,
+            'stats' => $stats,
+            'topValues' => $topValues,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalRecords' => $totalRecords
+        ]);
+    }
+
     public function updateSegment(ServerRequestInterface $request, array $args): ResponseInterface
     {
         $id = $args['id'] ?? null;

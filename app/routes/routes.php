@@ -91,6 +91,7 @@ return function (Container $container): Router {
         // Segment Management
         $route->get('/segment/edit/{id:\d+}', [SegmentController::class, 'viewSegment']);
         $route->post('/segment/edit/{id:\d+}', [SegmentController::class, 'updateSegment']);
+        $route->get('/segment/data/{id:\d+}', [SegmentController::class, 'viewSegmentData']);
         $route->get('/segments[/page/{page:\d+}]', [SegmentController::class, 'viewSegments']);
         
         // Client Config
