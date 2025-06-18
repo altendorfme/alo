@@ -12,7 +12,6 @@ class DraftCleanupCommand
     private $db;
     private $climate;
     private $config;
-    private $config;
 
     public function __construct(CLImate $climate, Config $config)
     {
