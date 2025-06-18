@@ -157,8 +157,8 @@ class Auth
 
     public function check(): bool
     {
-        if ($this->user !== null && $this->validateSession() !== false) {
-            return true;
+        if ($this->user !== null) {
+            return $this->validateSession() !== false;
         }
 
         $session = $this->validateSession();

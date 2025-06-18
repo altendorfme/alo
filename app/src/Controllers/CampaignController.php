@@ -191,19 +191,25 @@ class CampaignController extends BaseController
 
     private function getListSegments(): array
     {
+        static $cachedSegments = null;
+        
+        if ($cachedSegments !== null) {
+            return $cachedSegments;
+        }
+
         $listSegments = $this->db->query(
             "SELECT
                 s.id,
                 s.name,
                 s.description,
-                (SELECT GROUP_CONCAT(DISTINCT `value` SEPARATOR '|')
-                 FROM segment_goals sg
-                 WHERE sg.segment_id = s.id) AS segment_values
-             FROM segments s
-             ORDER BY s.name"
+                GROUP_CONCAT(DISTINCT sg.value SEPARATOR '|') AS segment_values
+            FROM segments s
+            LEFT JOIN segment_goals sg ON sg.segment_id = s.id
+            GROUP BY s.id, s.name, s.description
+            ORDER BY s.name"
         );
 
-        $listSegments = array_map(function ($segment) {
+        $cachedSegments = array_map(function ($segment) {
             return [
                 'id' => $segment['id'],
                 'name' => $segment['name'],
@@ -212,7 +218,7 @@ class CampaignController extends BaseController
             ];
         }, $listSegments);
 
-        return array_filter($listSegments);
+        return array_filter($cachedSegments);
     }
 
     public function viewCampaign(ServerRequestInterface $request): ResponseInterface
@@ -994,7 +1000,6 @@ class CampaignController extends BaseController
             $errorCount = 0;
             
             foreach ($campaignIds as $campaignId) {
-                // Verificar se a campanha existe e pode ser deletada
                 $campaign = $campaignObj->get($campaignId);
                 if ($campaign && in_array($campaign['status'], ['draft', 'cancelled'])) {
                     $result = $campaignObj->delete($campaignId);
