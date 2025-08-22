@@ -152,7 +152,7 @@
                                         </select>
                                     </div>
                                     <div class="col">
-                                        <select class="form-select segment-values" name="segments[<?= $key ?>][values][]" multiple="" size="3">
+                                        <select class="form-select segment-values" name="segments[<?= $key ?>][values][]" multiple="" size="10">
                                             <?php foreach ($values as $value) {
                                                 $selected = '';
 
