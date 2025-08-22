@@ -1,5 +1,5 @@
-import { initializeApp } from '/dist/scripts/firebase/firebase-app.js';
-import { getMessaging, getToken, onMessage } from '/dist/scripts/firebase/firebase-messaging.js';
+import { initializeApp } from '/dist/scripts/firebase/firebase-app.min.js';
+import { getMessaging, getToken, onMessage } from '/dist/scripts/firebase/firebase-messaging.min.js';
 
 class aloLogger {
     constructor(enableLogging = false) {

@@ -7,6 +7,7 @@ const uglify = require('gulp-uglify');
 const clean_css = require('gulp-clean-css');
 const sourcemaps = require('gulp-sourcemaps');
 const replace = require('gulp-replace');
+const rename = require('gulp-rename');
 
 const paths = {
     bootstrap: {
@@ -110,6 +111,13 @@ function ldloaderCSS() {
 
 function firebaseJS() {
     return gulp.src(paths.firebase.scripts.src)
+        .pipe(sourcemaps.init())
+        .pipe(uglify())
+        .pipe(rename(function (path) {
+            path.basename += '.min';
+        }))
+        .pipe(gulp.dest(paths.firebase.scripts.dest))
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.firebase.scripts.dest))
 }
 
@@ -132,3 +140,10 @@ exports.default = gulp.series(
     gulp.parallel(bootstrapCSS, bootstrapJS, bootstrapFonts, chartJS, firebaseJS, ldloaderCSS, ldloaderJS),
     watch
 );
+
+exports.firebaseJS = firebaseJS;
+exports.bootstrapJS = bootstrapJS;
+exports.bootstrapCSS = bootstrapCSS;
+exports.chartJS = chartJS;
+exports.ldloaderJS = ldloaderJS;
+exports.ldloaderCSS = ldloaderCSS;
