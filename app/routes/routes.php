@@ -46,6 +46,7 @@ return function (Container $container): Router {
     // SDK Routes
     $router->get('/clientSDK', [SDKController::class, 'clientSDK']);
     $router->get('/serviceWorker', [SDKController::class, 'serviceWorker']);
+    $router->get('/Firebase', [SDKController::class, 'firebase']);
     
     // API
     //-- Subscriber

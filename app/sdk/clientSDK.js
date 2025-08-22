@@ -1,6 +1,3 @@
-import { initializeApp } from '/dist/scripts/firebase/firebase-app.min.js';
-import { getMessaging, getToken, onMessage } from '/dist/scripts/firebase/firebase-messaging.min.js';
-
 class aloLogger {
     constructor(enableLogging = false) {
         this.enableLogging = enableLogging;
@@ -559,8 +556,8 @@ class aloSDK extends alo {
         this.NOTIFICATION_STORAGE_KEY = 'alo-'+this.firebaseConfig.appId;
         this.registrationMode = config.registrationMode || 'manual';
 
-        this.app = initializeApp(this.firebaseConfig);
-        this.messaging = getMessaging(this.app);
+        this.app = firebase.initializeApp(this.firebaseConfig);
+        this.messaging = firebase.messaging();
 
         if (this.registrationMode === 'auto') {
             const browser = this.detectBrowserDetails();
@@ -675,7 +672,7 @@ class aloSDK extends alo {
             const permission = await Notification.requestPermission();
 
             if (permission === 'granted') {
-                const token = await getToken(this.messaging, {
+                const token = await this.messaging.getToken({
                     vapidKey: '{{VAPID_PUBLIC_KEY}}',
                     serviceWorkerRegistration: registration
                 });
@@ -709,7 +706,7 @@ class aloSDK extends alo {
     }
 
     onMessageReceived(callback) {
-        onMessage(this.messaging, (payload) => {
+        this.messaging.onMessage((payload) => {
             try {
                 const now = Date.now();
                 const notificationKey = JSON.stringify({

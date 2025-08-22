@@ -4,7 +4,6 @@ const gulp = require('gulp');
 const sass = require('gulp-sass')(require('sass'));
 const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
-const clean_css = require('gulp-clean-css');
 const sourcemaps = require('gulp-sourcemaps');
 const replace = require('gulp-replace');
 const rename = require('gulp-rename');
@@ -41,10 +40,9 @@ const paths = {
     firebase: {
         scripts: {
             src: [
-                'node_modules/firebase/firebase-app.js',
-                'node_modules/firebase/firebase-messaging.js'
+                'node_modules/firebase/firebase-compat.js'
             ],
-            dest: 'public/dist/scripts/firebase'
+            dest: 'sdk'
         }
     },
     ldloader: {
@@ -111,13 +109,7 @@ function ldloaderCSS() {
 
 function firebaseJS() {
     return gulp.src(paths.firebase.scripts.src)
-        .pipe(sourcemaps.init())
-        .pipe(uglify())
-        .pipe(rename(function (path) {
-            path.basename += '.min';
-        }))
-        .pipe(gulp.dest(paths.firebase.scripts.dest))
-        .pipe(sourcemaps.write('.'))
+        .pipe(rename('Firebase.js'))
         .pipe(gulp.dest(paths.firebase.scripts.dest))
 }
 

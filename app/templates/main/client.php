@@ -176,7 +176,8 @@ aloBtn.addEventListener('click', async () => {
             const enableLogging = enableLoggingCheckbox.checked;
             const enableCustomSegments = enableCustomSegmentsCheckbox.checked;
 
-            let code = `<script type="module">
+            let code = `<script src="<?= $appUrl ?>/Firebase"></script>
+<script type="module">
     import aloSDK from '<?= $appUrl ?>/clientSDK';
     const aloConfig = {
         registrationMode: '${registrationMode}'`;

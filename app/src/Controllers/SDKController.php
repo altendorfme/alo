@@ -68,6 +68,17 @@ class SDKController extends BaseController
         );
     }
 
+    public function firebase(): ResponseInterface
+    {
+        $content = file_get_contents(__DIR__ . '/../../sdk/Firebase.js');
+
+        return new Response(
+            200,
+            ['Content-Type' => 'application/javascript'],
+            $content
+        );
+    }
+
     public function downloadaloSW(): ResponseInterface
     {
         $auth = Auth::getInstance();
