@@ -40,7 +40,8 @@ const paths = {
     firebase: {
         scripts: {
             src: [
-                'node_modules/firebase/firebase-compat.js'
+                'node_modules/firebase/firebase-app-compat.js',
+                'node_modules/firebase/firebase-messaging-compat.js'
             ],
             dest: 'sdk'
         }
@@ -109,7 +110,8 @@ function ldloaderCSS() {
 
 function firebaseJS() {
     return gulp.src(paths.firebase.scripts.src)
-        .pipe(rename('Firebase.js'))
+        .pipe(concat('Firebase.js'))
+        .pipe(replace(/\/\/# sourceMappingURL=.*\.map/g, '')) // Remove source map references
         .pipe(gulp.dest(paths.firebase.scripts.dest))
 }
 
