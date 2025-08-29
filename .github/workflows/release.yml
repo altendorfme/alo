@@ -11,9 +11,9 @@ env:
   DOCKER_IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  docker-build:
-    name: 🐳 Build and Push
-    runs-on: ubuntu-latest
+  docker-build-amd64:
+    name: 🐳 Build and Push (AMD64)
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -31,8 +31,104 @@ jobs:
 
       - name: 🛠️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: 📋 Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          platforms: linux/amd64,linux/arm64
+          images: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
+            ${{ env.DOCKERHUB_REPOSITORY }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+          flavor: |
+            suffix=-amd64
+
+      - name: 🔐 Log in to GitHub Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗️ Build and Push (AMD64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=amd64
+          cache-to: type=gha,mode=max,scope=amd64
+
+  docker-build-arm64:
+    name: 🐳 Build and Push (ARM64)
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: 🛠️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 📋 Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}
+            ${{ env.DOCKERHUB_REPOSITORY }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+          flavor: |
+            suffix=-arm64
+
+      - name: 🔐 Log in to GitHub Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗️ Build and Push (ARM64)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=arm64
+          cache-to: type=gha,mode=max,scope=arm64
+
+  docker-manifest:
+    name: 🔗 Create Multi-Platform Manifest
+    runs-on: ubuntu-24.04
+    needs: [docker-build-amd64, docker-build-arm64]
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: 📋 Extract Docker metadata
         id: meta
@@ -53,21 +149,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🏗️ Build and Push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: 🛠️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔗 Create and Push Multi-Platform Manifest
+        run: |
+          # Extract the main tags (without suffixes)
+          TAGS="${{ steps.meta.outputs.tags }}"
+          
+          for tag in $TAGS; do
+            echo "Creating manifest for $tag"
+            docker buildx imagetools create \
+              --tag $tag \
+              $tag-amd64 \
+              $tag-arm64
+          done
 
   publish-release:
     name: 📦 Publish Release
-    runs-on: ubuntu-latest
-    needs: docker-build
+    runs-on: ubuntu-24.04
+    needs: [docker-build-amd64, docker-build-arm64, docker-manifest]
     permissions:
       contents: write
     
